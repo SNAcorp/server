@@ -4,8 +4,8 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
-from models import Order, Terminal, Bottle
-from database import get_db
+from app.models import Order, Terminal, Bottle
+from app.database import get_db
 
 router = APIRouter()
 

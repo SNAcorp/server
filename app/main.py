@@ -8,8 +8,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from app.dependencies import get_current_user
 from app.routers import auth, users, admin, superadmin
-from jwt_auth import verify_terminal
-from models import Base, EMPTY_BOTTLE_ID, RFID, OrderItem, OrderRFID, TerminalState
+from app.jwt_auth import verify_terminal
+from app.models import Base, EMPTY_BOTTLE_ID, RFID, OrderItem, OrderRFID, TerminalState
 from routers import terminals, orders, bottles, rfid
 
 from fastapi import Depends, HTTPException, Request, Form
@@ -18,9 +18,9 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
-from models import Order, Terminal, Bottle
-from database import get_db
-from schemas import IsServerOnline, User
+from app.models import Order, Terminal, Bottle
+from app.database import get_db
+from app.schemas import IsServerOnline, User
 
 app = FastAPI()
 

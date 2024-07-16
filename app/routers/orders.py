@@ -3,8 +3,8 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
-from models import Order, RFID, OrderRFID
-from database import get_db
+from app.models import Order, RFID, OrderRFID
+from app.database import get_db
 
 router = APIRouter()
 

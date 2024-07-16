@@ -4,8 +4,8 @@ from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from models import RFID
-from database import get_db
+from app.models import RFID
+from app.database import get_db
 
 router = APIRouter()
 

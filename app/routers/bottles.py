@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
-from models import Bottle
-from database import get_db
-from schemas import BottleCreate
+from app.models import Bottle
+from app.database import get_db
+from app.schemas import BottleCreate
 
 router = APIRouter()
 
