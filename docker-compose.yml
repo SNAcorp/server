@@ -1,5 +1,5 @@
 services:
-  db:
+  db-1:
     image: postgres:13
     environment:
       POSTGRES_USER: server
@@ -7,13 +7,13 @@ services:
       POSTGRES_DB: terminals
     volumes:
       - postgres_data:/var/lib/postgresql/data
-  web:
+  web-1:
     build: .
-    command: /wait-for-it.sh db:5432 -- uvicorn app.main:app --host 0.0.0.0 --port 80
+    command: /wait-for-it.sh db-1:5432 -- uvicorn app.main:app --host 0.0.0.0 --port 80
     ports:
       - "80:80"
     depends_on:
-      - db
+      - db-1
     environment:
       - DATABASE_URL=postgresql+asyncpg://server:v9023aSH@db-1:5432/terminals
 
