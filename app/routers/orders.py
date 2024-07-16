@@ -9,7 +9,7 @@ from app.database import get_db
 router = APIRouter()
 
 
-@router.get("/orders")
+@router.get("/")
 async def get_orders(db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(Order))
     orders = result.scalars().all()

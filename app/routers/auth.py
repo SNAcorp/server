@@ -34,6 +34,6 @@ async def login_user(smth: UserLogin, db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Email not verified")
     access_token = create_access_token(data={"sub": user.email})
 
-    response = RedirectResponse(url="/dashboard", status_code=303)
+    response = RedirectResponse(url="/terminals", status_code=303)
     response.set_cookie(key="access_token", value=access_token, httponly=True)
     return response

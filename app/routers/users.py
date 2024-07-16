@@ -11,7 +11,7 @@ from app.dependencies import get_db, get_current_user
 from app.utils import verify_password
 
 router = APIRouter()
-templates = Jinja2Templates(directory="templates")
+templates = Jinja2Templates(directory="app/templates")
 
 
 @router.get("/", response_model=list[User])
