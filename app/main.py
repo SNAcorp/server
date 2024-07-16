@@ -224,6 +224,32 @@ async def create_order_page(request: Request,
                                           {"request": request,
                                            "current_user": current_user})
 
+@app.post("/create-order")
+async def create_order(request: Request, db: AsyncSession = Depends(get_db)):
+    form = await request.form()
+    rfids = form.getlist('rfids')
+    order = Order()
+    db.add(order)
+    await db.flush()  # Ensuring the order is added and its ID is available
+
+    # Logging the received RFID codes for debugging
+    print(f"Received RFID codes: {rfids}")
+
+    for rfid_code in rfids:
+        rfid_result = await db.execute(select(RFID).where(RFID.code == rfid_code))
+        rfid = rfid_result.scalars().first()
+        if rfid is None:
+            # If RFID not found, add it to the database
+            print(f"RFID {rfid_code} not found in the database. Adding it.")
+            rfid = RFID(code=rfid_code)
+            db.add(rfid)
+            await db.flush()  # Ensure the RFID is added and its ID is available
+        order_rfid = OrderRFID(order_id=order.id, rfid_id=rfid.id)
+        db.add(order_rfid)
+
+    await db.commit()
+    response = RedirectResponse(url="/orders", status_code=303)
+    return response
 
 @app.get("/terminals", response_class=HTMLResponse)
 async def dashboard(request: Request,
