@@ -4,14 +4,9 @@ services:
     environment:
       POSTGRES_USER: server
       POSTGRES_PASSWORD: v9023aSH
-      POSTGRES_DB: fortran
+      POSTGRES_DB: terminals
     volumes:
       - postgres_data:/var/lib/postgresql/data
-  redis:
-    image: "redis:latest"
-    container_name: redis
-    ports:
-      - "6379:6379"
   web:
     build: .
     command: /wait-for-it.sh db:5432 -- uvicorn app.main:app --host 0.0.0.0 --port 80
@@ -19,11 +14,8 @@ services:
       - "80:80"
     depends_on:
       - db
-      - redis
     environment:
-      - DATABASE_URL=postgresql+asyncpg://server:v9023aSH@localhost:5432/fortran
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
+      - DATABASE_URL=postgresql+asyncpg://server:v9023aSH@localhost:5432/terminals
 
 volumes:
   postgres_data:
