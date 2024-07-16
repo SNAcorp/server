@@ -21,7 +21,7 @@ services:
       - db
       - redis
     environment:
-      - DATABASE_URL=postgresql+asyncpg:://server:v9023aSH@db:5432/fortran
+      - DATABASE_URL=postgresql+asyncpg://server:v9023aSH@db:5432/terminals
       - REDIS_HOST=redis
       - REDIS_PORT=6379
 
