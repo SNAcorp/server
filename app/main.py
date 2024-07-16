@@ -28,7 +28,7 @@ app = FastAPI()
 # DATABASE_URL = "postgresql+asyncpg://nikitastepanov@localhost/terminals"
 DATABASE_URL = os.getenv('DATABASE_URL')
 
-engine = create_engine("postgresql://nikitastepanov@localhost/terminals", echo=True)
+engine = create_engine("postgresql://erver:v9023aSH@db:5432/terminals", echo=True)
 
 # Создание соединения
 conn = engine.connect()
