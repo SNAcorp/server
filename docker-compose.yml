@@ -15,7 +15,7 @@ services:
     depends_on:
       - db
     environment:
-      - DATABASE_URL=postgresql+asyncpg://server:v9023aSH@db:5432/terminals
+      - DATABASE_URL=postgresql+asyncpg://server:v9023aSH@db-1:5432/terminals
 
 volumes:
   postgres_data:
