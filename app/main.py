@@ -10,7 +10,7 @@ from app.dependencies import get_current_user
 from app.routers import auth, users, admin, superadmin
 from app.jwt_auth import verify_terminal
 from app.models import Base, EMPTY_BOTTLE_ID, RFID, OrderItem, OrderRFID, TerminalState
-from routers import terminals, orders, bottles, rfid
+from app.routers import terminals, orders, bottles, rfid
 
 from fastapi import Depends, HTTPException, Request, Form
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
