@@ -182,19 +182,20 @@
 {% block content %}
 <div class="create-order-container">
     <h2>Create Order</h2>
-    <div class="carousel" id="carousel">
-        <div class="carousel-button" id="prev-button" onclick="prevTab()">&#8249;</div>
-        <div id="page-numbers" class="carousel-pages"></div>
-        <div class="carousel-button" id="next-button" onclick="nextTab()">&#8250;</div>
-    </div>
-    <div class="rfid-fields-container" id="rfid-fields-container">
-        <div class="tab-content active" id="tab-0">
-
-            <button type="button" class="add-button" onclick="addRfidField()">Add RFID</button>
+    <form id="create-order-form">
+        <div class="carousel" id="carousel">
+            <div class="carousel-button" id="prev-button" onclick="prevTab()">&#8249;</div>
+            <div id="page-numbers" class="carousel-pages"></div>
+            <div class="carousel-button" id="next-button" onclick="nextTab()">&#8250;</div>
         </div>
-    </div>
+        <div class="rfid-fields-container" id="rfid-fields-container">
+            <div class="tab-content active" id="tab-0">
+                <button type="button" class="add-button" onclick="addRfidField()">Add RFID</button>
+            </div>
+        </div>
+    </form>
 </div>
-<button type="submit" class="order-button" onclick="submitOrder()">Create Order</button>
+<button type="button" class="order-button" onclick="submitOrder()">Create Order</button>
 
 <script>
 let currentTab = 0;
@@ -312,9 +313,34 @@ function checkDuplicateRfids() {
 }
 
 function submitOrder() {
-    const form = document.getElementById('create-order-form');
     if (validateRfids()) {
-        form.submit();
+        const rfids = document.querySelectorAll('input[name="rfids"]');
+        const rfidValues = Array.from(rfids).map(rfid => rfid.value);
+
+        fetch("create-order", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": "{{ csrf_token }}"
+            },
+            body: JSON.stringify({ rfids: rfidValues })
+        })
+        .then(response => {
+            if (response.status === 303) {
+                window.location.href = "/orders";
+            } else {
+                return response.json();
+            }
+        })
+        .then(data => {
+            if (data && !data.success) {
+                alert('Error creating order.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error creating order.');
+        });
     }
 }
 

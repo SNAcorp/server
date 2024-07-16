@@ -226,8 +226,8 @@ async def create_order_page(request: Request,
 
 @app.post("/create-order")
 async def create_order(request: Request, db: AsyncSession = Depends(get_db)):
-    form = await request.form()
-    rfids = form.getlist('rfids')
+    data = await request.json()
+    rfids = data.get('rfids', [])
     order = Order()
     db.add(order)
     await db.flush()  # Ensuring the order is added and its ID is available
@@ -238,7 +238,7 @@ async def create_order(request: Request, db: AsyncSession = Depends(get_db)):
     for rfid_code in rfids:
         rfid_result = await db.execute(select(RFID).where(RFID.code == rfid_code))
         rfid = rfid_result.scalars().first()
-        if rfid is None:
+        if (rfid is None):
             # If RFID not found, add it to the database
             print(f"RFID {rfid_code} not found in the database. Adding it.")
             rfid = RFID(code=rfid_code)
