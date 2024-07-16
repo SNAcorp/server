@@ -1,3 +1,5 @@
+import os
+
 from fastapi import Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
@@ -6,7 +8,8 @@ import jwt
 from app.crud import get_user_by_email
 from app.schemas import User
 
-DATABASE_URL = "postgresql+asyncpg://nikitastepanov@localhost/terminals"
+# DATABASE_URL = "postgresql+asyncpg://nikitastepanov@localhost/terminals"
+DATABASE_URL = os.getenv('DATABASE_URL')
 
 engine = create_async_engine(DATABASE_URL, echo=True)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine, class_=AsyncSession)
