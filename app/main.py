@@ -1,6 +1,7 @@
 import os
 
 from fastapi import FastAPI
+from sqlalchemy import create_engine
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.orm import sessionmaker
 
@@ -26,6 +27,19 @@ app = FastAPI()
 
 # DATABASE_URL = "postgresql+asyncpg://nikitastepanov@localhost/terminals"
 DATABASE_URL = os.getenv('DATABASE_URL')
+
+engine = create_engine(DATABASE_URL, echo=True)
+
+# Создание соединения
+conn = engine.connect()
+conn.execute("commit")
+
+# Создание базы данных "terminals"
+conn.execute("CREATE DATABASE terminals")
+
+# Закрытие соединения
+conn.close()
+
 engine = create_async_engine(DATABASE_URL, echo=True)
 AsyncSessionLocal = sessionmaker(
     bind=engine,
