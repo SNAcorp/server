@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Order Details{% endblock %}
+
+{% block content %}
+<h2>Order Details</h2>
+<p>Order ID: {{ order.id }}</p>
+<p>Completed: {{ order.is_completed }}</p>
+
+<h3>RFIDs</h3>
+<ul>
+    {% for rfid in order.rfids %}
+        <li>RFID: {{ rfid.code }} ({{ rfid.timestamp }})</li>
+    {% endfor %}
+</ul>
+
+<h3>Items</h3>
+<ul>
+    {% for item in order.items %}
+        <li>{{ item.bottle_name }}: {{ item.total_volume }} ml
+            <ul>
+                {% for timestamp in item.timestamps %}
+                    <li>{{ timestamp }}</li>
+                {% endfor %}
+            </ul>
+        </li>
+    {% endfor %}
+</ul>
+
+<h3>Add RFID</h3>
+<form action="/order/{{ order.id }}/add_rfid" method="post">
+    <input type="text" name="rfid_code" placeholder="Enter RFID code" required>
+    <button type="submit">Add RFID</button>
+</form>
+
+<form action="/order/{{ order.id }}/complete" method="post">
+    <button type="submit">Complete Order</button>
+</form>
+{% endblock %}

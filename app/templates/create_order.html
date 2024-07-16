@@ -1,0 +1,392 @@
+{% extends "base.html" %}
+
+{% block title %}Create Order{% endblock %}
+
+{% block style %}
+    .create-order-container {
+        max-width: 900px;
+        height: auto;
+        margin: 0 auto;
+        padding: 20px;
+        background: #f9f9f9;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        position: relative;
+    }
+    .create-order-container h2 {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    .carousel {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 20px;
+        display: none;
+    }
+    .carousel-button {
+        padding: 15px;
+        cursor: pointer;
+        border: none;
+        background: none;
+        font-size: 24px;
+        transition: transform 0.2s;
+    }
+    .carousel-button:hover {
+        transform: scale(1.1);
+    }
+    .carousel-pages {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+    }
+    .carousel-page {
+        padding: 10px 20px;
+        cursor: pointer;
+        border: 1px solid #ccc;
+        background: #f9f9f9;
+        border-radius: 5px;
+        margin: 0 5px;
+        transition: background 0.2s;
+    }
+    .carousel-page.active {
+        background: #e0e0e0;
+    }
+    .carousel-page:hover {
+        background: #d0d0d0;
+    }
+    .rfid-fields-container {
+        flex: 1;
+        overflow-y: auto;
+        padding: 10px;
+    }
+    .tab-content {
+        display: none;
+    }
+    .tab-content.active {
+        display: block;
+    }
+    .rfid-field {
+        display: flex;
+        align-items: center;
+        position: relative;
+        margin-bottom: 15px;
+        animation: fadeIn 0.5s ease-in-out;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .create-order-container label {
+        flex: 0 0 70px;  /* Fixed width to align input fields */
+        margin-right: 10px;
+        white-space: nowrap;
+    }
+    .create-order-container input[type="text"] {
+        flex: 1;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        transition: border-color 0.2s;
+    }
+    .create-order-container input[type="text"]:focus {
+        border-color: #007bff;
+    }
+    .create-order-container button[type="button"], .create-order-container button[type="submit"] {
+        padding: 15px 30px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-top: 10px;
+        transition: transform 0.2s, background-color 0.2s;
+    }
+    .create-order-container button[type="button"]:hover, .create-order-container button[type="submit"]:hover {
+        transform: scale(1.05);
+    }
+    .create-order-container button[type="button"] {
+        background: #007bff;
+        color: white;
+    }
+    .create-order-container button[type="submit"] {
+        background: #28a745;
+        color: white;
+        position: absolute;
+        right: 20px;
+        bottom: 20px;
+        transition: background-color 0.3s, transform 0.3s;
+    }
+    .create-order-container button[type="submit"]:hover {
+        background-color: #218838;
+        transform: scale(1.1);
+    }
+    .remove-button {
+        background: #f8d7da;
+        color: white;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 30px;
+        height: 40px;
+        margin-left: 10px;
+        padding: 0;
+        border-radius: 50%;
+        position: relative;
+        transition: background-color 0.3s, transform 0.3s;
+    }
+    .remove-button::before {
+        content: '×';
+        background-color: #f8d7da;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 24px;
+        line-height: 0;
+    }
+    .remove-button:hover {
+        background-color: #f8d7da;
+        transform: scale(1.1);
+    }
+    .add-button {
+        background: #007bff;
+        color: white;
+        margin-top: 10px;
+        transition: background-color 0.3s, transform 0.3s;
+    }
+    .add-button:hover {
+        background-color: #0056b3;
+        transform: scale(1.1);
+    }
+    .order-button {
+        background: #28a745;
+        color: white;
+        padding: 15px 30px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        position: fixed;
+        top: 80px;
+        right: 20px;
+        transition: background-color 0.3s, transform 0.3s;
+    }
+    .order-button:hover {
+        background-color: #218838;
+        transform: scale(1.1);
+    }
+{% endblock %}
+
+{% block content %}
+<div class="create-order-container">
+    <h2>Create Order</h2>
+    <div class="carousel" id="carousel">
+        <div class="carousel-button" id="prev-button" onclick="prevTab()">&#8249;</div>
+        <div id="page-numbers" class="carousel-pages"></div>
+        <div class="carousel-button" id="next-button" onclick="nextTab()">&#8250;</div>
+    </div>
+    <div class="rfid-fields-container" id="rfid-fields-container">
+        <div class="tab-content active" id="tab-0">
+
+            <button type="button" class="add-button" onclick="addRfidField()">Add RFID</button>
+        </div>
+    </div>
+</div>
+<button type="submit" class="order-button" onclick="submitOrder()">Create Order</button>
+
+<script>
+let currentTab = 0;
+const maxFieldsPerTab = 6;
+const maxVisiblePages = 5;
+
+function addRfidField() {
+    const rfidFieldsContainer = document.getElementById('rfid-fields-container');
+    const currentTabContent = document.getElementById(`tab-${currentTab}`);
+    const index = document.querySelectorAll('.rfid-field').length;
+    const newField = document.createElement('div');
+    newField.classList.add('rfid-field', 'fade-in');
+    newField.innerHTML = `
+        <label for="rfid-${index}">RFID ${index + 1}:</label>
+        <input type="text" id="rfid-${index}" name="rfids" oninput="checkDuplicateRfids()">
+        <button type="button" class="remove-button" style="margin-top: 0 !important; background-color: #E32636;" onclick="removeField(this)"></button>
+    `;
+    currentTabContent.appendChild(newField);
+
+    if (currentTabContent.children.length > maxFieldsPerTab + 1) {
+        createNewTab();
+    } else {
+        checkDuplicateRfids();
+        updateFieldLabels();
+        updateCarouselButtons();
+    }
+    moveAddButton();
+}
+
+function moveAddButton() {
+    const addBtn = document.querySelector('.add-button');
+    const currentTabContent = document.getElementById(`tab-${currentTab}`);
+    currentTabContent.appendChild(addBtn);
+}
+
+function removeField(button) {
+    const field = button.parentElement;
+    const tabContent = field.parentElement;
+    if (document.querySelectorAll('.rfid-field').length > 1) {
+        field.remove();
+        if (tabContent.children.length === 1 && currentTab > 0) {
+            tabContent.remove();
+            currentTab--;
+            showTab(currentTab);
+        }
+        checkDuplicateRfids();
+        updateFieldLabels();
+        updateCarouselButtons();
+        moveAddButton();
+    } else {
+        alert('You must have at least one RFID field.');
+    }
+}
+
+function createNewTab() {
+    currentTab++;
+    const newTabContent = document.createElement('div');
+    newTabContent.classList.add('tab-content');
+    newTabContent.id = `tab-${currentTab}`;
+    document.getElementById('rfid-fields-container').appendChild(newTabContent);
+
+    showTab(currentTab);
+    addRfidField(); // Initialize the first field on the new tab
+    updateCarouselButtons();
+}
+
+function showTab(index) {
+    const tabContents = document.querySelectorAll('.tab-content');
+    tabContents.forEach((tabContent, i) => {
+        tabContent.classList.toggle('active', i === index);
+    });
+    currentTab = index;
+    updateCarouselButtons();
+}
+
+function nextTab() {
+    if (currentTab < document.querySelectorAll('.tab-content').length - 1) {
+        showTab(currentTab + 1);
+    }
+}
+
+function prevTab() {
+    if (currentTab > 0) {
+        showTab(currentTab - 1);
+    }
+}
+
+function updateFieldLabels() {
+    const fields = document.querySelectorAll('.rfid-field');
+    fields.forEach((field, index) => {
+        const label = field.querySelector('label');
+        label.textContent = `RFID ${index + 1}:`;
+    });
+}
+
+function checkDuplicateRfids() {
+    const rfids = document.querySelectorAll('input[name="rfids"]');
+    const values = {};
+    rfids.forEach(rfid => {
+        rfid.classList.remove(...rfid.classList);
+        if (rfid.value !== '') {
+            if (values[rfid.value]) {
+                values[rfid.value].push(rfid);
+            } else {
+                values[rfid.value] = [rfid];
+            }
+        }
+    });
+    Object.keys(values).forEach((key, index) => {
+        if (values[key].length > 1) {
+            const errorClass = `input-error-${(index % 5) + 1}`;
+            values[key].forEach(rfid => rfid.classList.add(errorClass));
+        }
+    });
+}
+
+function submitOrder() {
+    const form = document.getElementById('create-order-form');
+    if (validateRfids()) {
+        form.submit();
+    }
+}
+
+function validateRfids() {
+    const rfids = document.querySelectorAll('input[name="rfids"]');
+    let isValid = true;
+    const values = new Set();
+    let hasNonEmptyField = false;
+
+    rfids.forEach(rfid => {
+        if (rfid.classList.contains('input-error-1') || rfid.classList.contains('input-error-2') || rfid.classList.contains('input-error-3') || rfid.classList.contains('input-error-4') || rfid.classList.contains('input-error-5')) {
+            isValid = false;
+        }
+        if (rfid.value.trim() !== '') {
+            values.add(rfid.value);
+            hasNonEmptyField = true;
+        }
+    });
+
+    if (!isValid) {
+        alert('Duplicate RFIDs found. Please ensure all RFIDs are unique.');
+        return false;
+    }
+
+    if (!hasNonEmptyField) {
+        alert('All fields are empty. Please add at least one RFID.');
+        return false;
+    }
+
+    return isValid;
+}
+
+function updateCarouselButtons() {
+    const prevButton = document.getElementById('prev-button');
+    const nextButton = document.getElementById('next-button');
+    const tabContents = document.querySelectorAll('.tab-content');
+    const pageNumbers = document.getElementById('page-numbers');
+
+    prevButton.classList.toggle('disabled', currentTab === 0);
+    nextButton.classList.toggle('disabled', currentTab === tabContents.length - 1);
+
+    pageNumbers.innerHTML = '';
+    const totalTabs = tabContents.length;
+    if (totalTabs <= 1) {
+        document.getElementById('carousel').style.display = 'none';
+        return;
+    } else {
+        document.getElementById('carousel').style.display = 'flex';
+    }
+
+    let startPage = Math.max(0, currentTab - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalTabs, startPage + maxVisiblePages);
+
+    if (endPage - startPage < maxVisiblePages) {
+        startPage = Math.max(0, endPage - maxVisiblePages);
+    }
+
+    for (let i = startPage; i < endPage; i++) {
+        const pageNumber = document.createElement('div');
+        pageNumber.classList.add('carousel-page');
+        if (i === currentTab) {
+            pageNumber.classList.add('active');
+        }
+        pageNumber.textContent = i + 1;
+        pageNumber.setAttribute('onclick', `showTab(${i})`);
+        pageNumbers.appendChild(pageNumber);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    addRfidField();  // Initialize the first field
+    updateCarouselButtons();
+});
+</script>
+{% endblock %}

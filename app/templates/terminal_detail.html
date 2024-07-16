@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Manage Terminal {{ terminal.id }}</h2>
+{% for bottle in terminal.bottles %}
+    <form action="/terminals/{{ terminal.id }}/update-bottle" method="post">
+        <label for="slot_number">Slot Number:</label>
+        <input type="number" id="slot_number" name="slot_number" value="{{ bottle.slot_number }}" readonly>
+        <label for="bottle_id">Bottle ID:</label>
+        <input type="number" id="bottle_id" name="bottle_id" value="{{ bottle.bottle_id }}">
+        <label for="remaining_volume">Remaining Volume:</label>
+        <input type="number" step="0.01" id="remaining_volume" name="remaining_volume" value="{{ bottle.remaining_volume }}">
+        <button type="submit">Update Bottle</button>
+    </form>
+{% endfor %}
+{% endblock %}

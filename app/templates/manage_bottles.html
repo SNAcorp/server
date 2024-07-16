@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Bottles{% endblock %}
+
+{% block style %}
+    .manage-bottles-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        background: #f9f9f9;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .manage-bottles-container h2 {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    .form-step {
+        display: none;
+    }
+    .form-step.active {
+        display: block;
+    }
+    .form-navigation {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 20px;
+    }
+    .form-navigation button {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        background-color: #007bff;
+        color: white;
+        transition: background-color 0.3s, transform 0.3s;
+    }
+    .form-navigation button:hover {
+        background-color: #0056b3;
+        transform: scale(1.05);
+    }
+    .dropzone {
+        border: 2px dashed #007bff;
+        border-radius: 10px;
+        background: #e9f4ff;
+        padding: 20px;
+        text-align: center;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+    .dropzone:hover {
+        background-color: #d0e8ff;
+    }
+    .dropzone input {
+        display: none;
+    }
+{% endblock %}
+
+{% block content %}
+<div class="manage-bottles-container">
+    <h2>Manage Bottles</h2>
+    <form action="/add-bottle" method="post" id="bottle-form">
+        <!-- Step 1: Basic Information -->
+        <div class="form-step active" id="step-1">
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name">
+            <label for="winery">Winery:</label>
+            <input type="text" id="winery" name="winery">
+            <label for="rating_average">Rating Average:</label>
+            <input type="text" id="rating_average" name="rating_average">
+            <label for="location">Location:</label>
+            <input type="text" id="location" name="location">
+        </div>
+
+        <!-- Step 2: Images -->
+        <div class="form-step" id="step-2">
+            <label for="image_path300">Image Path 300:</label>
+            <div class="dropzone" id="dropzone-300">
+                <span>Drop image here or click to upload (300px)</span>
+                <input type="file" id="image_path300" name="image_path300" accept="image/*">
+            </div>
+            <label for="image_path600">Image Path 600:</label>
+            <div class="dropzone" id="dropzone-600">
+                <span>Drop image here or click to upload (600px)</span>
+                <input type="file" id="image_path600" name="image_path600" accept="image/*">
+            </div>
+        </div>
+
+        <!-- Step 3: URLs and Description -->
+        <div class="form-step" id="step-3">
+            <label for="url300">URL 300:</label>
+            <input type="text" id="url300" name="url300">
+            <label for="url600">URL 600:</label>
+            <input type="text" id="url600" name="url600">
+            <label for="description">Description:</label>
+            <textarea id="description" name="description"></textarea>
+        </div>
+
+        <!-- Step 4: Wine Details -->
+        <div class="form-step" id="step-4">
+            <label for="wine_type">Wine Type:</label>
+            <input type="text" id="wine_type" name="wine_type">
+            <label for="volume">Volume:</label>
+            <input type="text" id="volume" name="volume">
+        </div>
+
+        <!-- Navigation Buttons -->
+        <div class="form-navigation">
+            <button type="button" id="prev-btn" onclick="prevStep()" style="display: none;">Previous</button>
+            <button type="button" id="next-btn" onclick="nextStep()">Next</button>
+            <button type="submit" id="submit-btn" style="display: none;">Add Bottle</button>
+        </div>
+    </form>
+</div>
+
+<script>
+let currentStep = 1;
+const totalSteps = 4;
+
+function showStep(step) {
+    document.querySelectorAll('.form-step').forEach((el, index) => {
+        el.classList.toggle('active', index + 1 === step);
+    });
+    document.getElementById('prev-btn').style.display = step > 1 ? 'inline-block' : 'none';
+    document.getElementById('next-btn').style.display = step < totalSteps ? 'inline-block' : 'none';
+    document.getElementById('submit-btn').style.display = step === totalSteps ? 'inline-block' : 'none';
+}
+
+function nextStep() {
+    if (currentStep < totalSteps) {
+        currentStep++;
+        showStep(currentStep);
+    }
+}
+
+function prevStep() {
+    if (currentStep > 1) {
+        currentStep--;
+        showStep(currentStep);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.dropzone').forEach(dropzone => {
+        dropzone.addEventListener('click', () => {
+            dropzone.querySelector('input[type="file"]').click();
+        });
+        dropzone.querySelector('input[type="file"]').addEventListener('change', event => {
+            const fileName = event.target.files[0].name;
+            dropzone.querySelector('span').textContent = `Selected: ${fileName}`;
+        });
+    });
+});
+</script>
+{% endblock %}

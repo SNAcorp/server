@@ -1,0 +1,276 @@
+import os
+
+from fastapi import FastAPI
+from sqlalchemy.ext.asyncio import create_async_engine
+from sqlalchemy.orm import sessionmaker
+
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from app.dependencies import get_current_user
+from app.routers import auth, users, admin, superadmin
+from jwt_auth import verify_terminal
+from models import Base, EMPTY_BOTTLE_ID, RFID, OrderItem, OrderRFID, TerminalState
+from routers import terminals, orders, bottles, rfid
+
+from fastapi import Depends, HTTPException, Request, Form
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
+from fastapi.templating import Jinja2Templates
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
+from sqlalchemy.orm import selectinload
+from models import Order, Terminal, Bottle
+from database import get_db
+from schemas import IsServerOnline, User
+
+app = FastAPI()
+
+# DATABASE_URL = "postgresql+asyncpg://nikitastepanov@localhost/terminals"
+DATABASE_URL = os.getenv('DATABASE_URL')
+engine = create_async_engine(DATABASE_URL, echo=True)
+AsyncSessionLocal = sessionmaker(
+    bind=engine,
+    class_=AsyncSession,
+    expire_on_commit=False
+)
+
+app.include_router(terminals.router, prefix="/terminal", tags=["terminals"])
+app.include_router(orders.router, prefix="/orders", tags=["orders"])
+app.include_router(bottles.router, prefix="/bottles", tags=["bottles"])
+app.include_router(rfid.router, prefix="/rfid", tags=["rfid"])
+app.include_router(auth.router, prefix="/auth", tags=["auth"])
+app.include_router(users.router, prefix="/users", tags=["users"])
+app.include_router(admin.router, prefix="/admin", tags=["admin"])
+app.include_router(superadmin.router, prefix="/superadmin", tags=["superadmin"])
+
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+
+@app.on_event("startup")
+async def startup():
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+
+    async with AsyncSession(engine) as session:
+        states = [
+            "Active",
+            "Broken",
+            "Under Maintenance",
+            "Updating",
+            "Switched off",
+            "Connection lost"
+        ]
+        result = await session.execute(select(Bottle).where(Bottle.id == EMPTY_BOTTLE_ID))
+        empty_bottle = result.scalars().first()
+        if empty_bottle is None:
+            empty_bottle = Bottle(
+                id=EMPTY_BOTTLE_ID,
+                name="Empty Bottle",
+                winery="N/A",
+                rating_average=0.0,
+                location="N/A",
+                image_path300="",
+                image_path600="",
+                url300="",
+                url600="",
+                description="This is an empty slot.",
+                wine_type="N/A",
+                volume=0.0
+            )
+            session.add(empty_bottle)
+        for state in states:
+            status = await session.execute(select(TerminalState).where(TerminalState.state == state))
+            if status.scalars().first() is None:
+                new_state = TerminalState(state=state)
+                session.add(new_state)
+        await session.commit()
+
+
+app_templates = Jinja2Templates(directory="templates")
+
+origins = [
+    "http://localhost",
+    "http://localhost:8000",
+    "http://localhost:3000",
+    # Добавьте другие допустимые источники здесь
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+@app.get("/orders", response_class=HTMLResponse)
+async def read_orders(request: Request,
+                      db: AsyncSession = Depends(get_db),
+                      current_user: User = Depends(get_current_user)):
+    result = await db.execute(select(Order))
+    orders = result.scalars().all()
+    return app_templates.TemplateResponse("orders.html",
+                                          {"request": request,
+                                           "orders": orders,
+                                           "current_user": current_user})
+
+
+@app.get("/lol", response_class=HTMLResponse)
+async def lol():
+    return RedirectResponse("/dashboard", 302)
+
+
+@app.post("/order/{order_id}/add_rfid")
+async def add_rfid_to_order(order_id: int,
+                            rfid_code: str = Form(...),
+                            db: AsyncSession = Depends(get_db),
+                            current_user: User = Depends(get_current_user)):
+    result = await db.execute(select(Order).where(Order.id == order_id))
+    order = result.scalars().first()
+    if order is None:
+        raise HTTPException(status_code=404, detail="Order not found")
+
+    rfid_result = await db.execute(select(RFID).where(RFID.code == rfid_code))
+    rfid = rfid_result.scalars().first()
+    if rfid is None:
+        raise HTTPException(status_code=404, detail="RFID not found")
+
+    order_rfid = OrderRFID(order_id=order.id, rfid_id=rfid.id)
+    db.add(order_rfid)
+    await db.commit()
+
+    return {"message": "RFID added to order successfully"}
+
+
+@app.get("/login")
+def admin_panel(request: Request,
+                current_user: User = Depends(get_current_user)):
+    if current_user:
+        return RedirectResponse("/dashboard", 303)
+    return app_templates.TemplateResponse("login_register.html",
+                                          {"request": request})
+
+
+@app.get("/order/{order_id}", response_class=HTMLResponse)
+async def read_order(order_id: int, request: Request,
+                     db: AsyncSession = Depends(get_db),
+                     current_user: User = Depends(get_current_user)):
+    if current_user is None:
+        return RedirectResponse("/login", 303)
+    result = await db.execute(
+        select(Order).options(
+            selectinload(Order.rfids).selectinload(OrderRFID.rfid),
+            selectinload(Order.items).selectinload(OrderItem.bottle)
+        ).where(Order.id == order_id)
+    )
+    order = result.scalars().first()
+    if order is None:
+        raise HTTPException(status_code=404, detail="Order not found")
+
+    order_details = {
+        "id": order.id,
+        "is_completed": order.is_completed,
+        "rfids": [{"code": order_rfid.rfid.code, "timestamp": order_rfid.timestamp} for order_rfid in order.rfids],
+        "items": []
+    }
+
+    wine_details = {}
+    for item in order.items:
+        bottle_name = item.bottle.name
+        if bottle_name not in wine_details:
+            wine_details[bottle_name] = {
+                "bottle_id": item.bottle.id,
+                "total_volume": 0,
+                "timestamps": []
+            }
+        wine_details[bottle_name]["total_volume"] += item.volume
+
+    order_details["items"] = [
+        {
+            "bottle_name": bottle_name,
+            "bottle_id": details["bottle_id"],
+            "total_volume": details["total_volume"],
+            "timestamps": details["timestamps"]
+        }
+        for bottle_name, details in wine_details.items()
+    ]
+
+    return app_templates.TemplateResponse("order_detail.html",
+                                          {"request": request,
+                                           "order": order_details,
+                                           "current_user": current_user})
+
+
+@app.get("/create-order", response_class=HTMLResponse)
+async def create_order_page(request: Request,
+                            current_user: User = Depends(get_current_user)):
+    if current_user is None:
+        return RedirectResponse("/login", 303)
+    return app_templates.TemplateResponse("create_order.html",
+                                          {"request": request,
+                                           "current_user": current_user})
+
+
+@app.get("/terminals", response_class=HTMLResponse)
+async def dashboard(request: Request,
+                    db: AsyncSession = Depends(get_db),
+                    current_user: User = Depends(get_current_user)):
+    if current_user is None:
+        return RedirectResponse("/login", 303)
+    result = await db.execute(select(Terminal).options(selectinload(Terminal.status)))
+    terminals = result.scalars().all()
+    return app_templates.TemplateResponse("terminals.html",
+                                          {"request": request,
+                                           "terminals": terminals,
+                                           "current_user": current_user})
+
+
+
+@app.get("/terminals/{terminal_id}", response_class=HTMLResponse)
+async def manage_terminal(request: Request,
+                          terminal_id: int,
+                          db: AsyncSession = Depends(get_db),
+                          current_user: User = Depends(get_current_user)):
+    if current_user is None:
+        return RedirectResponse("/login", 303)
+    result = await db.execute(
+        select(Terminal).options(selectinload(Terminal.bottles)).filter(Terminal.id == terminal_id))
+    terminal = result.scalars().first()
+    if not terminal:
+        raise HTTPException(status_code=404, detail="Terminal not found")
+
+    bottles_result = await db.execute(select(Bottle))
+    bottles = bottles_result.scalars().all()
+    sorted_bottles = sorted(terminal.bottles, key=lambda x: x.slot_number)
+
+    return app_templates.TemplateResponse("manage_terminal.html",
+                                          {"request": request,
+                                           "terminal": terminal,
+                                           "bottles": bottles,
+                                           "sorted": sorted_bottles,
+                                           "current_user": current_user})
+
+
+@app.get("/manage-bottles", response_class=HTMLResponse)
+async def manage_bottles(request: Request,
+                         current_user: User = Depends(get_current_user)):
+    if current_user is None:
+        return RedirectResponse("/login", 303)
+    return app_templates.TemplateResponse("manage_bottles.html", {"request": request, "current_user": current_user})
+
+
+@app.post("/", response_class=JSONResponse)
+async def reset_bottles_endpoint(request: IsServerOnline):
+    payload = verify_terminal(request.token)
+    if payload["terminal_id"] != request.terminal_id:
+        raise HTTPException(status_code=403, detail="Invalid terminal ID")
+    return {"is_online": True}
+
+
+def main():
+    import uvicorn
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+
+
+if __name__ == "__main__":
+    main()
