@@ -27,18 +27,18 @@ app = FastAPI()
 
 # DATABASE_URL = "postgresql+asyncpg://nikitastepanov@localhost/terminals"
 DATABASE_URL = os.getenv('DATABASE_URL')
-
-engine = create_engine("postgresql://server:v9023aSH@db:5432/terminals", echo=True)
-
-# Создание соединения
-conn = engine.connect()
-conn.execute("commit")
-
-# Создание базы данных "terminals"
-conn.execute("CREATE DATABASE terminals")
-
-# Закрытие соединения
-conn.close()
+#
+# engine = create_engine("postgresql://server:v9023aSH@db:5432/terminals", echo=True)
+#
+# # Создание соединения
+# conn = engine.connect()
+# conn.execute("commit")
+#
+# # Создание базы данных "terminals"
+# conn.execute("CREATE DATABASE terminals")
+#
+# # Закрытие соединения
+# conn.close()
 
 engine = create_async_engine(DATABASE_URL, echo=True)
 AsyncSessionLocal = sessionmaker(
