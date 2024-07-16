@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
@@ -55,4 +55,5 @@ async def create_order(request: Request, db: AsyncSession = Depends(get_db)):
         db.add(order_rfid)
 
     await db.commit()
-    return JSONResponse(content={"message": "Order created"})
+    response = RedirectResponse(url="/orders", status_code=303)
+    return response
