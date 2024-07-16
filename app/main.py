@@ -99,7 +99,7 @@ async def startup():
         await session.commit()
 
 
-app_templates = Jinja2Templates(directory="templates")
+app_templates = Jinja2Templates(directory="app/templates")
 
 origins = [
     "http://localhost",
