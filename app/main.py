@@ -56,7 +56,7 @@ app.include_router(users.router, prefix="/users", tags=["users"])
 app.include_router(admin.router, prefix="/admin", tags=["admin"])
 app.include_router(superadmin.router, prefix="/superadmin", tags=["superadmin"])
 
-app.mount("/static", StaticFiles(directory="app/static"), name="static")
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
 @app.on_event("startup")
@@ -99,7 +99,7 @@ async def startup():
         await session.commit()
 
 
-app_templates = Jinja2Templates(directory="app/templates")
+app_templates = Jinja2Templates(directory="templates")
 
 origins = [
     "http://localhost",
@@ -225,7 +225,7 @@ async def create_order_page(request: Request,
                                            "current_user": current_user})
 
 
-@app.post("/create-order", response_class=RedirectResponse)
+@app.post("/create-order", response_class=JSONResponse)
 async def create_order(request: Request, db: AsyncSession = Depends(get_db)):
     data = await request.json()
     rfids = data.get('rfids', [])
@@ -236,20 +236,38 @@ async def create_order(request: Request, db: AsyncSession = Depends(get_db)):
     # Logging the received RFID codes for debugging
     print(f"Received RFID codes: {rfids}")
 
+    errors = []
     for rfid_code in rfids:
         rfid_result = await db.execute(select(RFID).where(RFID.code == rfid_code))
         rfid = rfid_result.scalars().first()
-        if (rfid is None):
+
+        if rfid is None:
             # If RFID not found, add it to the database
             print(f"RFID {rfid_code} not found in the database. Adding it.")
             rfid = RFID(code=rfid_code)
             db.add(rfid)
             await db.flush()  # Ensure the RFID is added and its ID is available
-        order_rfid = OrderRFID(order_id=order.id, rfid_id=rfid.id)
-        db.add(order_rfid)
+        else:
+            # Check if the RFID is in any active orders
+            active_order_result = await db.execute(
+                select(OrderRFID)
+                .join(Order)
+                .where(Order.is_completed == False, OrderRFID.rfid_id == rfid.id)
+            )
+            active_order_rfid = active_order_result.scalars().first()
+            if active_order_rfid:
+                errors.append({"rfid": rfid_code, "message": f"RFID {rfid_code} is already in use in an active order."})
+
+        if not errors:
+            order_rfid = OrderRFID(order_id=order.id, rfid_id=rfid.id)
+            db.add(order_rfid)
+
+    if errors:
+        return JSONResponse(content={"success": False, "errors": errors}, status_code=400)
 
     await db.commit()
-    return RedirectResponse("/orders", 303)
+    return JSONResponse(content={"success": True}, status_code=200)
+
 
 
 @app.get("/terminals", response_class=HTMLResponse)

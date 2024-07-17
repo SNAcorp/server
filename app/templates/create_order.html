@@ -173,9 +173,20 @@
         right: 20px;
         transition: background-color 0.3s, transform 0.3s;
     }
-    .order-button:hover {
-        background-color: #218838;
-        transform: scale(1.1);
+    .input-error {
+        border-color: #e32636;
+    }
+    .alert {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 20px;
+        background-color: #f44336;
+        color: white;
+        border-radius: 5px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        z-index: 1000;
+        display: none;
     }
 {% endblock %}
 
@@ -196,7 +207,7 @@
     </form>
 </div>
 <button type="button" class="order-button" onclick="submitOrder()">Create Order</button>
-
+<div id="alert" class="alert"></div>
 <script>
 let currentTab = 0;
 const maxFieldsPerTab = 6;
@@ -325,9 +336,13 @@ function submitOrder() {
             },
             body: JSON.stringify({ rfids: rfidValues })
         })
-        .then(response => {
-            window.location.href = "/orders";
-
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.href = "/orders";
+            } else {
+                handleServerErrors(data.errors);
+            }
         })
         .catch(error => {
             console.error('Error:', error);
@@ -400,6 +415,16 @@ function updateCarouselButtons() {
         pageNumber.setAttribute('onclick', `showTab(${i})`);
         pageNumbers.appendChild(pageNumber);
     }
+}
+
+function handleServerErrors(errors) {
+    const alertDiv = document.getElementById('alert');
+    const errorMessages = errors.map(error => error.message).join('<br>');
+    alertDiv.innerHTML = errorMessages;
+    alertDiv.style.display = 'block';
+    setTimeout(() => {
+        alertDiv.style.display = 'none';
+    }, 5000);
 }
 
 document.addEventListener('DOMContentLoaded', function() {
