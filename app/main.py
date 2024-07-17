@@ -14,7 +14,7 @@ from app.models import Base, EMPTY_BOTTLE_ID, RFID, OrderItem, OrderRFID, Termin
 from app.routers import terminals, orders, bottles, rfid
 
 from fastapi import Depends, HTTPException, Request, Form
-from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Response
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
@@ -224,7 +224,8 @@ async def create_order_page(request: Request,
                                           {"request": request,
                                            "current_user": current_user})
 
-@app.post("/create-order")
+
+@app.post("/create-order", response_class=RedirectResponse)
 async def create_order(request: Request, db: AsyncSession = Depends(get_db)):
     data = await request.json()
     rfids = data.get('rfids', [])
@@ -248,7 +249,8 @@ async def create_order(request: Request, db: AsyncSession = Depends(get_db)):
         db.add(order_rfid)
 
     await db.commit()
-    return RedirectResponse(url="/orders", status_code=303)
+    return RedirectResponse("/orders", 303)
+
 
 @app.get("/terminals", response_class=HTMLResponse)
 async def dashboard(request: Request,
@@ -262,7 +264,6 @@ async def dashboard(request: Request,
                                           {"request": request,
                                            "terminals": terminals,
                                            "current_user": current_user})
-
 
 
 @app.get("/terminals/{terminal_id}", response_class=HTMLResponse)
