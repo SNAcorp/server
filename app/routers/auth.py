@@ -30,8 +30,8 @@ async def login_user(smth: UserLogin, db: AsyncSession = Depends(get_db)):
     user = await get_user_by_email(db, smth.email)
     if not user or not verify_password(smth.password, user.hashed_password):
         raise HTTPException(status_code=400, detail="Invalid credentials")
-    if not user.is_verified:
-        raise HTTPException(status_code=400, detail="Email not verified")
+    # if not user.is_verified:
+    #     raise HTTPException(status_code=400, detail="Email not verified")
     access_token = create_access_token(data={"sub": user.email})
 
     response = RedirectResponse(url="/terminals", status_code=303)
