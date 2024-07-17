@@ -325,7 +325,22 @@ function submitOrder() {
             },
             body: JSON.stringify({ rfids: rfidValues })
         })
-
+        .then(response => {
+            if (response.status === 303) {
+                window.location.href += "/orders";
+            } else {
+                return response.json();
+            }
+        })
+        .then(data => {
+            if (data && !data.success) {
+                alert('Error creating order.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error creating order.');
+        });
     }
 }
 
