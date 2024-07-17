@@ -327,9 +327,9 @@ function submitOrder() {
         })
         .then(response => {
             if (response.status === 303) {
-                window.location.href += "/orders";
+                window.location.href = "/orders";
             } else {
-                return response.json();
+                return response
             }
         })
         .then(data => {
