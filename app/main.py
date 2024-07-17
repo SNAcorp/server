@@ -248,8 +248,7 @@ async def create_order(request: Request, db: AsyncSession = Depends(get_db)):
         db.add(order_rfid)
 
     await db.commit()
-    response = RedirectResponse(url="/orders", status_code=303)
-    return response
+    return RedirectResponse(url="/orders", status_code=303)
 
 @app.get("/terminals", response_class=HTMLResponse)
 async def dashboard(request: Request,
