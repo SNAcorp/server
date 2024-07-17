@@ -329,7 +329,8 @@ function submitOrder() {
             if (response.status === 303) {
                 window.location.href = "/orders";
             } else {
-                return response
+                alert('Error 303');
+                return response;
             }
         })
         .then(data => {
