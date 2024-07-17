@@ -326,17 +326,8 @@ function submitOrder() {
             body: JSON.stringify({ rfids: rfidValues })
         })
         .then(response => {
-            if (response.status === 303) {
-                window.location.href = "/orders";
-            } else {
-                alert('Error 303');
-                return response;
-            }
-        })
-        .then(data => {
-            if (data && !data.success) {
-                alert('Error creating order.');
-            }
+            window.location.href = "/orders";
+
         })
         .catch(error => {
             console.error('Error:', error);
