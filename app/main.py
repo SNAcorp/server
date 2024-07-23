@@ -56,7 +56,7 @@ app.include_router(users.router, prefix="/users", tags=["users"])
 app.include_router(admin.router, prefix="/admin", tags=["admin"])
 app.include_router(superadmin.router, prefix="/superadmin", tags=["superadmin"])
 
-app.mount("/static", StaticFiles(directory="static"), name="static")
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 
 @app.on_event("startup")
@@ -99,7 +99,7 @@ async def startup():
         await session.commit()
 
 
-app_templates = Jinja2Templates(directory="templates")
+app_templates = Jinja2Templates(directory="app/templates")
 
 origins = [
     "http://localhost",
