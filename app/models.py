@@ -79,8 +79,6 @@ class Bottle(Base):
     location = Column(String)
     image_path300 = Column(String)
     image_path600 = Column(String)
-    url300 = Column(String)
-    url600 = Column(String)
     description = Column(String)
     wine_type = Column(String)
     volume = Column(Float)  # Total volume of the bottle

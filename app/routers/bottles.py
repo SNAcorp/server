@@ -37,8 +37,6 @@ async def create_bottle_endpoint(
     location: str = Form(...),
     image_path300_hidden: str = Form(...),
     image_path600_hidden: str = Form(...),
-    url300: str = Form(...),
-    url600: str = Form(...),
     description: str = Form(...),
     wine_type: str = Form(...),
     volume: float = Form(...),

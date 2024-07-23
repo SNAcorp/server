@@ -25,8 +25,6 @@ class BottleCreate(BaseModel):
     winery: str
     rating_average: float
     location: str
-    url300: str
-    url600: str
     description: str
     wine_type: str
     volume: float
