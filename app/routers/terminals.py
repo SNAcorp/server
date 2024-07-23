@@ -132,6 +132,7 @@ async def get_terminal_bottles(terminal_id: int, db: AsyncSession = Depends(get_
         bottle = bottle_result.scalars().first()
         if bottle:
             bottle_info.append({
+                "id": bottle.id,
                 "name": bottle.name,
                 "description": bottle.description,
                 "winery": bottle.winery,

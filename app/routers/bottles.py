@@ -1,5 +1,7 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import FileResponse
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
 from app.models import Bottle
 from app.database import get_db
 from app.schemas import BottleCreate
@@ -26,3 +28,18 @@ async def create_bottle_endpoint(bottle: BottleCreate, db: AsyncSession = Depend
     await db.commit()
     await db.refresh(new_bottle)
     return new_bottle
+
+@router.get("/image/{bottle_id}/{resolution}", response_class=FileResponse)
+async def get_bottle_image(bottle_id: int, resolution: str, db: AsyncSession = Depends(get_db)):
+    async with db as session:
+        result = await session.execute(select(Bottle).filter(Bottle.id == bottle_id))
+        bottle = result.scalars().first()
+        if bottle:
+            if resolution == "300":
+                return FileResponse(bottle.image_path300)
+            elif resolution == "600":
+                return FileResponse(bottle.image_path600)
+            else:
+                raise HTTPException(status_code=400, detail="Invalid resolution")
+        else:
+            raise HTTPException(status_code=404, detail="Bottle not found")
