@@ -59,7 +59,7 @@
 {% block content %}
 <div class="manage-bottles-container">
     <h2>Manage Bottles</h2>
-    <form action="/add-bottle" method="post" id="bottle-form">
+    <form action="/bottles/create-bottle" method="post" id="bottle-form">
         <!-- Step 1: Basic Information -->
         <div class="form-step active" id="step-1">
             <label for="name">Name:</label>
@@ -77,12 +77,14 @@
             <label for="image_path300">Image Path 300:</label>
             <div class="dropzone" id="dropzone-300">
                 <span>Drop image here or click to upload (300px)</span>
-                <input type="file" id="image_path300" name="image_path300" accept="image/*">
+                <input type="file" id="image_path300" name="image_path300" accept="image/png">
+                <input type="hidden" name="image_path300_hidden">
             </div>
             <label for="image_path600">Image Path 600:</label>
             <div class="dropzone" id="dropzone-600">
                 <span>Drop image here or click to upload (600px)</span>
-                <input type="file" id="image_path600" name="image_path600" accept="image/*">
+                <input type="file" id="image_path600" name="image_path600" accept="image/png">
+                <input type="hidden" name="image_path600_hidden">
             </div>
         </div>
 
@@ -145,9 +147,32 @@ document.addEventListener('DOMContentLoaded', () => {
         dropzone.addEventListener('click', () => {
             dropzone.querySelector('input[type="file"]').click();
         });
+
         dropzone.querySelector('input[type="file"]').addEventListener('change', event => {
-            const fileName = event.target.files[0].name;
-            dropzone.querySelector('span').textContent = `Selected: ${fileName}`;
+            const file = event.target.files[0];
+            if (file && file.type === "image/png") {
+                const formData = new FormData();
+                formData.append('file', file);
+
+                fetch('/bottles/upload-image', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.file_path) {
+                        dropzone.querySelector('span').textContent = `Uploaded: ${file.name}`;
+                        dropzone.querySelector('input[type="hidden"]').value = data.file_path;
+                    } else {
+                        dropzone.querySelector('span').textContent = 'Upload failed.';
+                    }
+                })
+                .catch(() => {
+                    dropzone.querySelector('span').textContent = 'Upload failed.';
+                });
+            } else {
+                dropzone.querySelector('span').textContent = 'Only PNG files are allowed.';
+            }
         });
     });
 });

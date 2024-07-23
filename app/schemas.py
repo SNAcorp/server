@@ -25,8 +25,6 @@ class BottleCreate(BaseModel):
     winery: str
     rating_average: float
     location: str
-    image_path300: str
-    image_path600: str
     url300: str
     url600: str
     description: str
@@ -50,7 +48,7 @@ class UseTerminalRequest(BaseModel):
     terminal_id: int
     rfid_code: str
     slot_number: int
-    volume: float
+    volume: int
     token: str
 
 

@@ -14,11 +14,12 @@ from app.schemas import TerminalBottleCreate, UseTerminalRequest, RegisterTermin
     ResetTerminalRequest
 
 router = APIRouter()
-
+SMALL_PORTION = 30
+BIG_PORTION = 120
 
 @router.post("/register-terminal", response_model=RegisterTerminalResponse)
-async def register_terminal(db: AsyncSession = Depends(get_db)):
-    new_terminal = Terminal(status_id=1, registration_date=datetime.utcnow())
+async def register_terminal(serial: str, db: AsyncSession = Depends(get_db)):
+    new_terminal = Terminal(status_id=1, registration_date=datetime.utcnow(), serial=serial)
     db.add(new_terminal)
     await db.commit()
     await db.refresh(new_terminal)
@@ -32,14 +33,13 @@ async def register_terminal(db: AsyncSession = Depends(get_db)):
             remaining_volume=0.0,
             bottle_id=EMPTY_BOTTLE_ID
         )
-        for i in range(1, 9)
+        for i in range(0, 8)
     ]
 
     db.add_all(empty_bottles)
     await db.commit()
 
-    uid = uuid.uuid4().hex  # Генерируйте уникальный ID для терминала
-    token = create_terminal_token(ter_id, reg_date, uid)
+    token = create_terminal_token(ter_id, reg_date, serial)
 
     return {"terminal_id": ter_id, "token": token}
 
@@ -82,7 +82,13 @@ async def use_terminal(request: UseTerminalRequest, db: AsyncSession = Depends(g
         raise HTTPException(status_code=404, detail="Bottle not found in the terminal")
     if terminal_bottle.remaining_volume < request.volume:
         raise HTTPException(status_code=400, detail="Not enough volume in the bottle")
-    terminal_bottle.remaining_volume -= request.volume
+
+    if request.volume == 0:
+        terminal_bottle.remaining_volume -= SMALL_PORTION
+    elif request.volume == 1:
+        terminal_bottle.remaining_volume -= BIG_PORTION
+    else:
+        raise HTTPException(status_code=404, detail="Portion not found")
 
     order = Order()
     db.add(order)
@@ -103,12 +109,14 @@ async def add_bottle_to_terminal(terminal_bottle: TerminalBottleCreate, db: Asyn
     if not terminal:
         raise HTTPException(status_code=404, detail="Terminal not found")
 
+    if terminal_bottle.slot_number > 7 or terminal_bottle.slot_number < 0:
+        raise HTTPException(status_code=404, detail="Slot not found")
+
     new_terminal_bottle = TerminalBottle(
         terminal_id=terminal_bottle.terminal_id,
         slot_number=terminal_bottle.slot_number,
         remaining_volume=terminal_bottle.remaining_volume,
-        bottle_id=terminal_bottle.bottle_id,
-        index=terminal_bottle.slot_number
+        bottle_id=terminal_bottle.bottle_id
     )
 
     db.add(new_terminal_bottle)
@@ -193,7 +201,6 @@ async def update_terminal_bottle(terminal_id: int, request: Request, db: AsyncSe
                 bottle_id=bottle_id,
                 slot_number=slot_number,
                 remaining_volume=(await db.execute(select(Bottle.volume).where(Bottle.id == bottle_id))).scalar(),
-                index=slot_number  # Устанавливаем индекс при добавлении
             )
             db.add(terminal_bottle)
 

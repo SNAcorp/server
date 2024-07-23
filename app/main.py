@@ -56,7 +56,7 @@ app.include_router(users.router, prefix="/users", tags=["users"])
 app.include_router(admin.router, prefix="/admin", tags=["admin"])
 app.include_router(superadmin.router, prefix="/superadmin", tags=["superadmin"])
 
-app.mount("/static", StaticFiles(directory="app/static"), name="static")
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
 @app.on_event("startup")
@@ -82,8 +82,8 @@ async def startup():
                 winery="N/A",
                 rating_average=0.0,
                 location="N/A",
-                image_path300="",
-                image_path600="",
+                image_path300="images/empty300.png",
+                image_path600="images/empty600.png",
                 url300="",
                 url600="",
                 description="This is an empty slot.",
@@ -99,7 +99,7 @@ async def startup():
         await session.commit()
 
 
-app_templates = Jinja2Templates(directory="app/templates")
+app_templates = Jinja2Templates(directory="templates")
 
 origins = [
     "http://localhost",
@@ -327,7 +327,7 @@ async def reset_bottles_endpoint(request: IsServerOnline):
 
 def main():
     import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=8001, reload=True)
 
 
 if __name__ == "__main__":

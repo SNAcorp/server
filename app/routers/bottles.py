@@ -1,34 +1,66 @@
-from fastapi import APIRouter, Depends, HTTPException
+import uuid
+
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from fastapi.responses import FileResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from app.models import Bottle
 from app.database import get_db
 from app.schemas import BottleCreate
+import os
 
 router = APIRouter()
 
 
+@router.post("/upload-image")
+async def upload_image(file: UploadFile = File(...)):
+    if file.content_type != "image/png":
+        raise HTTPException(status_code=400, detail="Invalid file type. Only PNG is allowed.")
+
+    UPLOAD_DIR = "images"
+    os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+    file_id = str(uuid.uuid4())
+    file_path = f"images/{file_id}.png"
+
+    with open(file_path, "wb+") as buffer:
+        buffer.write(await file.read())
+
+    return {"file_path": file_path}
+
+
 @router.post("/create-bottle")
-async def create_bottle_endpoint(bottle: BottleCreate, db: AsyncSession = Depends(get_db)):
+async def create_bottle_endpoint(
+    name: str = Form(...),
+    winery: str = Form(...),
+    rating_average: float = Form(...),
+    location: str = Form(...),
+    image_path300_hidden: str = Form(...),
+    image_path600_hidden: str = Form(...),
+    url300: str = Form(...),
+    url600: str = Form(...),
+    description: str = Form(...),
+    wine_type: str = Form(...),
+    volume: float = Form(...),
+    db: AsyncSession = Depends(get_db)
+):
     new_bottle = Bottle(
-        name=bottle.name,
-        winery=bottle.winery,
-        rating_average=bottle.rating_average,
-        location=bottle.location,
-        image_path300=bottle.image_path300,
-        image_path600=bottle.image_path600,
-        url300=bottle.url300,
-        url600=bottle.url600,
-        description=bottle.description,
-        wine_type=bottle.wine_type,
-        volume=bottle.volume
+        name=name,
+        winery=winery,
+        rating_average=rating_average,
+        location=location,
+        image_path300=image_path300_hidden,
+        image_path600=image_path600_hidden,
+        url300=url300,
+        url600=url600,
+        description=description,
+        wine_type=wine_type,
+        volume=volume
     )
     db.add(new_bottle)
     await db.commit()
     await db.refresh(new_bottle)
     return new_bottle
-
 @router.get("/image/{bottle_id}/{resolution}", response_class=FileResponse)
 async def get_bottle_image(bottle_id: int, resolution: str, db: AsyncSession = Depends(get_db)):
     async with db as session:

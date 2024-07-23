@@ -31,7 +31,6 @@ class Order(Base):
     rfids = relationship("OrderRFID", back_populates="order")
 
 
-
 class RFID(Base):
     __tablename__ = "rfids"
     id = Column(Integer, primary_key=True, index=True)
@@ -43,20 +42,22 @@ class RFID(Base):
     order_rfids = relationship("OrderRFID", back_populates="rfid")
 
 
-
 class Terminal(Base):
     __tablename__ = "terminals"
     id = Column(Integer, primary_key=True, index=True)
     registration_date = Column(DateTime, default=datetime.utcnow)
     status_id = Column(Integer, ForeignKey('terminal_states.id'), default=1, nullable=False)
+    serial = Column(String, unique=True)
     bottles = relationship("TerminalBottle", back_populates="terminal")
     status = relationship("TerminalState", back_populates="terminals")
+
 
 class TerminalState(Base):
     __tablename__ = "terminal_states"
     id = Column(Integer, primary_key=True, index=True)
     state = Column(String, unique=True, index=True)
     terminals = relationship("Terminal", back_populates="status")
+
 
 class TerminalBottle(Base):
     __tablename__ = "terminal_bottles"
@@ -84,6 +85,7 @@ class Bottle(Base):
     wine_type = Column(String)
     volume = Column(Float)  # Total volume of the bottle
 
+
 class BottleUsageLog(Base):
     __tablename__ = "bottle_usage_log"
     id = Column(Integer, primary_key=True, index=True)
@@ -91,6 +93,7 @@ class BottleUsageLog(Base):
     bottle_id = Column(Integer, ForeignKey("bottles.id"))
     usage_date = Column(DateTime, default=datetime.utcnow)
     used_volume = Column(Float)
+
 
 class OrderItem(Base):
     __tablename__ = "order_items"
