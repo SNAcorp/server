@@ -84,8 +84,6 @@ async def startup():
                 location="N/A",
                 image_path300="images/empty300.png",
                 image_path600="images/empty600.png",
-                url300="",
-                url600="",
                 description="This is an empty slot.",
                 wine_type="N/A",
                 volume=0.0
