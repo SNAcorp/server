@@ -31,16 +31,16 @@ async def upload_image(file: UploadFile = File(...)):
 
 @router.post("/create-bottle")
 async def create_bottle_endpoint(
-    name: str = Form(...),
-    winery: str = Form(...),
-    rating_average: float = Form(...),
-    location: str = Form(...),
-    image_path300_hidden: str = Form(...),
-    image_path600_hidden: str = Form(...),
-    description: str = Form(...),
-    wine_type: str = Form(...),
-    volume: float = Form(...),
-    db: AsyncSession = Depends(get_db)
+        name: str = Form(...),
+        winery: str = Form(...),
+        rating_average: float = Form(...),
+        location: str = Form(...),
+        image_path300_hidden: str = Form(...),
+        image_path600_hidden: str = Form(...),
+        description: str = Form(...),
+        wine_type: str = Form(...),
+        volume: float = Form(...),
+        db: AsyncSession = Depends(get_db)
 ):
     new_bottle = Bottle(
         name=name,
@@ -59,6 +59,8 @@ async def create_bottle_endpoint(
     await db.commit()
     await db.refresh(new_bottle)
     return new_bottle
+
+
 @router.get("/image/{bottle_id}/{resolution}", response_class=FileResponse)
 async def get_bottle_image(bottle_id: int, resolution: str, db: AsyncSession = Depends(get_db)):
     async with db as session:

@@ -37,6 +37,10 @@ class BottleResponse(BaseModel):
         from_attributes = True
 
 
+class RegisterTerminalRequest(BaseModel):
+    serial: str
+
+
 class RegisterTerminalResponse(BaseModel):
     terminal_id: int
     token: str

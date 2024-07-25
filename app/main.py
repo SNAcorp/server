@@ -1,7 +1,6 @@
 import os
 
 from fastapi import FastAPI
-from sqlalchemy import create_engine
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.orm import sessionmaker
 
@@ -14,7 +13,7 @@ from app.models import Base, EMPTY_BOTTLE_ID, RFID, OrderItem, OrderRFID, Termin
 from app.routers import terminals, orders, bottles, rfid
 
 from fastapi import Depends, HTTPException, Request, Form
-from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Response
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
@@ -249,8 +248,8 @@ async def create_order(request: Request, db: AsyncSession = Depends(get_db)):
             # Check if the RFID is in any active orders
             active_order_result = await db.execute(
                 select(OrderRFID)
-                .join(Order)
-                .where(Order.is_completed == False, OrderRFID.rfid_id == rfid.id)
+                    .join(Order)
+                    .where(Order.is_completed == False, OrderRFID.rfid_id == rfid.id)
             )
             active_order_rfid = active_order_result.scalars().first()
             if active_order_rfid:
@@ -265,7 +264,6 @@ async def create_order(request: Request, db: AsyncSession = Depends(get_db)):
 
     await db.commit()
     return JSONResponse(content={"success": True}, status_code=200)
-
 
 
 @app.get("/terminals", response_class=HTMLResponse)
@@ -325,7 +323,7 @@ async def reset_bottles_endpoint(request: IsServerOnline):
 
 def main():
     import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=8001, reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=80, reload=True)
 
 
 if __name__ == "__main__":

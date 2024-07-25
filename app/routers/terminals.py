@@ -1,25 +1,22 @@
-import logging
-
-from fastapi import APIRouter, Depends, HTTPException, Security, Request
-from fastapi.security import HTTPAuthorizationCredentials
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload, joinedload
-from datetime import datetime, timedelta
-import uuid
+from datetime import datetime, timedelta, timezone
 from app.models import Terminal, TerminalBottle, RFID, Order, OrderItem, Bottle, EMPTY_BOTTLE_ID, BottleUsageLog
 from app.database import get_db
-from app.jwt_auth import create_terminal_token, verify_terminal, security
-from app.schemas import TerminalBottleCreate, UseTerminalRequest, RegisterTerminalResponse, TerminalResponse, \
-    ResetTerminalRequest
+from app.jwt_auth import create_terminal_token, verify_terminal
+from app.schemas import TerminalBottleCreate, UseTerminalRequest, TerminalResponse, \
+    ResetTerminalRequest, RegisterTerminalRequest
 
 router = APIRouter()
-SMALL_PORTION = 30
-BIG_PORTION = 120
+SMALL_PORTION = 0.03
+BIG_PORTION = 0.12
 
-@router.post("/register-terminal", response_model=RegisterTerminalResponse)
-async def register_terminal(serial: str, db: AsyncSession = Depends(get_db)):
-    new_terminal = Terminal(status_id=1, registration_date=datetime.utcnow(), serial=serial)
+
+@router.post("/register-terminal")
+async def register_terminal(request: RegisterTerminalRequest, db: AsyncSession = Depends(get_db)):
+    new_terminal = Terminal(status_id=1, registration_date=datetime.utcnow(), serial=request.serial)
     db.add(new_terminal)
     await db.commit()
     await db.refresh(new_terminal)
@@ -39,7 +36,7 @@ async def register_terminal(serial: str, db: AsyncSession = Depends(get_db)):
     db.add_all(empty_bottles)
     await db.commit()
 
-    token = create_terminal_token(ter_id, reg_date, serial)
+    token = create_terminal_token(ter_id, reg_date, request.serial)
 
     return {"terminal_id": ter_id, "token": token}
 
@@ -80,8 +77,8 @@ async def use_terminal(request: UseTerminalRequest, db: AsyncSession = Depends(g
     terminal_bottle = result.scalars().first()
     if terminal_bottle is None:
         raise HTTPException(status_code=404, detail="Bottle not found in the terminal")
-    if terminal_bottle.remaining_volume < request.volume:
-        raise HTTPException(status_code=400, detail="Not enough volume in the bottle")
+    if terminal_bottle.remaining_volume < 0.12:
+        raise HTTPException(status_code=400, detail=f"Not enough volume in the bottle: {terminal_bottle.remaining_volume, SMALL_PORTION if request.volume == 0 else BIG_PORTION}")
 
     if request.volume == 0:
         terminal_bottle.remaining_volume -= SMALL_PORTION
@@ -98,7 +95,7 @@ async def use_terminal(request: UseTerminalRequest, db: AsyncSession = Depends(g
     db.add(order_item)
     await db.commit()
 
-    return {"message": "Wine poured successfully"}
+    return {"is_valid": True}
 
 
 @router.post("/add-bottle-to-terminal")
@@ -148,8 +145,6 @@ async def get_terminal_bottles(terminal_id: int, db: AsyncSession = Depends(get_
                 "location": bottle.location,
                 "image_path300": bottle.image_path300,
                 "image_path600": bottle.image_path600,
-                "url300": bottle.url300,
-                "url600": bottle.url600,
                 "wine_type": bottle.wine_type,
                 "volume": bottle.volume,
                 "remaining_volume": terminal_bottle.remaining_volume,
