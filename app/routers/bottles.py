@@ -49,8 +49,6 @@ async def create_bottle_endpoint(
         location=location,
         image_path300=image_path300_hidden,
         image_path600=image_path600_hidden,
-        url300=url300,
-        url600=url600,
         description=description,
         wine_type=wine_type,
         volume=volume
