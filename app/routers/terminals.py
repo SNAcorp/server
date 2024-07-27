@@ -16,6 +16,13 @@ BIG_PORTION = 0.12
 
 @router.post("/register-terminal")
 async def register_terminal(request: RegisterTerminalRequest, db: AsyncSession = Depends(get_db)):
+
+    res = await db.execute(select(Terminal).where(Terminal.serial == request.serial))
+    old_terminal = res.scalars().first()
+    if old_terminal is not None:
+        token = create_terminal_token(old_terminal.terminal_id, old_terminal.registration_date, request.serial)
+        return {"terminal_id": old_terminal.terminal_id, "token": token}
+
     new_terminal = Terminal(status_id=1, registration_date=datetime.utcnow(), serial=request.serial)
     db.add(new_terminal)
     await db.commit()
