@@ -9,12 +9,13 @@ router = APIRouter()
 
 
 @router.put("/role/{user_id}")
-async def change_user_role(user_id: int, role: str, db: AsyncSession = Depends(get_db),
+async def change_user_role(request: Request, user_id: int, db: AsyncSession = Depends(get_db),
                            current_user: User = Depends(get_admin_user)):
     user = await get_user(db, user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    updated_user = update_user_role(db, user, role)
+    data = await request.json()
+    updated_user = update_user_role(db, user, data.role)
     return updated_user
 
 
