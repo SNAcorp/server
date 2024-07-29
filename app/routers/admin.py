@@ -15,7 +15,8 @@ async def change_user_role(request: Request, user_id: int, db: AsyncSession = De
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     data = await request.json()
-    updated_user = update_user_role(db, user, data.role)
+    print(data)
+    updated_user = update_user_role(db, user, data["role"])
     return updated_user
 
 
