@@ -3,7 +3,7 @@
 {% block title %}Manage Bottles{% endblock %}
 
 {% block link %}
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/dropzone.min.css" integrity="sha512-3gLUBcy13u59To2K1kDSXZilDiFCXn1V1hPCn2hLVF2nLlxxAcRTgHd9+oVoxP+iF7/bp8D6aMSHxa8Aq+Efnw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/dropzone.min.css" integrity="sha512-3gLUBcy13u59To2K1kDSXZilDiFCn2hV1hPCn2hLVF2nLlxxAcRTgHd9+oVoxP+iF7/bp8D6aMSHxa8Aq+Efnw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 {% endblock %}
 
 {% block style %}
@@ -114,7 +114,7 @@
             <input type="text" id="location" name="location" class="form-field" required>
         </div>
 
-        <!-- Images -->
+        <!-- Image Path 300 -->
         <div class="form-step" id="step-2">
             <label for="image_path300">Image Path 300:</label>
             <div class="dropzone" id="dropzone-300">
@@ -122,6 +122,10 @@
                 <input type="file" id="image_path300" name="image_path300" accept="image/png">
                 <input type="hidden" name="image_path300_hidden" class="form-field">
             </div>
+        </div>
+
+        <!-- Image Path 600 -->
+        <div class="form-step" id="step-3">
             <label for="image_path600">Image Path 600:</label>
             <div class="dropzone" id="dropzone-600">
                 <span>Drop image here or click to upload (600px)</span>
@@ -131,13 +135,13 @@
         </div>
 
         <!-- URLs and Description -->
-        <div class="form-step" id="step-3">
+        <div class="form-step" id="step-4">
             <label for="description">Description:</label>
             <textarea id="description" name="description" class="form-field" required></textarea>
         </div>
 
         <!-- Wine Details -->
-        <div class="form-step" id="step-4">
+        <div class="form-step" id="step-5">
             <label for="wine_type">Wine Type:</label>
             <input type="text" id="wine_type" name="wine_type" class="form-field" required>
             <label for="volume">Volume:</label>
@@ -162,7 +166,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/dropzone.min.js" integrity="sha512-EFR6PRuH2y+haIGxJGoS5niij4OoxocUaq0yMgK9pqHzcwkTn5M0qg1nK8xQhgudWofpJ8yC1yX1L7Yq+bsBGA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 let currentStep = 1;
-const totalSteps = 4;
+const totalSteps = 5;
 
 function updateProgress() {
     const totalFields = document.querySelectorAll('.form-field').length;
