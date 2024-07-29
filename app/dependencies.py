@@ -43,8 +43,8 @@ async def get_current_user(request: Request, db: AsyncSession = Depends(get_db))
 
 
 async def get_admin_user(current_user: User = Depends(get_current_user)):
-    if current_user.is_superuser:
-        raise HTTPException(status_code=403, detail="Not enough permissions1")
+    if not current_user.is_superuser or current_user.role not in ["admin", "superadmin"]:
+        raise HTTPException(status_code=403, detail="Not enough permissions")
     return current_user
 
 
