@@ -66,9 +66,9 @@ async def get_bottle_image(bottle_id: int, resolution: str, db: AsyncSession = D
         bottle = result.scalars().first()
         if bottle:
             if resolution == "300":
-                return FileResponse(bottle.image_path300)
+                return FileResponse("/app" + bottle.image_path300)
             elif resolution == "600":
-                return FileResponse(bottle.image_path600)
+                return FileResponse("/app" + bottle.image_path600)
             else:
                 raise HTTPException(status_code=400, detail="Invalid resolution")
         else:
