@@ -15,8 +15,9 @@ async def change_user_role(request: Request, user_id: int, db: AsyncSession = De
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     data = await request.json()
-    print(data)
-    updated_user = update_user_role(db, user, dict(data)["role"])
+    if data["role"] == "superuser" and not current_user.is_superuser:
+        raise HTTPException(status_code=403, detail="Permission denied")
+    updated_user = await update_user_role(db, user, data["role"])
     return updated_user
 
 
@@ -26,7 +27,9 @@ async def block_user_route(user_id: int, db: AsyncSession = Depends(get_db),
     user = await get_user(db, user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    blocked_user = block_user(db, user)
+    if user.is_superuser and not current_user.is_superuser:
+        raise HTTPException(status_code=403, detail="Permission denied")
+    blocked_user = await block_user(db, user)
     return blocked_user
 
 
@@ -36,7 +39,9 @@ async def unblock_user_route(user_id: int, db: AsyncSession = Depends(get_db),
     user = await get_user(db, user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    unblocked_user = unblock_user(db, user)
+    if user.is_superuser and not current_user.is_superuser:
+        raise HTTPException(status_code=403, detail="Permission denied")
+    unblocked_user = await unblock_user(db, user)
     return unblocked_user
 
 
