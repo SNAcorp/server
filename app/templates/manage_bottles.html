@@ -2,6 +2,10 @@
 
 {% block title %}Manage Bottles{% endblock %}
 
+{% block link %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/dropzone.min.css" integrity="sha512-3gLUBcy13u59To2K1kDSXZilDiFCXn1V1hPCn2hLVF2nLlxxAcRTgHd9+oVoxP+iF7/bp8D6aMSHxa8Aq+Efnw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+{% endblock %}
+
 {% block style %}
     .manage-bottles-container {
         max-width: 900px;
@@ -16,12 +20,6 @@
         margin-bottom: 30px;
         font-weight: bold;
         font-size: 2rem;
-    }
-    .form-step {
-        display: none;
-    }
-    .form-step.active {
-        display: block;
     }
     .form-navigation {
         display: flex;
@@ -45,16 +43,14 @@
         border: 2px dashed #007bff;
         border-radius: 10px;
         background: #e9f4ff;
-        padding: 20px;
+        padding: 50px;
         text-align: center;
         cursor: pointer;
         transition: background-color 0.3s;
+        margin-top: 20px;
     }
     .dropzone:hover {
         background-color: #d0e8ff;
-    }
-    .dropzone input {
-        display: none;
     }
     label {
         display: block;
@@ -72,73 +68,65 @@
         margin-top: 30px;
         text-align: center;
     }
-    .wine-bottle {
-        width: 50px;
-        height: 150px;
-        border: 2px solid #007bff;
-        border-radius: 10px;
-        position: relative;
+    .progress {
+        height: 30px;
+        background-color: #f4f4f4;
+        border-radius: 5px;
         overflow: hidden;
-        margin: 0 auto 10px;
     }
-    .wine-fill {
-        width: 100%;
-        height: 0;
+    .progress-bar {
+        width: 0;
+        height: 100%;
         background-color: #007bff;
-        position: absolute;
-        bottom: 0;
-        transition: height 0.5s ease;
-    }
-    .progress-text {
-        font-size: 1.2rem;
-        font-weight: bold;
+        text-align: center;
+        line-height: 30px;
+        color: white;
+        transition: width 0.5s ease;
     }
 {% endblock %}
 
 {% block content %}
 <div class="manage-bottles-container">
     <h2>Manage Bottles</h2>
-    <form action="/bottles/create-bottle" method="post" id="bottle-form">
-        <!-- Step 1: Basic Information -->
+    <form action="/bottles/create-bottle" method="post" id="bottle-form" enctype="multipart/form-data">
+        <!-- Basic Information -->
         <div class="form-step active" id="step-1">
             <label for="name">Name:</label>
-            <input type="text" id="name" name="name" class="form-field">
+            <input type="text" id="name" name="name" class="form-field" required>
             <label for="winery">Winery:</label>
-            <input type="text" id="winery" name="winery" class="form-field">
+            <input type="text" id="winery" name="winery" class="form-field" required>
             <label for="rating_average">Rating Average:</label>
-            <input type="text" id="rating_average" name="rating_average" class="form-field">
+            <input type="number" id="rating_average" name="rating_average" class="form-field" min="0" max="100" required>
             <label for="location">Location:</label>
-            <input type="text" id="location" name="location" class="form-field">
+            <input type="text" id="location" name="location" class="form-field" required>
         </div>
 
-        <!-- Step 2: Images -->
+        <!-- Images -->
         <div class="form-step" id="step-2">
             <label for="image_path300">Image Path 300:</label>
             <div class="dropzone" id="dropzone-300">
-                <span>Drop image here or click to upload (300px)</span>
                 <input type="file" id="image_path300" name="image_path300" accept="image/png">
                 <input type="hidden" name="image_path300_hidden" class="form-field">
             </div>
             <label for="image_path600">Image Path 600:</label>
             <div class="dropzone" id="dropzone-600">
-                <span>Drop image here or click to upload (600px)</span>
                 <input type="file" id="image_path600" name="image_path600" accept="image/png">
                 <input type="hidden" name="image_path600_hidden" class="form-field">
             </div>
         </div>
 
-        <!-- Step 3: URLs and Description -->
+        <!-- URLs and Description -->
         <div class="form-step" id="step-3">
             <label for="description">Description:</label>
-            <textarea id="description" name="description" class="form-field"></textarea>
+            <textarea id="description" name="description" class="form-field" required></textarea>
         </div>
 
-        <!-- Step 4: Wine Details -->
+        <!-- Wine Details -->
         <div class="form-step" id="step-4">
             <label for="wine_type">Wine Type:</label>
-            <input type="text" id="wine_type" name="wine_type" class="form-field">
+            <input type="text" id="wine_type" name="wine_type" class="form-field" required>
             <label for="volume">Volume:</label>
-            <input type="text" id="volume" name="volume" class="form-field">
+            <input type="number" id="volume" name="volume" class="form-field" required>
         </div>
 
         <!-- Navigation Buttons -->
@@ -151,12 +139,12 @@
 </div>
 
 <div class="progress-container">
-    <div class="wine-bottle">
-        <div class="wine-fill" id="wine-fill"></div>
+    <div class="progress">
+        <div class="progress-bar" id="progress-bar">0%</div>
     </div>
-    <div class="progress-text" id="progress-text">0%</div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/dropzone.min.js" integrity="sha512-EFR6PRuH2y+haIGxJGoS5niij4OoxocUaq0yMgK9pqHzcwkTn5M0qg1nK8xQhgudWofpJ8yC1yX1L7Yq+bsBGA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 let currentStep = 1;
 const totalSteps = 4;
@@ -165,8 +153,9 @@ function updateProgress() {
     const totalFields = document.querySelectorAll('.form-field').length;
     const filledFields = Array.from(document.querySelectorAll('.form-field')).filter(field => field.value.trim() !== '').length;
     const progress = (filledFields / totalFields) * 100;
-    document.getElementById('wine-fill').style.height = progress + '%';
-    document.getElementById('progress-text').textContent = Math.round(progress) + '%';
+    const progressBar = document.getElementById('progress-bar');
+    progressBar.style.width = progress + '%';
+    progressBar.textContent = Math.round(progress) + '%';
 }
 
 function showStep(step) {
@@ -195,35 +184,19 @@ function prevStep() {
 
 document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.dropzone').forEach(dropzone => {
-        dropzone.addEventListener('click', () => {
-            dropzone.querySelector('input[type="file"]').click();
-        });
-
-        dropzone.querySelector('input[type="file"]').addEventListener('change', event => {
-            const file = event.target.files[0];
-            if (file && file.type === "image/png") {
-                const formData = new FormData();
-                formData.append('file', file);
-
-                fetch('/bottles/upload-image', {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.file_path) {
-                        dropzone.querySelector('span').textContent = `Uploaded: ${file.name}`;
-                        dropzone.querySelector('input[type="hidden"]').value = data.file_path;
-                        updateProgress();
-                    } else {
-                        dropzone.querySelector('span').textContent = 'Upload failed.';
-                    }
-                })
-                .catch(() => {
-                    dropzone.querySelector('span').textContent = 'Upload failed.';
+        new Dropzone(dropzone, {
+            url: '/bottles/upload-image',
+            acceptedFiles: 'image/png',
+            maxFiles: 1,
+            init: function() {
+                this.on('success', function(file, response) {
+                    const hiddenInput = dropzone.querySelector('input[type="hidden"]');
+                    hiddenInput.value = response.file_path;
+                    updateProgress();
                 });
-            } else {
-                dropzone.querySelector('span').textContent = 'Only PNG files are allowed.';
+                this.on('error', function(file, response) {
+                    alert('Upload failed: ' + response);
+                });
             }
         });
     });
