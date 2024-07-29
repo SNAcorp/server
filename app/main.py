@@ -309,9 +309,7 @@ async def manage_terminal(request: Request,
 
 @app.get("/admin/panel", response_class=HTMLResponse)
 async def admin_panel(request: Request, db: AsyncSession = Depends(get_db),
-                      current_user: User = Depends(get_current_user)):
-    if not current_user.is_admin:
-        raise HTTPException(status_code=403, detail="Not authorized")
+                      current_user: User = Depends(get_admin_user)):
 
     all_users = await get_all_users(db)
     unblocked_users = await get_unblocked_users(db)
