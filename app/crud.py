@@ -150,6 +150,16 @@ async def get_all_users(db: AsyncSession):
     return result.scalars().all()
 
 
+async def get_unblocked_users(db: AsyncSession):
+    result = await db.execute(select(User).where(User.is_active == True))
+    return result.scalars().all()
+
+
+async def get_blocked_users(db: AsyncSession):
+    result = await db.execute(select(User).where(User.is_active == False))
+    return result.scalars().all()
+
+
 async def get_users(db: AsyncSession, skip: int = 0, limit: int = 10):
     result = await db.execute(select(models.User).offset(skip).limit(limit))
     return result.scalars().all()

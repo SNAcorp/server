@@ -7,7 +7,7 @@ from sqlalchemy.orm import sessionmaker
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from app.crud import get_unverified_users, get_all_users
+from app.crud import get_unverified_users, get_all_users, get_blocked_users, get_unblocked_users
 from app.dependencies import get_current_user, get_admin_user
 from app.routers import auth, users, admin, superadmin
 from app.jwt_auth import verify_terminal
@@ -309,20 +309,25 @@ async def manage_terminal(request: Request,
 
 @app.get("/admin/panel", response_class=HTMLResponse)
 async def admin_panel(request: Request, db: AsyncSession = Depends(get_db),
-                      current_user: User = Depends(get_admin_user)):
-    if current_user is None:
-        return RedirectResponse("/login", 303)
+                      current_user: User = Depends(get_current_user)):
+    if not current_user.is_admin:
+        raise HTTPException(status_code=403, detail="Not authorized")
 
     all_users = await get_all_users(db)
+    unblocked_users = await get_unblocked_users(db)
+    blocked_users = await get_blocked_users(db)
     unverified_users = []
     if current_user.is_superuser:
         unverified_users = await get_unverified_users(db)
 
-    return app_templates.TemplateResponse("admin_panel.html", {"request": request,
-                                                               "current_user": current_user,
-                                                               "all_users": all_users,
-                                                               "unverified_users": unverified_users})
-
+    return app_templates.TemplateResponse("admin_panel.html", {
+        "request": request,
+        "current_user": current_user,
+        "all_users": all_users,
+        "unblocked_users": unblocked_users,
+        "blocked_users": blocked_users,
+        "unverified_users": unverified_users
+    })
 
 @app.get("/manage-bottles", response_class=HTMLResponse)
 async def manage_bottles(request: Request,

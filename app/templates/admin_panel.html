@@ -8,69 +8,81 @@
     <div class="row">
         <!-- Change User Role -->
         <div class="col-md-4">
-            <div class="card mb-4 shadow-sm">
-                <div class="card-body">
-                    <h5 class="card-title">Change User Role</h5>
-                    <p class="card-text">Change the role of a user.</p>
-                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#changeRoleModal">Change Role</button>
+            <button class="btn btn-primary btn-block mb-4" data-toggle="modal" data-target="#changeRoleModal">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Change User Role</h5>
+                        <p class="card-text">Change the role of a user.</p>
+                        <span class="badge badge-info">Admin</span>
+                    </div>
                 </div>
-            </div>
+            </button>
         </div>
 
         <!-- Block User -->
         <div class="col-md-4">
-            <div class="card mb-4 shadow-sm">
-                <div class="card-body">
-                    <h5 class="card-title">Block User</h5>
-                    <p class="card-text">Block a user from accessing the system.</p>
-                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#blockUserModal">Block User</button>
+            <button class="btn btn-primary btn-block mb-4" data-toggle="modal" data-target="#blockUserModal">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Block User</h5>
+                        <p class="card-text">Block a user from accessing the system.</p>
+                        <span class="badge badge-info">Admin</span>
+                    </div>
                 </div>
-            </div>
+            </button>
         </div>
 
         <!-- Unblock User -->
         <div class="col-md-4">
-            <div class="card mb-4 shadow-sm">
-                <div class="card-body">
-                    <h5 class="card-title">Unblock User</h5>
-                    <p class="card-text">Unblock a previously blocked user.</p>
-                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#unblockUserModal">Unblock User</button>
+            <button class="btn btn-primary btn-block mb-4" data-toggle="modal" data-target="#unblockUserModal">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Unblock User</h5>
+                        <p class="card-text">Unblock a previously blocked user.</p>
+                        <span class="badge badge-info">Admin</span>
+                    </div>
                 </div>
-            </div>
+            </button>
         </div>
 
         {% if current_user.is_superuser %}
         <!-- Verify User -->
         <div class="col-md-4">
-            <div class="card mb-4 shadow-sm">
-                <div class="card-body">
-                    <h5 class="card-title">Verify User</h5>
-                    <p class="card-text">Verify a user.</p>
-                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#verifyUserModal">Verify User</button>
+            <button class="btn btn-primary btn-block mb-4" data-toggle="modal" data-target="#verifyUserModal">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Verify User</h5>
+                        <p class="card-text">Verify a user.</p>
+                        <span class="badge badge-warning">Superadmin</span>
+                    </div>
                 </div>
-            </div>
+            </button>
         </div>
 
         <!-- Reject User -->
         <div class="col-md-4">
-            <div class="card mb-4 shadow-sm">
-                <div class="card-body">
-                    <h5 class="card-title">Reject User</h5>
-                    <p class="card-text">Reject a user's verification.</p>
-                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#rejectUserModal">Reject User</button>
+            <button class="btn btn-primary btn-block mb-4" data-toggle="modal" data-target="#rejectUserModal">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Reject User</h5>
+                        <p class="card-text">Reject a user's verification.</p>
+                        <span class="badge badge-warning">Superadmin</span>
+                    </div>
                 </div>
-            </div>
+            </button>
         </div>
 
         <!-- Make Superadmin -->
         <div class="col-md-4">
-            <div class="card mb-4 shadow-sm">
-                <div class="card-body">
-                    <h5 class="card-title">Make Superadmin</h5>
-                    <p class="card-text">Promote a user to superadmin.</p>
-                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#makeSuperadminModal">Make Superadmin</button>
+            <button class="btn btn-primary btn-block mb-4" data-toggle="modal" data-target="#makeSuperadminModal">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Make Superadmin</h5>
+                        <p class="card-text">Promote a user to superadmin.</p>
+                        <span class="badge badge-warning">Superadmin</span>
+                    </div>
                 </div>
-            </div>
+            </button>
         </div>
         {% endif %}
     </div>
@@ -131,7 +143,7 @@
                     <div class="form-group">
                         <label for="block_user_select">Or select user</label>
                         <select class="form-control" id="block_user_select" name="block_user_select">
-                            {% for user in all_users %}
+                            {% for user in unblocked_users %}
                             <option value="{{ user.id }}">{{ user.email }}</option>
                             {% endfor %}
                         </select>
@@ -162,7 +174,7 @@
                     <div class="form-group">
                         <label for="unblock_user_select">Or select user</label>
                         <select class="form-control" id="unblock_user_select" name="unblock_user_select">
-                            {% for user in all_users %}
+                            {% for user in blocked_users %}
                             <option value="{{ user.id }}">{{ user.email }}</option>
                             {% endfor %}
                         </select>
@@ -282,6 +294,7 @@
         });
         if (response.ok) {
             alert('Role updated successfully');
+            location.reload();
         } else {
             alert('Error updating role');
         }
@@ -295,6 +308,7 @@
         });
         if (response.ok) {
             alert('User blocked successfully');
+            location.reload();
         } else {
             alert('Error blocking user');
         }
@@ -308,6 +322,7 @@
         });
         if (response.ok) {
             alert('User unblocked successfully');
+            location.reload();
         } else {
             alert('Error unblocking user');
         }
@@ -321,6 +336,7 @@
         });
         if (response.ok) {
             alert('User verified successfully');
+            location.reload();
         } else {
             alert('Error verifying user');
         }
@@ -334,6 +350,7 @@
         });
         if (response.ok) {
             alert('User rejected successfully');
+            location.reload();
         } else {
             alert('Error rejecting user');
         }
@@ -347,6 +364,7 @@
         });
         if (response.ok) {
             alert('User promoted to superadmin successfully');
+            location.reload();
         } else {
             alert('Error promoting user');
         }
