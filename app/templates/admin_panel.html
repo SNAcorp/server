@@ -213,7 +213,7 @@
 
 <!-- View/Edit User Modal -->
 <div class="modal fade" id="viewUserModal" tabindex="-1" role="dialog" aria-labelledby="viewUserModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="viewUserModalLabel">View/Edit User</h5>
@@ -293,8 +293,8 @@
                     <li class="list-group-item"><strong>Middle Name:</strong> ${user.middle_name}</li>
                     <li class="list-group-item"><strong>Phone Number:</strong> ${user.phone_number}</li>
                     <li class="list-group-item"><strong>Role:</strong> ${user.role}</li>
-                    <li class="list-group-item"><strong>Active:</strong> ${user.is_active}</li>
-                    <li class="list-group-item"><strong>Verified:</strong> ${user.is_verified}</li>
+                    <li class="list-group-item"><strong>Active:</strong> ${user.is_active ? 'Yes' : 'No'}</li>
+                    <li class="list-group-item"><strong>Verified:</strong> ${user.is_verified ? 'Yes' : 'No'}</li>
                     <li class="list-group-item"><strong>Registration Date:</strong> ${user.registration_date}</li>
                     <li class="list-group-item"><strong>Block Date:</strong> ${user.block_date}</li>
                 </ul>
@@ -310,37 +310,45 @@
             const user = await response.json();
             const userDetails = `
                 <form id="viewUserForm">
-                    <div class="form-group">
-                        <label for="view_email">Email</label>
-                        <input type="email" class="form-control" id="view_email" name="email" value="${user.email}" disabled>
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="view_email">Email</label>
+                            <input type="email" class="form-control" id="view_email" name="email" value="${user.email}" disabled>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="view_first_name">First Name</label>
+                            <input type="text" class="form-control" id="view_first_name" name="first_name" value="${user.first_name}">
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="view_first_name">First Name</label>
-                        <input type="text" class="form-control" id="view_first_name" name="first_name" value="${user.first_name}" disabled>
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="view_last_name">Last Name</label>
+                            <input type="text" class="form-control" id="view_last_name" name="last_name" value="${user.last_name}">
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="view_middle_name">Middle Name</label>
+                            <input type="text" class="form-control" id="view_middle_name" name="middle_name" value="${user.middle_name}">
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="view_last_name">Last Name</label>
-                        <input type="text" class="form-control" id="view_last_name" name="last_name" value="${user.last_name}" disabled>
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="view_phone_number">Phone Number</label>
+                            <input type="text" class="form-control" id="view_phone_number" name="phone_number" value="${user.phone_number}">
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="view_role">Role</label>
+                            <input type="text" class="form-control" id="view_role" name="role" value="${user.role}">
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="view_middle_name">Middle Name</label>
-                        <input type="text" class="form-control" id="view_middle_name" name="middle_name" value="${user.middle_name}" disabled>
-                    </div>
-                    <div class="form-group">
-                        <label for="view_phone_number">Phone Number</label>
-                        <input type="text" class="form-control" id="view_phone_number" name="phone_number" value="${user.phone_number}" disabled>
-                    </div>
-                    <div class="form-group">
-                        <label for="view_role">Role</label>
-                        <input type="text" class="form-control" id="view_role" name="role" value="${user.role}" disabled>
-                    </div>
-                    <div class="form-group">
-                        <label for="view_is_active">Active</label>
-                        <input type="checkbox" class="form-control" id="view_is_active" name="is_active" ${user.is_active ? 'checked' : ''} disabled>
-                    </div>
-                    <div class="form-group">
-                        <label for="view_is_verified">Verified</label>
-                        <input type="checkbox" class="form-control" id="view_is_verified" name="is_verified" ${user.is_verified ? 'checked' : ''} disabled>
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="view_is_active">Active</label>
+                            <p class="form-control-plaintext">${user.is_active ? 'Yes' : 'No'}</p>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="view_is_verified">Verified</label>
+                            <p class="form-control-plaintext">${user.is_verified ? 'Yes' : 'No'}</p>
+                        </div>
                     </div>
                 </form>
             `;
@@ -352,7 +360,9 @@
     async function enableEditUser() {
         const form = document.getElementById('viewUserForm');
         for (let element of form.elements) {
-            element.disabled = false;
+            if (element.name !== 'email') {
+                element.disabled = false;
+            }
         }
         document.getElementById('saveUserDetailsBtn').style.display = 'inline-block';
         document.getElementById('enableEditUserBtn').style.display = 'none';
@@ -389,8 +399,6 @@
         const form = document.getElementById('viewUserForm');
         const formData = new FormData(form);
         const userData = Object.fromEntries(formData.entries());
-        userData.is_active = formData.get('is_active') ? true : false;
-        userData.is_verified = formData.get('is_verified') ? true : false;
         const response = await fetch(`/admin/user/${userId}`, {
             method: 'PUT',
             headers: {
