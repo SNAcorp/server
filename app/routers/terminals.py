@@ -12,6 +12,8 @@ from app.schemas import TerminalBottleCreate, UseTerminalRequest, TerminalRespon
 router = APIRouter()
 SMALL_PORTION = 0.03
 BIG_PORTION = 0.12
+SMALL_PORTION_TIME = 3
+BIG_PORTION_TIME = 9
 
 
 @router.post("/register-terminal")
@@ -158,7 +160,9 @@ async def get_terminal_bottles(terminal_id: int, db: AsyncSession = Depends(get_
                 "slot_number": terminal_bottle.slot_number
             })
 
-    return {"terminal_id": terminal_id, "bottles": bottle_info}
+    return {"terminal_id": terminal_id,
+            "bottles": bottle_info,
+            "volumes": {"big": BIG_PORTION_TIME, "small": SMALL_PORTION_TIME}}
 
 
 @router.post("/{terminal_id}/update-bottle", response_model=TerminalResponse)
