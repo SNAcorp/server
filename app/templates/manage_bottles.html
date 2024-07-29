@@ -3,7 +3,7 @@
 {% block title %}Manage Bottles{% endblock %}
 
 {% block link %}
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/dropzone.min.css" integrity="sha512-3gLUBcy13u59To2K1kDSXZilDiFCXn1V1hPCn2hLVF2nLlxxAcRTgHd9+oVoxP+iF7/bp8D6aMSHxa8Aq+Efnw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/dropzone.min.css" integrity="sha512-3gLUBcy13u59To2K1kDSXZilDiFCXn2hV1hPCn2hLVF2nLlxxAcRTgHd9+oVoxP+iF7/bp8D6aMSHxa8Aq+Efnw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" integrity="sha512-MC7KwMtcwQZoxk71x4GZAKJxTYdY1IR1YtX7+FxrVdL8kpYYquSMqk4H8r9e6zYXZ5u+tqJXt0H7jATJ4um5P4w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 <style>
     .manage-bottles-container {
@@ -312,15 +312,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function validateField(field) {
         const group = field.closest('.input-group');
-        if (field.type === 'text' && field.required && field.value.trim() === '') {
+        const value = field.value.trim();
+        if (field.type === 'text' && field.required && value === '') {
             group.classList.add('invalid');
             group.classList.remove('valid');
             toastr.error('This field is required.');
-        } else if (field.type === 'number' && isNaN(field.value)) {
-            group.classList.add('invalid');
-            group.classList.remove('valid');
-            toastr.error('Please enter a valid number.');
-        } else if (field.value.trim() !== '') {
+        } else if (field.type === 'number' || field.type === 'text' && field.name === 'rating_average' || field.name === 'volume') {
+            if (!/^\d+(\.\d+)?$/.test(value)) {
+                group.classList.add('invalid');
+                group.classList.remove('valid');
+                toastr.error('Please enter a valid number.');
+            } else {
+                group.classList.add('valid');
+                group.classList.remove('invalid');
+            }
+        } else if (value !== '') {
             group.classList.add('valid');
             group.classList.remove('invalid');
         } else {
