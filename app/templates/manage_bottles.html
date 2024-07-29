@@ -119,7 +119,7 @@
             <label for="image_path300">Image Path 300:</label>
             <div class="dropzone" id="dropzone-300">
                 <span>Drop image here or click to upload (300px)</span>
-                <input type="file" id="image_path300" name="image_path300" accept="image/png">
+                <input type="file" id="image_path300" name="image_path300" accept="image/png" class="form-field">
                 <input type="hidden" name="image_path300_hidden" class="form-field">
             </div>
         </div>
@@ -129,7 +129,7 @@
             <label for="image_path600">Image Path 600:</label>
             <div class="dropzone" id="dropzone-600">
                 <span>Drop image here or click to upload (600px)</span>
-                <input type="file" id="image_path600" name="image_path600" accept="image/png">
+                <input type="file" id="image_path600" name="image_path600" accept="image/png" class="form-field">
                 <input type="hidden" name="image_path600_hidden" class="form-field">
             </div>
         </div>
@@ -184,7 +184,6 @@ function showStep(step) {
     document.getElementById('prev-btn').style.display = step > 1 ? 'inline-block' : 'none';
     document.getElementById('next-btn').style.display = step < totalSteps ? 'inline-block' : 'none';
     document.getElementById('submit-btn').style.display = step === totalSteps ? 'inline-block' : 'none';
-    updateProgress();
 }
 
 function nextStep() {
@@ -237,6 +236,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     showStep(currentStep);
+    updateProgress();
 });
 </script>
 {% endblock %}
