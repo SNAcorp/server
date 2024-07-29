@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.schemas import User
 from app.crud import update_user_role, block_user, unblock_user, get_user, update_user
@@ -21,20 +21,21 @@ async def change_user_role(request: Request, user_id: int, db: AsyncSession = De
     return updated_user
 
 
-@router.get("/user/{user_id}", response_class=HTMLResponse)
+@router.get("/admin/user/{user_id}", response_class=JSONResponse)
 async def get_user_details(user_id: int, db: AsyncSession = Depends(get_db)):
     user = await get_user(db, user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    return user
+    return JSONResponse(content=user.__dict__)
 
 
-@router.get("/user/{user_id}", response_class=HTMLResponse)
-async def get_user_details(user_id: int, db: AsyncSession = Depends(get_db)):
+@router.put("/admin/user/{user_id}", response_class=JSONResponse)
+async def update_user_details(user_id: int, user_data: dict, db: AsyncSession = Depends(get_db)):
     user = await get_user(db, user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    return user
+    updated_user = await update_user(db, user, user_data)
+    return JSONResponse(content=updated_user.__dict__)
 
 
 @router.put("/user/{user_id}", response_class=HTMLResponse)
