@@ -218,6 +218,23 @@ async def unblock_user(db: AsyncSession, user: models.User):
     return user
 
 
+def user_to_dict(user: User):
+    return {
+        "id": user.id,
+        "email": user.email,
+        "first_name": user.first_name,
+        "last_name": user.last_name,
+        "middle_name": user.middle_name,
+        "phone_number": user.phone_number,
+        "role": user.role,
+        "is_active": user.is_active,
+        "is_superuser": user.is_superuser,
+        "is_verified": user.is_verified,
+        "registration_date": user.registration_date.isoformat() if user.registration_date else None,
+        "block_date": user.block_date.isoformat() if user.block_date else None
+    }
+
+
 async def update_user(db: AsyncSession, user: User, user_data: dict):
     for key, value in user_data.items():
         setattr(user, key, value)
