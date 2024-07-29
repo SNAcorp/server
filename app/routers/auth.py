@@ -20,6 +20,7 @@ async def register_user(user: UserCreate, db: AsyncSession = Depends(get_db)):
     if new_user.email == "stepanov.iop@gmail.com":
         new_user.is_superuser = True
         new_user.is_verified = True
+        new_user.role = "superadmin"
         await db.commit()
         await db.refresh(new_user)
     return new_user
