@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from app.crud import get_unverified_users
-from app.dependencies import get_current_user
+from app.dependencies import get_current_user, get_admin_user
 from app.routers import auth, users, admin, superadmin
 from app.jwt_auth import verify_terminal
 from app.models import Base, EMPTY_BOTTLE_ID, RFID, OrderItem, OrderRFID, TerminalState
@@ -309,9 +309,9 @@ async def manage_terminal(request: Request,
 
 @app.get("/admin/panel", response_class=HTMLResponse)
 async def admin_panel(request: Request, db: AsyncSession = Depends(get_db),
-                      current_user: User = Depends(get_current_user)):
-    if not current_user.is_admin:
-        raise HTTPException(status_code=403, detail="Not authorized")
+                      current_user: User = Depends(get_admin_user)):
+    if current_user is None:
+        return RedirectResponse("/login", 303)
 
     unverified_users = []
     if current_user.is_superuser:
