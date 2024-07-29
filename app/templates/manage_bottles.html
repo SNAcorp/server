@@ -145,7 +145,7 @@
             </div>
             <label for="rating_average">Rating Average:</label>
             <div class="input-group" id="group-rating_average">
-                <input type="number" id="rating_average" name="rating_average" class="form-field" min="0" max="100" required>
+                <input type="text" id="rating_average" name="rating_average" class="form-field" required>
                 <span class="valid-icon valid">✔</span>
                 <span class="valid-icon invalid">✖</span>
             </div>
@@ -197,7 +197,7 @@
             </div>
             <label for="volume">Volume:</label>
             <div class="input-group" id="group-volume">
-                <input type="number" id="volume" name="volume" class="form-field" required>
+                <input type="text" id="volume" name="volume" class="form-field" required>
                 <span class="valid-icon valid">✔</span>
                 <span class="valid-icon invalid">✖</span>
             </div>
@@ -312,7 +312,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function validateField(field) {
         const group = field.closest('.input-group');
-        if (field.type === 'number' && isNaN(field.value)) {
+        if (field.type === 'text' && field.required && field.value.trim() === '') {
+            group.classList.add('invalid');
+            group.classList.remove('valid');
+            toastr.error('This field is required.');
+        } else if (field.type === 'number' && isNaN(field.value)) {
             group.classList.add('invalid');
             group.classList.remove('valid');
             toastr.error('Please enter a valid number.');
