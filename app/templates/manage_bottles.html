@@ -195,7 +195,7 @@ function prevStep() {
 
 document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.dropzone').forEach(dropzone => {
-        new Dropzone(dropzone, {
+        const dropzoneInstance = new Dropzone(dropzone, {
             url: '/bottles/upload-image',
             acceptedFiles: 'image/png',
             maxFiles: 1,
@@ -209,6 +209,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     alert('Upload failed: ' + response);
                 });
             }
+        });
+
+        dropzoneInstance.on('dragover', function() {
+            dropzone.classList.add('hover');
+        });
+
+        dropzoneInstance.on('dragleave', function() {
+            dropzone.classList.remove('hover');
+        });
+
+        dropzoneInstance.on('drop', function() {
+            dropzone.classList.remove('hover');
         });
     });
 
