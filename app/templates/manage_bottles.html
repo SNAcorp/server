@@ -98,23 +98,17 @@
 {% block content %}
 <div class="manage-bottles-container">
     <h2>Manage Bottles</h2>
-    <div class="progress-container">
-        <div class="wine-bottle">
-            <div class="wine-fill" id="wine-fill"></div>
-        </div>
-        <div class="progress-text" id="progress-text">0%</div>
-    </div>
     <form action="/bottles/create-bottle" method="post" id="bottle-form">
         <!-- Step 1: Basic Information -->
         <div class="form-step active" id="step-1">
             <label for="name">Name:</label>
-            <input type="text" id="name" name="name">
+            <input type="text" id="name" name="name" class="form-field">
             <label for="winery">Winery:</label>
-            <input type="text" id="winery" name="winery">
+            <input type="text" id="winery" name="winery" class="form-field">
             <label for="rating_average">Rating Average:</label>
-            <input type="text" id="rating_average" name="rating_average">
+            <input type="text" id="rating_average" name="rating_average" class="form-field">
             <label for="location">Location:</label>
-            <input type="text" id="location" name="location">
+            <input type="text" id="location" name="location" class="form-field">
         </div>
 
         <!-- Step 2: Images -->
@@ -123,28 +117,28 @@
             <div class="dropzone" id="dropzone-300">
                 <span>Drop image here or click to upload (300px)</span>
                 <input type="file" id="image_path300" name="image_path300" accept="image/png">
-                <input type="hidden" name="image_path300_hidden">
+                <input type="hidden" name="image_path300_hidden" class="form-field">
             </div>
             <label for="image_path600">Image Path 600:</label>
             <div class="dropzone" id="dropzone-600">
                 <span>Drop image here or click to upload (600px)</span>
                 <input type="file" id="image_path600" name="image_path600" accept="image/png">
-                <input type="hidden" name="image_path600_hidden">
+                <input type="hidden" name="image_path600_hidden" class="form-field">
             </div>
         </div>
 
         <!-- Step 3: URLs and Description -->
         <div class="form-step" id="step-3">
             <label for="description">Description:</label>
-            <textarea id="description" name="description"></textarea>
+            <textarea id="description" name="description" class="form-field"></textarea>
         </div>
 
         <!-- Step 4: Wine Details -->
         <div class="form-step" id="step-4">
             <label for="wine_type">Wine Type:</label>
-            <input type="text" id="wine_type" name="wine_type">
+            <input type="text" id="wine_type" name="wine_type" class="form-field">
             <label for="volume">Volume:</label>
-            <input type="text" id="volume" name="volume">
+            <input type="text" id="volume" name="volume" class="form-field">
         </div>
 
         <!-- Navigation Buttons -->
@@ -156,12 +150,21 @@
     </form>
 </div>
 
+<div class="progress-container">
+    <div class="wine-bottle">
+        <div class="wine-fill" id="wine-fill"></div>
+    </div>
+    <div class="progress-text" id="progress-text">0%</div>
+</div>
+
 <script>
 let currentStep = 1;
 const totalSteps = 4;
 
 function updateProgress() {
-    const progress = (currentStep / totalSteps) * 100;
+    const totalFields = document.querySelectorAll('.form-field').length;
+    const filledFields = Array.from(document.querySelectorAll('.form-field')).filter(field => field.value.trim() !== '').length;
+    const progress = (filledFields / totalFields) * 100;
     document.getElementById('wine-fill').style.height = progress + '%';
     document.getElementById('progress-text').textContent = Math.round(progress) + '%';
 }
@@ -211,6 +214,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (data.file_path) {
                         dropzone.querySelector('span').textContent = `Uploaded: ${file.name}`;
                         dropzone.querySelector('input[type="hidden"]').value = data.file_path;
+                        updateProgress();
                     } else {
                         dropzone.querySelector('span').textContent = 'Upload failed.';
                     }
@@ -223,7 +227,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
-    updateProgress();
+
+    document.querySelectorAll('.form-field').forEach(field => {
+        field.addEventListener('input', updateProgress);
+    });
+
+    showStep(currentStep);
 });
 </script>
 {% endblock %}
