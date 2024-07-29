@@ -3,59 +3,275 @@
 {% block title %}Admin Panel{% endblock %}
 
 {% block content %}
-<div class="container">
+<div class="container mt-5">
     <h1>Admin Panel</h1>
-    <div>
-        <h2>Change User Role</h2>
-        <form id="roleForm">
-            <input type="number" id="user_id" name="user_id" placeholder="User ID" required>
-            <input type="text" id="role" name="role" placeholder="Role" required>
-            <button type="submit">Change Role</button>
-        </form>
+    <div class="row">
+        <!-- Change User Role -->
+        <div class="col-md-4">
+            <div class="card mb-4 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Change User Role</h5>
+                    <p class="card-text">Change the role of a user.</p>
+                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#changeRoleModal">Change Role</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Block User -->
+        <div class="col-md-4">
+            <div class="card mb-4 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Block User</h5>
+                    <p class="card-text">Block a user from accessing the system.</p>
+                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#blockUserModal">Block User</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Unblock User -->
+        <div class="col-md-4">
+            <div class="card mb-4 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Unblock User</h5>
+                    <p class="card-text">Unblock a previously blocked user.</p>
+                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#unblockUserModal">Unblock User</button>
+                </div>
+            </div>
+        </div>
+
+        {% if current_user.is_superuser %}
+        <!-- Verify User -->
+        <div class="col-md-4">
+            <div class="card mb-4 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Verify User</h5>
+                    <p class="card-text">Verify a user.</p>
+                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#verifyUserModal">Verify User</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reject User -->
+        <div class="col-md-4">
+            <div class="card mb-4 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Reject User</h5>
+                    <p class="card-text">Reject a user's verification.</p>
+                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#rejectUserModal">Reject User</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Make Superadmin -->
+        <div class="col-md-4">
+            <div class="card mb-4 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Make Superadmin</h5>
+                    <p class="card-text">Promote a user to superadmin.</p>
+                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#makeSuperadminModal">Make Superadmin</button>
+                </div>
+            </div>
+        </div>
+        {% endif %}
     </div>
-    <div>
-        <h2>Block/Unblock User</h2>
-        <form id="blockForm">
-            <input type="number" id="block_user_id" name="block_user_id" placeholder="User ID" required>
-            <button type="submit">Block</button>
-        </form>
-        <form id="unblockForm">
-            <input type="number" id="unblock_user_id" name="unblock_user_id" placeholder="User ID" required>
-            <button type="submit">Unblock</button>
-        </form>
+</div>
+
+<!-- Modals -->
+<!-- Change Role Modal -->
+<div class="modal fade" id="changeRoleModal" tabindex="-1" role="dialog" aria-labelledby="changeRoleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="changeRoleModalLabel">Change User Role</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="roleForm">
+                    <div class="form-group">
+                        <label for="user_id">User ID</label>
+                        <input type="number" class="form-control" id="user_id" name="user_id" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="role">Role</label>
+                        <input type="text" class="form-control" id="role" name="role" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="user_select">Or select user</label>
+                        <select class="form-control" id="user_select" name="user_select">
+                            {% for user in all_users %}
+                            <option value="{{ user.id }}">{{ user.email }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Change Role</button>
+                </form>
+            </div>
+        </div>
     </div>
-    {% if current_user.is_superuser %}
-    <div>
-        <h2>Superadmin Functions</h2>
-        <form id="verifyForm">
-            <input type="number" id="verify_user_id" name="verify_user_id" placeholder="User ID" required>
-            <button type="submit">Verify</button>
-        </form>
-        <form id="rejectForm">
-            <input type="number" id="reject_user_id" name="reject_user_id" placeholder="User ID" required>
-            <button type="submit">Reject</button>
-        </form>
-        <form id="makeSuperadminForm">
-            <input type="number" id="superadmin_user_id" name="superadmin_user_id" placeholder="User ID" required>
-            <button type="submit">Make Superadmin</button>
-        </form>
-        <h2>Unverified Users</h2>
-        <ul id="unverifiedUsers">
-            {% for user in unverified_users %}
-            <li>{{ user.id }} - {{ user.email }} 
-                <button onclick="verifyUser({{ user.id }})">Verify</button>
-                <button onclick="rejectUser({{ user.id }})">Reject</button>
-            </li>
-            {% endfor %}
-        </ul>
+</div>
+
+<!-- Block User Modal -->
+<div class="modal fade" id="blockUserModal" tabindex="-1" role="dialog" aria-labelledby="blockUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="blockUserModalLabel">Block User</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="blockForm">
+                    <div class="form-group">
+                        <label for="block_user_id">User ID</label>
+                        <input type="number" class="form-control" id="block_user_id" name="block_user_id" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="block_user_select">Or select user</label>
+                        <select class="form-control" id="block_user_select" name="block_user_select">
+                            {% for user in all_users %}
+                            <option value="{{ user.id }}">{{ user.email }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Block User</button>
+                </form>
+            </div>
+        </div>
     </div>
-    {% endif %}
+</div>
+
+<!-- Unblock User Modal -->
+<div class="modal fade" id="unblockUserModal" tabindex="-1" role="dialog" aria-labelledby="unblockUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="unblockUserModalLabel">Unblock User</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="unblockForm">
+                    <div class="form-group">
+                        <label for="unblock_user_id">User ID</label>
+                        <input type="number" class="form-control" id="unblock_user_id" name="unblock_user_id" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="unblock_user_select">Or select user</label>
+                        <select class="form-control" id="unblock_user_select" name="unblock_user_select">
+                            {% for user in all_users %}
+                            <option value="{{ user.id }}">{{ user.email }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Unblock User</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Verify User Modal -->
+<div class="modal fade" id="verifyUserModal" tabindex="-1" role="dialog" aria-labelledby="verifyUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="verifyUserModalLabel">Verify User</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="verifyForm">
+                    <div class="form-group">
+                        <label for="verify_user_id">User ID</label>
+                        <input type="number" class="form-control" id="verify_user_id" name="verify_user_id" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="verify_user_select">Or select user</label>
+                        <select class="form-control" id="verify_user_select" name="verify_user_select">
+                            {% for user in unverified_users %}
+                            <option value="{{ user.id }}">{{ user.email }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Verify User</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reject User Modal -->
+<div class="modal fade" id="rejectUserModal" tabindex="-1" role="dialog" aria-labelledby="rejectUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="rejectUserModalLabel">Reject User</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="rejectForm">
+                    <div class="form-group">
+                        <label for="reject_user_id">User ID</label>
+                        <input type="number" class="form-control" id="reject_user_id" name="reject_user_id" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="reject_user_select">Or select user</label>
+                        <select class="form-control" id="reject_user_select" name="reject_user_select">
+                            {% for user in unverified_users %}
+                            <option value="{{ user.id }}">{{ user.email }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Reject User</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Make Superadmin Modal -->
+<div class="modal fade" id="makeSuperadminModal" tabindex="-1" role="dialog" aria-labelledby="makeSuperadminModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="makeSuperadminModalLabel">Make Superadmin</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="makeSuperadminForm">
+                    <div class="form-group">
+                        <label for="superadmin_user_id">User ID</label>
+                        <input type="number" class="form-control" id="superadmin_user_id" name="superadmin_user_id" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="superadmin_user_select">Or select user</label>
+                        <select class="form-control" id="superadmin_user_select" name="superadmin_user_select">
+                            {% for user in all_users %}
+                            <option value="{{ user.id }}">{{ user.email }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Make Superadmin</button>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
+    // JavaScript to handle form submissions
     document.getElementById('roleForm').addEventListener('submit', async (e) => {
         e.preventDefault();
-        const userId = document.getElementById('user_id').value;
+        const userId = document.getElementById('user_id').value || document.getElementById('user_select').value;
         const role = document.getElementById('role').value;
         const response = await fetch(`/admin/role/${userId}`, {
             method: 'PUT',
@@ -73,7 +289,7 @@
 
     document.getElementById('blockForm').addEventListener('submit', async (e) => {
         e.preventDefault();
-        const userId = document.getElementById('block_user_id').value;
+        const userId = document.getElementById('block_user_id').value || document.getElementById('block_user_select').value;
         const response = await fetch(`/admin/block/${userId}`, {
             method: 'PUT',
         });
@@ -86,7 +302,7 @@
 
     document.getElementById('unblockForm').addEventListener('submit', async (e) => {
         e.preventDefault();
-        const userId = document.getElementById('unblock_user_id').value;
+        const userId = document.getElementById('unblock_user_id').value || document.getElementById('unblock_user_select').value;
         const response = await fetch(`/admin/unblock/${userId}`, {
             method: 'PUT',
         });
@@ -99,7 +315,7 @@
 
     document.getElementById('verifyForm').addEventListener('submit', async (e) => {
         e.preventDefault();
-        const userId = document.getElementById('verify_user_id').value;
+        const userId = document.getElementById('verify_user_id').value || document.getElementById('verify_user_select').value;
         const response = await fetch(`/superadmin/verify/${userId}`, {
             method: 'PUT',
         });
@@ -112,7 +328,7 @@
 
     document.getElementById('rejectForm').addEventListener('submit', async (e) => {
         e.preventDefault();
-        const userId = document.getElementById('reject_user_id').value;
+        const userId = document.getElementById('reject_user_id').value || document.getElementById('reject_user_select').value;
         const response = await fetch(`/superadmin/reject/${userId}`, {
             method: 'PUT',
         });
@@ -125,7 +341,7 @@
 
     document.getElementById('makeSuperadminForm').addEventListener('submit', async (e) => {
         e.preventDefault();
-        const userId = document.getElementById('superadmin_user_id').value;
+        const userId = document.getElementById('superadmin_user_id').value || document.getElementById('superadmin_user_select').value;
         const response = await fetch(`/superadmin/superadmin/${userId}`, {
             method: 'PUT',
         });
@@ -135,29 +351,5 @@
             alert('Error promoting user');
         }
     });
-
-    async function verifyUser(userId) {
-        const response = await fetch(`/superadmin/verify/${userId}`, {
-            method: 'PUT',
-        });
-        if (response.ok) {
-            alert('User verified successfully');
-            location.reload();
-        } else {
-            alert('Error verifying user');
-        }
-    }
-
-    async function rejectUser(userId) {
-        const response = await fetch(`/superadmin/reject/${userId}`, {
-            method: 'PUT',
-        });
-        if (response.ok) {
-            alert('User rejected successfully');
-            location.reload();
-        } else {
-            alert('Error rejecting user');
-        }
-    }
 </script>
 {% endblock %}
