@@ -21,6 +21,14 @@ async def change_user_role(request: Request, user_id: int, db: AsyncSession = De
     return updated_user
 
 
+@router.get("/user/{user_id}", response_class=HTMLResponse)
+async def get_user_details(user_id: int, db: AsyncSession = Depends(get_db)):
+    user = await get_user(db, user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return user
+
+
 @router.put("/block/{user_id}")
 async def block_user_route(user_id: int, db: AsyncSession = Depends(get_db),
                            current_user: User = Depends(get_admin_user)):
@@ -43,5 +51,3 @@ async def unblock_user_route(user_id: int, db: AsyncSession = Depends(get_db),
         raise HTTPException(status_code=403, detail="Permission denied")
     unblocked_user = await unblock_user(db, user)
     return unblocked_user
-
-

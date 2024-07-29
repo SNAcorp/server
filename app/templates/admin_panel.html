@@ -5,70 +5,67 @@
 {% block content %}
 <div class="container mt-5">
     <h1>Admin Panel</h1>
-    <div class="row">
-        <!-- Change User Role -->
-        <div class="col-md-4">
-            <div class="card mb-4 shadow-sm" data-toggle="modal" data-target="#changeRoleModal" style="cursor: pointer;">
-                <div class="card-body">
-                    <h5 class="card-title">Change User Role</h5>
-                    <p class="card-text">Change the role of a user.</p>
-                    <span class="badge badge-info">Admin</span>
+    <ul class="nav nav-tabs" id="adminTab" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link active" id="admin-functions-tab" data-toggle="tab" href="#admin-functions" role="tab" aria-controls="admin-functions" aria-selected="true">Admin Functions</a>
+        </li>
+        {% if current_user.is_superuser %}
+        <li class="nav-item">
+            <a class="nav-link" id="verification-requests-tab" data-toggle="tab" href="#verification-requests" role="tab" aria-controls="verification-requests" aria-selected="false">Verification Requests</a>
+        </li>
+        {% endif %}
+    </ul>
+    <div class="tab-content" id="adminTabContent">
+        <div class="tab-pane fade show active" id="admin-functions" role="tabpanel" aria-labelledby="admin-functions-tab">
+            <div class="row mt-3">
+                <!-- Change User Role -->
+                <div class="col-md-4">
+                    <div class="card mb-4 shadow-sm" data-toggle="modal" data-target="#changeRoleModal" style="cursor: pointer;">
+                        <div class="card-body">
+                            <h5 class="card-title">Change User Role</h5>
+                            <p class="card-text">Change the role of a user.</p>
+                            <span class="badge badge-info">Admin</span>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
 
-        <!-- Block User -->
-        <div class="col-md-4">
-            <div class="card mb-4 shadow-sm" data-toggle="modal" data-target="#blockUserModal" style="cursor: pointer;">
-                <div class="card-body">
-                    <h5 class="card-title">Block User</h5>
-                    <p class="card-text">Block a user from accessing the system.</p>
-                    <span class="badge badge-info">Admin</span>
+                <!-- Block User -->
+                <div class="col-md-4">
+                    <div class="card mb-4 shadow-sm" data-toggle="modal" data-target="#blockUserModal" style="cursor: pointer;">
+                        <div class="card-body">
+                            <h5 class="card-title">Block User</h5>
+                            <p class="card-text">Block a user from accessing the system.</p>
+                            <span class="badge badge-info">Admin</span>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
 
-        <!-- Unblock User -->
-        <div class="col-md-4">
-            <div class="card mb-4 shadow-sm" data-toggle="modal" data-target="#unblockUserModal" style="cursor: pointer;">
-                <div class="card-body">
-                    <h5 class="card-title">Unblock User</h5>
-                    <p class="card-text">Unblock a previously blocked user.</p>
-                    <span class="badge badge-info">Admin</span>
+                <!-- Unblock User -->
+                <div class="col-md-4">
+                    <div class="card mb-4 shadow-sm" data-toggle="modal" data-target="#unblockUserModal" style="cursor: pointer;">
+                        <div class="card-body">
+                            <h5 class="card-title">Unblock User</h5>
+                            <p class="card-text">Unblock a previously blocked user.</p>
+                            <span class="badge badge-info">Admin</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
         {% if current_user.is_superuser %}
-        <!-- Verify User -->
-        <div class="col-md-4">
-            <div class="card mb-4 shadow-sm" data-toggle="modal" data-target="#verifyUserModal" style="cursor: pointer;">
-                <div class="card-body">
-                    <h5 class="card-title">Verify User</h5>
-                    <p class="card-text">Verify a user.</p>
-                    <span class="badge badge-warning">Superadmin</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Reject User -->
-        <div class="col-md-4">
-            <div class="card mb-4 shadow-sm" data-toggle="modal" data-target="#rejectUserModal" style="cursor: pointer;">
-                <div class="card-body">
-                    <h5 class="card-title">Reject User</h5>
-                    <p class="card-text">Reject a user's verification.</p>
-                    <span class="badge badge-warning">Superadmin</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Make Superadmin -->
-        <div class="col-md-4">
-            <div class="card mb-4 shadow-sm" data-toggle="modal" data-target="#makeSuperadminModal" style="cursor: pointer;">
-                <div class="card-body">
-                    <h5 class="card-title">Make Superadmin</h5>
-                    <p class="card-text">Promote a user to superadmin.</p>
-                    <span class="badge badge-warning">Superadmin</span>
+        <div class="tab-pane fade" id="verification-requests" role="tabpanel" aria-labelledby="verification-requests-tab">
+            <div class="row mt-3">
+                <div class="col-md-12">
+                    <h2>Verification Requests</h2>
+                    <ul class="list-group">
+                        {% for user in unverified_users %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            {{ user.email }}
+                            <button class="btn btn-primary" data-toggle="modal" data-target="#userModal" onclick="loadUserDetails({{ user.id }})">Review Request</button>
+                        </li>
+                        {% endfor %}
+                    </ul>
                 </div>
             </div>
         </div>
@@ -174,94 +171,22 @@
     </div>
 </div>
 
-<!-- Verify User Modal -->
-<div class="modal fade" id="verifyUserModal" tabindex="-1" role="dialog" aria-labelledby="verifyUserModalLabel" aria-hidden="true">
+<!-- User Details Modal -->
+<div class="modal fade" id="userModal" tabindex="-1" role="dialog" aria-labelledby="userModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="verifyUserModalLabel">Verify User</h5>
+                <h5 class="modal-title" id="userModalLabel">User Details</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <div class="modal-body">
-                <form id="verifyForm">
-                    <div class="form-group">
-                        <label for="verify_user_id">User ID</label>
-                        <input type="number" class="form-control" id="verify_user_id" name="verify_user_id" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="verify_user_select">Or select user</label>
-                        <select class="form-control" id="verify_user_select" name="verify_user_select">
-                            {% for user in unverified_users %}
-                            <option value="{{ user.id }}">{{ user.email }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Verify User</button>
-                </form>
+            <div class="modal-body" id="userDetails">
+                <!-- User details will be loaded here -->
             </div>
-        </div>
-    </div>
-</div>
-
-<!-- Reject User Modal -->
-<div class="modal fade" id="rejectUserModal" tabindex="-1" role="dialog" aria-labelledby="rejectUserModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="rejectUserModalLabel">Reject User</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form id="rejectForm">
-                    <div class="form-group">
-                        <label for="reject_user_id">User ID</label>
-                        <input type="number" class="form-control" id="reject_user_id" name="reject_user_id" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="reject_user_select">Or select user</label>
-                        <select class="form-control" id="reject_user_select" name="reject_user_select">
-                            {% for user in unverified_users %}
-                            <option value="{{ user.id }}">{{ user.email }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Reject User</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Make Superadmin Modal -->
-<div class="modal fade" id="makeSuperadminModal" tabindex="-1" role="dialog" aria-labelledby="makeSuperadminModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="makeSuperadminModalLabel">Make Superadmin</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form id="makeSuperadminForm">
-                    <div class="form-group">
-                        <label for="superadmin_user_id">User ID</label>
-                        <input type="number" class="form-control" id="superadmin_user_id" name="superadmin_user_id" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="superadmin_user_select">Or select user</label>
-                        <select class="form-control" id="superadmin_user_select" name="superadmin_user_select">
-                            {% for user in all_users %}
-                            <option value="{{ user.id }}">{{ user.email }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Make Superadmin</button>
-                </form>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" onclick="rejectUser()">Reject</button>
+                <button type="button" class="btn btn-success" onclick="verifyUser()">Verify</button>
             </div>
         </div>
     </div>
@@ -316,9 +241,26 @@
         }
     });
 
-    document.getElementById('verifyForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const userId = document.getElementById('verify_user_id').value || document.getElementById('verify_user_select').value;
+    async function loadUserDetails(userId) {
+        const response = await fetch(`/admin/user/${userId}`);
+        if (response.ok) {
+            const user = await response.json();
+            const userDetails = `
+                <p>Email: ${user.email}</p>
+                <p>First Name: ${user.first_name}</p>
+                <p>Last Name: ${user.last_name}</p>
+                <p>Phone: ${user.phone_number}</p>
+                <p>Role: ${user.role}</p>
+                <p>Active: ${user.is_active}</p>
+                <p>Verified: ${user.is_verified}</p>
+            `;
+            document.getElementById('userDetails').innerHTML = userDetails;
+            document.getElementById('userModal').dataset.userId = user.id;
+        }
+    }
+
+    async function verifyUser() {
+        const userId = document.getElementById('userModal').dataset.userId;
         const response = await fetch(`/superadmin/verify/${userId}`, {
             method: 'PUT',
         });
@@ -328,11 +270,10 @@
         } else {
             alert('Error verifying user');
         }
-    });
+    }
 
-    document.getElementById('rejectForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const userId = document.getElementById('reject_user_id').value || document.getElementById('reject_user_select').value;
+    async function rejectUser() {
+        const userId = document.getElementById('userModal').dataset.userId;
         const response = await fetch(`/superadmin/reject/${userId}`, {
             method: 'PUT',
         });
@@ -342,20 +283,6 @@
         } else {
             alert('Error rejecting user');
         }
-    });
-
-    document.getElementById('makeSuperadminForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const userId = document.getElementById('superadmin_user_id').value || document.getElementById('superadmin_user_select').value;
-        const response = await fetch(`/superadmin/superadmin/${userId}`, {
-            method: 'PUT',
-        });
-        if (response.ok) {
-            alert('User promoted to superadmin successfully');
-            location.reload();
-        } else {
-            alert('Error promoting user');
-        }
-    });
+    }
 </script>
 {% endblock %}
