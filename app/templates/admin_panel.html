@@ -293,8 +293,8 @@
                     <li class="list-group-item"><strong>Middle Name:</strong> ${user.middle_name}</li>
                     <li class="list-group-item"><strong>Phone Number:</strong> ${user.phone_number}</li>
                     <li class="list-group-item"><strong>Role:</strong> ${user.role}</li>
-                    <li class="list-group-item"><strong>Active:</strong> ${user.is_active ? 'Yes' : 'No'}</li>
-                    <li class="list-group-item"><strong>Verified:</strong> ${user.is_verified ? 'Yes' : 'No'}</li>
+                    <li class="list-group-item"><strong>Active:</strong> <span class="badge ${user.is_active ? 'badge-success' : 'badge-danger'}">${user.is_active ? 'Yes' : 'No'}</span></li>
+                    <li class="list-group-item"><strong>Verified:</strong> <span class="badge ${user.is_verified ? 'badge-success' : 'badge-danger'}">${user.is_verified ? 'Yes' : 'No'}</span></li>
                     <li class="list-group-item"><strong>Registration Date:</strong> ${user.registration_date}</li>
                     <li class="list-group-item"><strong>Block Date:</strong> ${user.block_date}</li>
                 </ul>
@@ -317,37 +317,37 @@
                         </div>
                         <div class="form-group col-md-6">
                             <label for="view_first_name">First Name</label>
-                            <input type="text" class="form-control" id="view_first_name" name="first_name" value="${user.first_name}">
+                            <input type="text" class="form-control" id="view_first_name" name="first_name" value="${user.first_name}" disabled>
                         </div>
                     </div>
                     <div class="form-row">
                         <div class="form-group col-md-6">
                             <label for="view_last_name">Last Name</label>
-                            <input type="text" class="form-control" id="view_last_name" name="last_name" value="${user.last_name}">
+                            <input type="text" class="form-control" id="view_last_name" name="last_name" value="${user.last_name}" disabled>
                         </div>
                         <div class="form-group col-md-6">
                             <label for="view_middle_name">Middle Name</label>
-                            <input type="text" class="form-control" id="view_middle_name" name="middle_name" value="${user.middle_name}">
+                            <input type="text" class="form-control" id="view_middle_name" name="middle_name" value="${user.middle_name}" disabled>
                         </div>
                     </div>
                     <div class="form-row">
                         <div class="form-group col-md-6">
                             <label for="view_phone_number">Phone Number</label>
-                            <input type="text" class="form-control" id="view_phone_number" name="phone_number" value="${user.phone_number}">
+                            <input type="text" class="form-control" id="view_phone_number" name="phone_number" value="${user.phone_number}" disabled>
                         </div>
                         <div class="form-group col-md-6">
                             <label for="view_role">Role</label>
-                            <input type="text" class="form-control" id="view_role" name="role" value="${user.role}">
+                            <input type="text" class="form-control" id="view_role" name="role" value="${user.role}" disabled>
                         </div>
                     </div>
                     <div class="form-row">
                         <div class="form-group col-md-6">
                             <label for="view_is_active">Active</label>
-                            <p class="form-control-plaintext">${user.is_active ? 'Yes' : 'No'}</p>
+                            <p class="form-control-plaintext"><span class="badge ${user.is_active ? 'badge-success' : 'badge-danger'}">${user.is_active ? 'Yes' : 'No'}</span></p>
                         </div>
                         <div class="form-group col-md-6">
                             <label for="view_is_verified">Verified</label>
-                            <p class="form-control-plaintext">${user.is_verified ? 'Yes' : 'No'}</p>
+                            <p class="form-control-plaintext"><span class="badge ${user.is_verified ? 'badge-success' : 'badge-danger'}">${user.is_verified ? 'Yes' : 'No'}</span></p>
                         </div>
                     </div>
                 </form>
