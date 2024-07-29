@@ -14,8 +14,6 @@ router = APIRouter()
 
 @router.post("/upload-image")
 async def upload_image(file: UploadFile = File(...)):
-    if file.content_type != "image/png":
-        raise HTTPException(status_code=400, detail="Invalid file type. Only PNG is allowed.")
 
     UPLOAD_DIR = "/images"
     os.makedirs(UPLOAD_DIR, exist_ok=True)
