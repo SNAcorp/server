@@ -5,9 +5,7 @@
 {% block link %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/dropzone.min.css" integrity="sha512-3gLUBcy13u59To2K1kDSXZilDiFCXn1V1hPCn2hLVF2nLlxxAcRTgHd9+oVoxP+iF7/bp8D6aMSHxa8Aq+Efnw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" integrity="sha512-MC7KwMtcwQZoxk71x4GZAKJxTYdY1IR1YtX7+FxrVdL8kpYYquSMqk4H8r9e6zYXZ5u+tqJXt0H7jATJ4um5P4w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-{% endblock %}
-
-{% block style %}
+<style>
     .manage-bottles-container {
         max-width: 900px;
         margin: 50px auto;
@@ -71,12 +69,31 @@
         margin-top: 10px;
         font-weight: bold;
     }
-    input[type="text"], input[type="number"], textarea {
+    .input-group {
+        position: relative;
+    }
+    .input-group input[type="text"], .input-group input[type="number"], .input-group textarea {
         width: 100%;
         padding: 8px;
         margin-top: 5px;
         border: 1px solid #ccc;
         border-radius: 5px;
+    }
+    .input-group .valid-icon {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 1.5rem;
+        display: none;
+    }
+    .input-group.valid .valid-icon.valid {
+        color: green;
+        display: inline;
+    }
+    .input-group.invalid .valid-icon.invalid {
+        color: red;
+        display: inline;
     }
     .progress-container {
         margin-top: 30px;
@@ -97,6 +114,7 @@
         color: white;
         transition: width 0.5s ease;
     }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -106,13 +124,29 @@
         <!-- Basic Information -->
         <div class="form-step active" id="step-1">
             <label for="name">Name:</label>
-            <input type="text" id="name" name="name" class="form-field" required>
+            <div class="input-group" id="group-name">
+                <input type="text" id="name" name="name" class="form-field" required>
+                <span class="valid-icon valid">✔</span>
+                <span class="valid-icon invalid">✖</span>
+            </div>
             <label for="winery">Winery:</label>
-            <input type="text" id="winery" name="winery" class="form-field" required>
+            <div class="input-group" id="group-winery">
+                <input type="text" id="winery" name="winery" class="form-field" required>
+                <span class="valid-icon valid">✔</span>
+                <span class="valid-icon invalid">✖</span>
+            </div>
             <label for="rating_average">Rating Average:</label>
-            <input type="number" id="rating_average" name="rating_average" class="form-field" min="0" max="100" required>
+            <div class="input-group" id="group-rating_average">
+                <input type="number" id="rating_average" name="rating_average" class="form-field" min="0" max="100" required>
+                <span class="valid-icon valid">✔</span>
+                <span class="valid-icon invalid">✖</span>
+            </div>
             <label for="location">Location:</label>
-            <input type="text" id="location" name="location" class="form-field" required>
+            <div class="input-group" id="group-location">
+                <input type="text" id="location" name="location" class="form-field" required>
+                <span class="valid-icon valid">✔</span>
+                <span class="valid-icon invalid">✖</span>
+            </div>
         </div>
 
         <!-- Image Path 300 -->
@@ -138,15 +172,27 @@
         <!-- URLs and Description -->
         <div class="form-step" id="step-4">
             <label for="description">Description:</label>
-            <textarea id="description" name="description" class="form-field" required></textarea>
+            <div class="input-group" id="group-description">
+                <textarea id="description" name="description" class="form-field" required></textarea>
+                <span class="valid-icon valid">✔</span>
+                <span class="valid-icon invalid">✖</span>
+            </div>
         </div>
 
         <!-- Wine Details -->
         <div class="form-step" id="step-5">
             <label for="wine_type">Wine Type:</label>
-            <input type="text" id="wine_type" name="wine_type" class="form-field" required>
+            <div class="input-group" id="group-wine_type">
+                <input type="text" id="wine_type" name="wine_type" class="form-field" required>
+                <span class="valid-icon valid">✔</span>
+                <span class="valid-icon invalid">✖</span>
+            </div>
             <label for="volume">Volume:</label>
-            <input type="number" id="volume" name="volume" class="form-field" required>
+            <div class="input-group" id="group-volume">
+                <input type="number" id="volume" name="volume" class="form-field" required>
+                <span class="valid-icon valid">✔</span>
+                <span class="valid-icon invalid">✖</span>
+            </div>
         </div>
 
         <!-- Navigation Buttons -->
@@ -256,14 +302,23 @@ document.addEventListener('DOMContentLoaded', () => {
     setupDropzone(dropzone300);
     setupDropzone(dropzone600);
 
+    function validateField(field) {
+        const group = field.closest('.input-group');
+        if (field.type === 'number' && isNaN(field.value)) {
+            group.classList.add('invalid');
+            group.classList.remove('valid');
+            toastr.error('Please enter a valid number.');
+        } else if (field.value.trim() !== '') {
+            group.classList.add('valid');
+            group.classList.remove('invalid');
+        } else {
+            group.classList.remove('valid', 'invalid');
+        }
+        updateProgress();
+    }
+
     document.querySelectorAll('.form-field').forEach(field => {
-        field.addEventListener('input', () => {
-            if (field.type === 'number' && isNaN(field.value)) {
-                toastr.error('Please enter a valid number.');
-            } else {
-                updateProgress();
-            }
-        });
+        field.addEventListener('input', () => validateField(field));
     });
 
     showStep(currentStep);
