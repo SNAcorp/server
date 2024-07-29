@@ -216,3 +216,12 @@ async def unblock_user(db: AsyncSession, user: models.User):
     await db.commit()
     await db.refresh(user)
     return user
+
+
+async def update_user(db: AsyncSession, user: User, user_data: dict):
+    for key, value in user_data.items():
+        setattr(user, key, value)
+    db.add(user)
+    await db.commit()
+    await db.refresh(user)
+    return user

@@ -13,6 +13,9 @@
         <li class="nav-item">
             <a class="nav-link" id="verification-requests-tab" data-toggle="tab" href="#verification-requests" role="tab" aria-controls="verification-requests" aria-selected="false">Verification Requests</a>
         </li>
+        <li class="nav-item">
+            <a class="nav-link" id="all-users-tab" data-toggle="tab" href="#all-users" role="tab" aria-controls="all-users" aria-selected="false">All Users</a>
+        </li>
         {% endif %}
     </ul>
     <div class="tab-content" id="adminTabContent">
@@ -69,6 +72,22 @@
                 </div>
             </div>
         </div>
+
+        <div class="tab-pane fade" id="all-users" role="tabpanel" aria-labelledby="all-users-tab">
+            <div class="row mt-3">
+                <div class="col-md-12">
+                    <h2>All Users</h2>
+                    <ul class="list-group">
+                        {% for user in all_users %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            {{ user.email }}
+                            <button class="btn btn-primary" data-toggle="modal" data-target="#editUserModal" onclick="loadEditUserDetails({{ user.id }})">Edit User</button>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
         {% endif %}
     </div>
 </div>
@@ -76,7 +95,7 @@
 <!-- Modals -->
 <!-- Change Role Modal -->
 <div class="modal fade" id="changeRoleModal" tabindex="-1" role="dialog" aria-labelledby="changeRoleModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
+    <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="changeRoleModalLabel">Change User Role</h5>
@@ -111,7 +130,7 @@
 
 <!-- Block User Modal -->
 <div class="modal fade" id="blockUserModal" tabindex="-1" role="dialog" aria-labelledby="blockUserModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
+    <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="blockUserModalLabel">Block User</h5>
@@ -142,7 +161,7 @@
 
 <!-- Unblock User Modal -->
 <div class="modal fade" id="unblockUserModal" tabindex="-1" role="dialog" aria-labelledby="unblockUserModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
+    <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="unblockUserModalLabel">Unblock User</h5>
@@ -173,7 +192,7 @@
 
 <!-- User Details Modal -->
 <div class="modal fade" id="userModal" tabindex="-1" role="dialog" aria-labelledby="userModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
+    <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="userModalLabel">User Details</h5>
@@ -187,6 +206,26 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-danger" onclick="rejectUser()">Reject</button>
                 <button type="button" class="btn btn-success" onclick="verifyUser()">Verify</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit User Modal -->
+<div class="modal fade" id="editUserModal" tabindex="-1" role="dialog" aria-labelledby="editUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editUserModalLabel">Edit User</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="editUserDetails">
+                <!-- Edit user form will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="saveUserDetails()">Save Changes</button>
             </div>
         </div>
     </div>
@@ -249,13 +288,61 @@
                 <p>Email: ${user.email}</p>
                 <p>First Name: ${user.first_name}</p>
                 <p>Last Name: ${user.last_name}</p>
+                <p>Middle Name: ${user.middle_name}</p>
                 <p>Phone: ${user.phone_number}</p>
                 <p>Role: ${user.role}</p>
                 <p>Active: ${user.is_active}</p>
                 <p>Verified: ${user.is_verified}</p>
+                <p>Registration Date: ${user.registration_date}</p>
+                <p>Block Date: ${user.block_date}</p>
             `;
             document.getElementById('userDetails').innerHTML = userDetails;
             document.getElementById('userModal').dataset.userId = user.id;
+        }
+    }
+
+    async function loadEditUserDetails(userId) {
+        const response = await fetch(`/admin/user/${userId}`);
+        if (response.ok) {
+            const user = await response.json();
+            const editUserDetails = `
+                <form id="editUserForm">
+                    <div class="form-group">
+                        <label for="edit_email">Email</label>
+                        <input type="email" class="form-control" id="edit_email" name="email" value="${user.email}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_first_name">First Name</label>
+                        <input type="text" class="form-control" id="edit_first_name" name="first_name" value="${user.first_name}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_last_name">Last Name</label>
+                        <input type="text" class="form-control" id="edit_last_name" name="last_name" value="${user.last_name}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_middle_name">Middle Name</label>
+                        <input type="text" class="form-control" id="edit_middle_name" name="middle_name" value="${user.middle_name}">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_phone_number">Phone Number</label>
+                        <input type="text" class="form-control" id="edit_phone_number" name="phone_number" value="${user.phone_number}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_role">Role</label>
+                        <input type="text" class="form-control" id="edit_role" name="role" value="${user.role}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_is_active">Active</label>
+                        <input type="checkbox" class="form-control" id="edit_is_active" name="is_active" ${user.is_active ? 'checked' : ''}>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_is_verified">Verified</label>
+                        <input type="checkbox" class="form-control" id="edit_is_verified" name="is_verified" ${user.is_verified ? 'checked' : ''}>
+                    </div>
+                </form>
+            `;
+            document.getElementById('editUserDetails').innerHTML = editUserDetails;
+            document.getElementById('editUserModal').dataset.userId = user.id;
         }
     }
 
@@ -282,6 +369,28 @@
             location.reload();
         } else {
             alert('Error rejecting user');
+        }
+    }
+
+    async function saveUserDetails() {
+        const userId = document.getElementById('editUserModal').dataset.userId;
+        const form = document.getElementById('editUserForm');
+        const formData = new FormData(form);
+        const userData = Object.fromEntries(formData.entries());
+        userData.is_active = formData.get('is_active') ? true : false;
+        userData.is_verified = formData.get('is_verified') ? true : false;
+        const response = await fetch(`/admin/user/${userId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(userData),
+        });
+        if (response.ok) {
+            alert('User details updated successfully');
+            location.reload();
+        } else {
+            alert('Error updating user details');
         }
     }
 </script>
