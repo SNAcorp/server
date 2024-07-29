@@ -81,7 +81,7 @@
                         {% for user in all_users %}
                         <li class="list-group-item d-flex justify-content-between align-items-center">
                             {{ user.email }}
-                            <button class="btn btn-primary" data-toggle="modal" data-target="#editUserModal" onclick="loadEditUserDetails({{ user.id }})">Edit User</button>
+                            <button class="btn btn-primary" data-toggle="modal" data-target="#viewUserModal" onclick="loadUserViewDetails({{ user.id }})">View User</button>
                         </li>
                         {% endfor %}
                     </ul>
@@ -225,7 +225,8 @@
                 <!-- Edit user form will be loaded here -->
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary" onclick="saveUserDetails()">Save Changes</button>
+                <button type="button" class="btn btn-primary" onclick="enableEditUser()">Enable Edit</button>
+                <button type="button" class="btn btn-primary" onclick="saveUserDetails()" style="display: none;" id="saveUserDetailsBtn">Save Changes</button>
             </div>
         </div>
     </div>
@@ -285,65 +286,75 @@
         if (response.ok) {
             const user = await response.json();
             const userDetails = `
-                <p>Email: ${user.email}</p>
-                <p>First Name: ${user.first_name}</p>
-                <p>Last Name: ${user.last_name}</p>
-                <p>Middle Name: ${user.middle_name}</p>
-                <p>Phone: ${user.phone_number}</p>
-                <p>Role: ${user.role}</p>
-                <p>Active: ${user.is_active}</p>
-                <p>Verified: ${user.is_verified}</p>
-                <p>Registration Date: ${user.registration_date}</p>
-                <p>Block Date: ${user.block_date}</p>
+                <ul class="list-group">
+                    <li class="list-group-item"><strong>Email:</strong> ${user.email}</li>
+                    <li class="list-group-item"><strong>First Name:</strong> ${user.first_name}</li>
+                    <li class="list-group-item"><strong>Last Name:</strong> ${user.last_name}</li>
+                    <li class="list-group-item"><strong>Middle Name:</strong> ${user.middle_name}</li>
+                    <li class="list-group-item"><strong>Phone Number:</strong> ${user.phone_number}</li>
+                    <li class="list-group-item"><strong>Role:</strong> ${user.role}</li>
+                    <li class="list-group-item"><strong>Active:</strong> ${user.is_active}</li>
+                    <li class="list-group-item"><strong>Verified:</strong> ${user.is_verified}</li>
+                    <li class="list-group-item"><strong>Registration Date:</strong> ${user.registration_date}</li>
+                    <li class="list-group-item"><strong>Block Date:</strong> ${user.block_date}</li>
+                </ul>
             `;
             document.getElementById('userDetails').innerHTML = userDetails;
             document.getElementById('userModal').dataset.userId = user.id;
         }
     }
 
-    async function loadEditUserDetails(userId) {
+    async function loadUserViewDetails(userId) {
         const response = await fetch(`/admin/user/${userId}`);
         if (response.ok) {
             const user = await response.json();
-            const editUserDetails = `
-                <form id="editUserForm">
+            const userDetails = `
+                <form id="viewUserForm">
                     <div class="form-group">
-                        <label for="edit_email">Email</label>
-                        <input type="email" class="form-control" id="edit_email" name="email" value="${user.email}" required>
+                        <label for="view_email">Email</label>
+                        <input type="email" class="form-control" id="view_email" name="email" value="${user.email}" disabled>
                     </div>
                     <div class="form-group">
-                        <label for="edit_first_name">First Name</label>
-                        <input type="text" class="form-control" id="edit_first_name" name="first_name" value="${user.first_name}" required>
+                        <label for="view_first_name">First Name</label>
+                        <input type="text" class="form-control" id="view_first_name" name="first_name" value="${user.first_name}" disabled>
                     </div>
                     <div class="form-group">
-                        <label for="edit_last_name">Last Name</label>
-                        <input type="text" class="form-control" id="edit_last_name" name="last_name" value="${user.last_name}" required>
+                        <label for="view_last_name">Last Name</label>
+                        <input type="text" class="form-control" id="view_last_name" name="last_name" value="${user.last_name}" disabled>
                     </div>
                     <div class="form-group">
-                        <label for="edit_middle_name">Middle Name</label>
-                        <input type="text" class="form-control" id="edit_middle_name" name="middle_name" value="${user.middle_name}">
+                        <label for="view_middle_name">Middle Name</label>
+                        <input type="text" class="form-control" id="view_middle_name" name="middle_name" value="${user.middle_name}" disabled>
                     </div>
                     <div class="form-group">
-                        <label for="edit_phone_number">Phone Number</label>
-                        <input type="text" class="form-control" id="edit_phone_number" name="phone_number" value="${user.phone_number}" required>
+                        <label for="view_phone_number">Phone Number</label>
+                        <input type="text" class="form-control" id="view_phone_number" name="phone_number" value="${user.phone_number}" disabled>
                     </div>
                     <div class="form-group">
-                        <label for="edit_role">Role</label>
-                        <input type="text" class="form-control" id="edit_role" name="role" value="${user.role}" required>
+                        <label for="view_role">Role</label>
+                        <input type="text" class="form-control" id="view_role" name="role" value="${user.role}" disabled>
                     </div>
                     <div class="form-group">
-                        <label for="edit_is_active">Active</label>
-                        <input type="checkbox" class="form-control" id="edit_is_active" name="is_active" ${user.is_active ? 'checked' : ''}>
+                        <label for="view_is_active">Active</label>
+                        <input type="checkbox" class="form-control" id="view_is_active" name="is_active" ${user.is_active ? 'checked' : ''} disabled>
                     </div>
                     <div class="form-group">
-                        <label for="edit_is_verified">Verified</label>
-                        <input type="checkbox" class="form-control" id="edit_is_verified" name="is_verified" ${user.is_verified ? 'checked' : ''}>
+                        <label for="view_is_verified">Verified</label>
+                        <input type="checkbox" class="form-control" id="view_is_verified" name="is_verified" ${user.is_verified ? 'checked' : ''} disabled>
                     </div>
                 </form>
             `;
-            document.getElementById('editUserDetails').innerHTML = editUserDetails;
+            document.getElementById('editUserDetails').innerHTML = userDetails;
             document.getElementById('editUserModal').dataset.userId = user.id;
         }
+    }
+
+    async function enableEditUser() {
+        const form = document.getElementById('viewUserForm');
+        for (let element of form.elements) {
+            element.disabled = false;
+        }
+        document.getElementById('saveUserDetailsBtn').style.display = 'inline-block';
     }
 
     async function verifyUser() {
@@ -374,7 +385,7 @@
 
     async function saveUserDetails() {
         const userId = document.getElementById('editUserModal').dataset.userId;
-        const form = document.getElementById('editUserForm');
+        const form = document.getElementById('viewUserForm');
         const formData = new FormData(form);
         const userData = Object.fromEntries(formData.entries());
         userData.is_active = formData.get('is_active') ? true : false;
