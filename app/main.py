@@ -306,7 +306,6 @@ async def manage_terminal(request: Request,
                                            "sorted": sorted_bottles,
                                            "current_user": current_user})
 
-
 @app.get("/admin/panel", response_class=HTMLResponse)
 async def admin_panel(request: Request, db: AsyncSession = Depends(get_db),
                       current_user: User = Depends(get_admin_user)):
