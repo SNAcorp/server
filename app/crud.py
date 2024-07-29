@@ -4,6 +4,7 @@ from sqlalchemy.future import select
 from app import models
 from passlib.context import CryptContext
 
+from app.models import User
 from app.schemas import UserCreate
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -133,6 +134,7 @@ class User(Base):
 У нас есть модель юзера и функции представленные в файле crud.py 
 Нужно реализовать html шаблон с наследованием от Base.html (представлена выше)  которая реализует панель суперадмина и нужно добавить функцию, чтобы админ мог подтвердить почту пользователя (потому что без подтверждения )"""
 
+
 async def get_user(db: AsyncSession, user_id: int):
     result = await db.execute(select(models.User).filter(models.User.id == user_id))
     return result.scalars().first()
@@ -162,6 +164,11 @@ async def create_user(db: AsyncSession, user: UserCreate):
     await db.commit()
     await db.refresh(db_user)
     return db_user
+
+
+async def get_unverified_users(db: AsyncSession):
+    result = await db.execute(select(User).where(User.is_verified == False))
+    return result.scalars().all()
 
 
 async def hash_func(word: str) -> str:

@@ -1,10 +1,163 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends "base.html" %}
 
-</body>
-</html>
+{% block title %}Admin Panel{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Admin Panel</h1>
+    <div>
+        <h2>Change User Role</h2>
+        <form id="roleForm">
+            <input type="number" id="user_id" name="user_id" placeholder="User ID" required>
+            <input type="text" id="role" name="role" placeholder="Role" required>
+            <button type="submit">Change Role</button>
+        </form>
+    </div>
+    <div>
+        <h2>Block/Unblock User</h2>
+        <form id="blockForm">
+            <input type="number" id="block_user_id" name="block_user_id" placeholder="User ID" required>
+            <button type="submit">Block</button>
+        </form>
+        <form id="unblockForm">
+            <input type="number" id="unblock_user_id" name="unblock_user_id" placeholder="User ID" required>
+            <button type="submit">Unblock</button>
+        </form>
+    </div>
+    {% if current_user.is_superuser %}
+    <div>
+        <h2>Superadmin Functions</h2>
+        <form id="verifyForm">
+            <input type="number" id="verify_user_id" name="verify_user_id" placeholder="User ID" required>
+            <button type="submit">Verify</button>
+        </form>
+        <form id="rejectForm">
+            <input type="number" id="reject_user_id" name="reject_user_id" placeholder="User ID" required>
+            <button type="submit">Reject</button>
+        </form>
+        <form id="makeSuperadminForm">
+            <input type="number" id="superadmin_user_id" name="superadmin_user_id" placeholder="User ID" required>
+            <button type="submit">Make Superadmin</button>
+        </form>
+        <h2>Unverified Users</h2>
+        <ul id="unverifiedUsers">
+            {% for user in unverified_users %}
+            <li>{{ user.id }} - {{ user.email }} 
+                <button onclick="verifyUser({{ user.id }})">Verify</button>
+                <button onclick="rejectUser({{ user.id }})">Reject</button>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    document.getElementById('roleForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const userId = document.getElementById('user_id').value;
+        const role = document.getElementById('role').value;
+        const response = await fetch(`/admin/role/${userId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ role: role }),
+        });
+        if (response.ok) {
+            alert('Role updated successfully');
+        } else {
+            alert('Error updating role');
+        }
+    });
+
+    document.getElementById('blockForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const userId = document.getElementById('block_user_id').value;
+        const response = await fetch(`/admin/block/${userId}`, {
+            method: 'PUT',
+        });
+        if (response.ok) {
+            alert('User blocked successfully');
+        } else {
+            alert('Error blocking user');
+        }
+    });
+
+    document.getElementById('unblockForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const userId = document.getElementById('unblock_user_id').value;
+        const response = await fetch(`/admin/unblock/${userId}`, {
+            method: 'PUT',
+        });
+        if (response.ok) {
+            alert('User unblocked successfully');
+        } else {
+            alert('Error unblocking user');
+        }
+    });
+
+    document.getElementById('verifyForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const userId = document.getElementById('verify_user_id').value;
+        const response = await fetch(`/superadmin/verify/${userId}`, {
+            method: 'PUT',
+        });
+        if (response.ok) {
+            alert('User verified successfully');
+        } else {
+            alert('Error verifying user');
+        }
+    });
+
+    document.getElementById('rejectForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const userId = document.getElementById('reject_user_id').value;
+        const response = await fetch(`/superadmin/reject/${userId}`, {
+            method: 'PUT',
+        });
+        if (response.ok) {
+            alert('User rejected successfully');
+        } else {
+            alert('Error rejecting user');
+        }
+    });
+
+    document.getElementById('makeSuperadminForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const userId = document.getElementById('superadmin_user_id').value;
+        const response = await fetch(`/superadmin/superadmin/${userId}`, {
+            method: 'PUT',
+        });
+        if (response.ok) {
+            alert('User promoted to superadmin successfully');
+        } else {
+            alert('Error promoting user');
+        }
+    });
+
+    async function verifyUser(userId) {
+        const response = await fetch(`/superadmin/verify/${userId}`, {
+            method: 'PUT',
+        });
+        if (response.ok) {
+            alert('User verified successfully');
+            location.reload();
+        } else {
+            alert('Error verifying user');
+        }
+    }
+
+    async function rejectUser(userId) {
+        const response = await fetch(`/superadmin/reject/${userId}`, {
+            method: 'PUT',
+        });
+        if (response.ok) {
+            alert('User rejected successfully');
+            location.reload();
+        } else {
+            alert('Error rejecting user');
+        }
+    }
+</script>
+{% endblock %}

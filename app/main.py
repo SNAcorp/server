@@ -6,6 +6,8 @@ from sqlalchemy.orm import sessionmaker
 
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+
+from app.crud import get_unverified_users
 from app.dependencies import get_current_user
 from app.routers import auth, users, admin, superadmin
 from app.jwt_auth import verify_terminal
@@ -303,6 +305,20 @@ async def manage_terminal(request: Request,
                                            "bottles": bottles,
                                            "sorted": sorted_bottles,
                                            "current_user": current_user})
+
+
+@app.get("/admin/panel", response_class=HTMLResponse)
+async def admin_panel(request: Request, db: AsyncSession = Depends(get_db),
+                      current_user: User = Depends(get_current_user)):
+    if not current_user.is_admin:
+        raise HTTPException(status_code=403, detail="Not authorized")
+
+    unverified_users = []
+    if current_user.is_superuser:
+        unverified_users = await get_unverified_users(db)
+
+    return app_templates.TemplateResponse("admin_panel.html", {"request": request, "current_user": current_user,
+                                                               "unverified_users": unverified_users})
 
 
 @app.get("/manage-bottles", response_class=HTMLResponse)
