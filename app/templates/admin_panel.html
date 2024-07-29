@@ -8,81 +8,69 @@
     <div class="row">
         <!-- Change User Role -->
         <div class="col-md-4">
-            <button class="btn btn-primary btn-block mb-4" data-toggle="modal" data-target="#changeRoleModal">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Change User Role</h5>
-                        <p class="card-text">Change the role of a user.</p>
-                        <span class="badge badge-info">Admin</span>
-                    </div>
+            <div class="card mb-4 shadow-sm" data-toggle="modal" data-target="#changeRoleModal" style="cursor: pointer;">
+                <div class="card-body">
+                    <h5 class="card-title">Change User Role</h5>
+                    <p class="card-text">Change the role of a user.</p>
+                    <span class="badge badge-info">Admin</span>
                 </div>
-            </button>
+            </div>
         </div>
 
         <!-- Block User -->
         <div class="col-md-4">
-            <button class="btn btn-primary btn-block mb-4" data-toggle="modal" data-target="#blockUserModal">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Block User</h5>
-                        <p class="card-text">Block a user from accessing the system.</p>
-                        <span class="badge badge-info">Admin</span>
-                    </div>
+            <div class="card mb-4 shadow-sm" data-toggle="modal" data-target="#blockUserModal" style="cursor: pointer;">
+                <div class="card-body">
+                    <h5 class="card-title">Block User</h5>
+                    <p class="card-text">Block a user from accessing the system.</p>
+                    <span class="badge badge-info">Admin</span>
                 </div>
-            </button>
+            </div>
         </div>
 
         <!-- Unblock User -->
         <div class="col-md-4">
-            <button class="btn btn-primary btn-block mb-4" data-toggle="modal" data-target="#unblockUserModal">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Unblock User</h5>
-                        <p class="card-text">Unblock a previously blocked user.</p>
-                        <span class="badge badge-info">Admin</span>
-                    </div>
+            <div class="card mb-4 shadow-sm" data-toggle="modal" data-target="#unblockUserModal" style="cursor: pointer;">
+                <div class="card-body">
+                    <h5 class="card-title">Unblock User</h5>
+                    <p class="card-text">Unblock a previously blocked user.</p>
+                    <span class="badge badge-info">Admin</span>
                 </div>
-            </button>
+            </div>
         </div>
 
         {% if current_user.is_superuser %}
         <!-- Verify User -->
         <div class="col-md-4">
-            <button class="btn btn-primary btn-block mb-4" data-toggle="modal" data-target="#verifyUserModal">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Verify User</h5>
-                        <p class="card-text">Verify a user.</p>
-                        <span class="badge badge-warning">Superadmin</span>
-                    </div>
+            <div class="card mb-4 shadow-sm" data-toggle="modal" data-target="#verifyUserModal" style="cursor: pointer;">
+                <div class="card-body">
+                    <h5 class="card-title">Verify User</h5>
+                    <p class="card-text">Verify a user.</p>
+                    <span class="badge badge-warning">Superadmin</span>
                 </div>
-            </button>
+            </div>
         </div>
 
         <!-- Reject User -->
         <div class="col-md-4">
-            <button class="btn btn-primary btn-block mb-4" data-toggle="modal" data-target="#rejectUserModal">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Reject User</h5>
-                        <p class="card-text">Reject a user's verification.</p>
-                        <span class="badge badge-warning">Superadmin</span>
-                    </div>
+            <div class="card mb-4 shadow-sm" data-toggle="modal" data-target="#rejectUserModal" style="cursor: pointer;">
+                <div class="card-body">
+                    <h5 class="card-title">Reject User</h5>
+                    <p class="card-text">Reject a user's verification.</p>
+                    <span class="badge badge-warning">Superadmin</span>
                 </div>
-            </button>
+            </div>
         </div>
 
         <!-- Make Superadmin -->
         <div class="col-md-4">
-            <button class="btn btn-primary btn-block mb-4" data-toggle="modal" data-target="#makeSuperadminModal">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Make Superadmin</h5>
-                        <p class="card-text">Promote a user to superadmin.</p>
-                        <span class="badge badge-warning">Superadmin</span>
-                    </div>
+            <div class="card mb-4 shadow-sm" data-toggle="modal" data-target="#makeSuperadminModal" style="cursor: pointer;">
+                <div class="card-body">
+                    <h5 class="card-title">Make Superadmin</h5>
+                    <p class="card-text">Promote a user to superadmin.</p>
+                    <span class="badge badge-warning">Superadmin</span>
                 </div>
-            </button>
+            </div>
         </div>
         {% endif %}
     </div>
