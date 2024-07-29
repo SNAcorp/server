@@ -3,7 +3,7 @@
 {% block title %}Manage Bottles{% endblock %}
 
 {% block link %}
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/dropzone.min.css" integrity="sha512-3gLUBcy13u59To2K1kDSXZilDiFCn2hV1hPCn2hLVF2nLlxxAcRTgHd9+oVoxP+iF7/bp8D6aMSHxa8Aq+Efnw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/dropzone.min.css" integrity="sha512-3gLUBcy13u59To2K1kDSXZilDiFCXn1V1hPCn2hLVF2nLlxxAcRTgHd9+oVoxP+iF7/bp8D6aMSHxa8Aq+Efnw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 {% endblock %}
 
 {% block style %}
@@ -163,7 +163,6 @@
     </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/dropzone.min.js" integrity="sha512-EFR6PRuH2y+haIGxJGoS5niij4OoxocUaq0yMgK9pqHzcwkTn5M0qg1nK8xQhgudWofpJ8yC1yX1L7Yq+bsBGA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 let currentStep = 1;
 const totalSteps = 5;
@@ -201,35 +200,69 @@ function prevStep() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('.dropzone').forEach(dropzone => {
-        const dropzoneInstance = new Dropzone(dropzone, {
-            url: '/bottles/upload-image',
-            acceptedFiles: 'image/png',
-            maxFiles: 1,
-            init: function() {
-                this.on('success', function(file, response) {
-                    const hiddenInput = dropzone.querySelector('input[type="hidden"]');
-                    hiddenInput.value = response.file_path;
-                    updateProgress();
-                });
-                this.on('error', function(file, response) {
-                    alert('Upload failed: ' + response);
-                });
-            }
-        });
+    const dropzone300 = document.getElementById('dropzone-300');
+    const dropzone600 = document.getElementById('dropzone-600');
 
-        dropzoneInstance.on('dragover', function() {
-            dropzone.classList.add('drag-hover');
-        });
-
-        dropzoneInstance.on('dragleave', function() {
-            dropzone.classList.remove('drag-hover');
-        });
-
-        dropzoneInstance.on('drop', function() {
-            dropzone.classList.remove('drag-hover');
-        });
+    dropzone300.addEventListener('dragover', (event) => {
+        event.preventDefault();
+        dropzone300.classList.add('drag-hover');
     });
+
+    dropzone300.addEventListener('dragleave', () => {
+        dropzone300.classList.remove('drag-hover');
+    });
+
+    dropzone300.addEventListener('drop', (event) => {
+        event.preventDefault();
+        dropzone300.classList.remove('drag-hover');
+        const fileInput = dropzone300.querySelector('input[type="file"]');
+        fileInput.files = event.dataTransfer.files;
+        handleFileUpload(fileInput);
+    });
+
+    dropzone300.querySelector('input[type="file"]').addEventListener('change', (event) => {
+        handleFileUpload(event.target);
+    });
+
+    dropzone600.addEventListener('dragover', (event) => {
+        event.preventDefault();
+        dropzone600.classList.add('drag-hover');
+    });
+
+    dropzone600.addEventListener('dragleave', () => {
+        dropzone600.classList.remove('drag-hover');
+    });
+
+    dropzone600.addEventListener('drop', (event) => {
+        event.preventDefault();
+        dropzone600.classList.remove('drag-hover');
+        const fileInput = dropzone600.querySelector('input[type="file"]');
+        fileInput.files = event.dataTransfer.files;
+        handleFileUpload(fileInput);
+    });
+
+    dropzone600.querySelector('input[type="file"]').addEventListener('change', (event) => {
+        handleFileUpload(event.target);
+    });
+
+    function handleFileUpload(fileInput) {
+        const formData = new FormData();
+        formData.append('file', fileInput.files[0]);
+
+        fetch('/bottles/upload-image', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            const hiddenInput = fileInput.nextElementSibling;
+            hiddenInput.value = data.file_path;
+            updateProgress();
+        })
+        .catch(() => {
+            alert('Upload failed.');
+        });
+    }
 
     document.querySelectorAll('.form-field').forEach(field => {
         field.addEventListener('input', updateProgress);
