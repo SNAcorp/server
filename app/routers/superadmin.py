@@ -12,7 +12,7 @@ async def verify_user(user_id: int, db: AsyncSession = Depends(get_db), current_
     user = await get_user(db, user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    updated_user = update_user_status(db, user, True)
+    updated_user = await update_user_status(db, user, True)
     return updated_user
 
 
@@ -23,7 +23,7 @@ async def reject_user(user_id: int, db: AsyncSession = Depends(get_db), current_
         raise HTTPException(status_code=404, detail="User not found")
     if user.role == "superuser" and not current_user.is_superuser:
         raise HTTPException(status_code=403, detail="Permission denied")
-    updated_user = update_user_status(db, user, False)
+    updated_user = await update_user_status(db, user, False)
     return updated_user
 
 
@@ -35,5 +35,5 @@ async def make_superadmin(user_id: int, db: AsyncSession = Depends(get_db),
         raise HTTPException(status_code=404, detail="User not found")
     if user.role == "superuser" and not current_user.is_superuser:
         raise HTTPException(status_code=403, detail="Permission denied")
-    updated_user = update_user_role(db, user, "superadmin")
+    updated_user = await update_user_role(db, user, "superadmin")
     return updated_user
