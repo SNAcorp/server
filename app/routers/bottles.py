@@ -11,20 +11,20 @@ import os
 
 router = APIRouter()
 app_templates = Jinja2Templates(directory="app/templates")
+UPLOAD_DIR = "images"
 
 
 @router.post("/upload-image")
 async def upload_image(file: UploadFile = File(...)):
-    UPLOAD_DIR = "/images"
     os.makedirs(UPLOAD_DIR, exist_ok=True)
 
     file_id = str(uuid.uuid4())
-    file_path = f"/images/{file_id}.png"
+    file_path = f"{UPLOAD_DIR}/{file_id}.png"
 
     with open(file_path, "wb+") as buffer:
         buffer.write(await file.read())
 
-    return {"file_path": file_path}
+    return {"file_path": f"/images/{file_id}.png"}
 
 
 @router.post("/create-bottle")
@@ -62,8 +62,8 @@ async def read_bottle(bottle_id: int, request: Request, session: AsyncSession = 
     if bottle_id < 0:
         raise HTTPException(status_code=404, detail="Bottle not found")
     result = await session.execute(
-            select(Bottle).filter(Bottle.id == bottle_id)
-        )
+        select(Bottle).filter(Bottle.id == bottle_id)
+    )
     bottle = result.scalars().first()
     if not bottle:
         raise HTTPException(status_code=404, detail="Bottle not found")
@@ -93,6 +93,8 @@ async def update_bottle(
         winery: str = Form(...),
         rating_average: float = Form(...),
         location: str = Form(...),
+        image_path300: UploadFile = File(None),
+        image_path600: UploadFile = File(None),
         image_path300_hidden: str = Form(...),
         image_path600_hidden: str = Form(...),
         description: str = Form(...),
@@ -111,12 +113,26 @@ async def update_bottle(
         if not bottle:
             raise HTTPException(status_code=404, detail="Bottle not found")
 
+        if image_path300:
+            image_path300_filename = f"{UPLOAD_DIR}/{str(uuid.uuid4())}.png"
+            with open(image_path300_filename, "wb+") as buffer:
+                buffer.write(await image_path300.read())
+            bottle.image_path300 = image_path300_filename
+        else:
+            bottle.image_path300 = image_path300_hidden
+
+        if image_path600:
+            image_path600_filename = f"{UPLOAD_DIR}/{str(uuid.uuid4())}.png"
+            with open(image_path600_filename, "wb+") as buffer:
+                buffer.write(await image_path600.read())
+            bottle.image_path600 = image_path600_filename
+        else:
+            bottle.image_path600 = image_path600_hidden
+
         bottle.name = name
         bottle.winery = winery
         bottle.rating_average = rating_average
         bottle.location = location
-        bottle.image_path300 = image_path300_hidden
-        bottle.image_path600 = image_path600_hidden
         bottle.description = description
         bottle.wine_type = wine_type
         bottle.volume = volume

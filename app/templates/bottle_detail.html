@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "Base.html" %}
 
 {% block title %}Bottle Detail{% endblock %}
 
@@ -79,6 +79,9 @@
         font-size: 16px;
         color: #343a40;
     }
+    .hidden {
+        display: none;
+    }
 </style>
 {% endblock %}
 
@@ -99,7 +102,7 @@
                 <div class="detail-text"><strong>Wine Type:</strong> {{ bottle.wine_type }}</div>
                 <div class="detail-text"><strong>Volume (ml):</strong> {{ bottle.volume }}</div>
             </div>
-            <form id="bottle-form" action="/update-bottle/{{ bottle.id }}" method="post" enctype="multipart/form-data" style="display: none;">
+            <form id="bottle-form" action="/bottles/update-bottle/{{ bottle.id }}" method="post" enctype="multipart/form-data" class="hidden">
                 <div class="form-group">
                     <label for="name">Name</label>
                     <input type="text" class="form-control" id="name" name="name" value="{{ bottle.name }}">
@@ -155,12 +158,12 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js" integrity="sha512-DK5OqgZLa3fuw8U0T8HkRhzCkBL69Gk7VslB3JhIf8zV7Tu+BCoox8YWVQMjRYb7/txO4d3EdyCQNfp9zzgF7g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
     document.getElementById("edit-button").addEventListener("click", function() {
-        document.getElementById("bottle-details").style.display = "none";
-        document.getElementById("bottle-form").style.display = "block";
-        this.style.display = "none";
+        document.getElementById("bottle-details").classList.add("hidden");
+        document.getElementById("bottle-form").classList.remove("hidden");
+        this.classList.add("hidden");
     });
 
-    function handleFileUpload(fileInput) {
+    function handleFileUpload(fileInput, dropzoneId) {
         const formData = new FormData();
         formData.append('file', fileInput.files[0]);
 
@@ -174,6 +177,7 @@
                 const hiddenInput = fileInput.nextElementSibling;
                 hiddenInput.value = data.file_path;
                 toastr.success('File uploaded successfully.');
+                document.getElementById(dropzoneId).innerHTML = '<div class="detail-text">File uploaded successfully: ' + data.file_path + '</div>';
             } else {
                 toastr.error('Upload failed.');
             }
@@ -183,7 +187,7 @@
         });
     }
 
-    function setupDropzone(dropzone) {
+    function setupDropzone(dropzone, dropzoneId) {
         dropzone.addEventListener('dragover', (event) => {
             event.preventDefault();
             dropzone.classList.add('drag-hover');
@@ -198,11 +202,11 @@
             dropzone.classList.remove('drag-hover');
             const fileInput = dropzone.querySelector('input[type="file"]');
             fileInput.files = event.dataTransfer.files;
-            handleFileUpload(fileInput);
+            handleFileUpload(fileInput, dropzoneId);
         });
 
         dropzone.querySelector('input[type="file"]').addEventListener('change', (event) => {
-            handleFileUpload(event.target);
+            handleFileUpload(event.target, dropzoneId);
         });
     }
 
@@ -210,8 +214,8 @@
         const dropzone300 = document.getElementById('dropzone-300');
         const dropzone600 = document.getElementById('dropzone-600');
 
-        setupDropzone(dropzone300);
-        setupDropzone(dropzone600);
+        setupDropzone(dropzone300, 'dropzone-300');
+        setupDropzone(dropzone600, 'dropzone-600');
     });
 </script>
 {% endblock %}
