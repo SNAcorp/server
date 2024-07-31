@@ -124,7 +124,7 @@
                     <div class="dropzone" id="dropzone-300">
                         <span>Drop image here or click to upload (300px)</span>
                         <input type="file" id="image_path300" name="image_path300" accept="image/png">
-                        <input type="hidden" name="image_path300_hidden" class="form-field">
+                        <input type="hidden" name="image_path300_hidden" id="image_path300_hidden" value="{{ bottle.image_path300 }}">
                     </div>
                 </div>
                 <div class="form-group">
@@ -132,7 +132,7 @@
                     <div class="dropzone" id="dropzone-600">
                         <span>Drop image here or click to upload (600px)</span>
                         <input type="file" id="image_path600" name="image_path600" accept="image/png">
-                        <input type="hidden" name="image_path600_hidden" class="form-field">
+                        <input type="hidden" name="image_path600_hidden" id="image_path600_hidden" value="{{ bottle.image_path600 }}">
                     </div>
                 </div>
                 <div class="form-group">
@@ -163,7 +163,7 @@
         this.classList.add("hidden");
     });
 
-    function handleFileUpload(fileInput, dropzoneId) {
+    function handleFileUpload(fileInput, hiddenInputId, dropzoneId) {
         const formData = new FormData();
         formData.append('file', fileInput.files[0]);
 
@@ -174,8 +174,7 @@
         .then(response => response.json())
         .then(data => {
             if (data.file_path) {
-                const hiddenInput = fileInput.nextElementSibling;
-                hiddenInput.value = data.file_path;
+                document.getElementById(hiddenInputId).value = data.file_path;
                 toastr.success('File uploaded successfully.');
                 document.getElementById(dropzoneId).innerHTML = '<div class="detail-text">File uploaded successfully: ' + data.file_path + '</div>';
             } else {
@@ -187,7 +186,7 @@
         });
     }
 
-    function setupDropzone(dropzone, dropzoneId) {
+    function setupDropzone(dropzone, hiddenInputId, dropzoneId) {
         dropzone.addEventListener('dragover', (event) => {
             event.preventDefault();
             dropzone.classList.add('drag-hover');
@@ -202,11 +201,15 @@
             dropzone.classList.remove('drag-hover');
             const fileInput = dropzone.querySelector('input[type="file"]');
             fileInput.files = event.dataTransfer.files;
-            handleFileUpload(fileInput, dropzoneId);
+            handleFileUpload(fileInput, hiddenInputId, dropzoneId);
         });
 
         dropzone.querySelector('input[type="file"]').addEventListener('change', (event) => {
-            handleFileUpload(event.target, dropzoneId);
+            handleFileUpload(event.target, hiddenInputId, dropzoneId);
+        });
+
+        dropzone.addEventListener('click', () => {
+            dropzone.querySelector('input[type="file"]').click();
         });
     }
 
@@ -214,8 +217,8 @@
         const dropzone300 = document.getElementById('dropzone-300');
         const dropzone600 = document.getElementById('dropzone-600');
 
-        setupDropzone(dropzone300, 'dropzone-300');
-        setupDropzone(dropzone600, 'dropzone-600');
+        setupDropzone(dropzone300, 'image_path300_hidden', 'dropzone-300');
+        setupDropzone(dropzone600, 'image_path600_hidden', 'dropzone-600');
     });
 </script>
 {% endblock %}
