@@ -111,7 +111,7 @@
 <div class="container">
     <div class="bottle-detail">
         <div class="bottle-image-container">
-            <img src="bottles/image/{{bottle.id}}/600" alt="{{ bottle.name }}" id="bottle-image">
+            <img src="/bottles/image/{{bottle.id}}/600" alt="{{ bottle.name }}" id="bottle-image">
         </div>
         <div class="bottle-info">
             <h2>{{ bottle.name }}</h2>
@@ -252,10 +252,6 @@
         if (!image300 || !image600) {
             alert("Please upload both images before submitting the form.");
             event.preventDefault();
-        } else {
-            console.log('Submitting form with:', image300, image600);
-            document.getElementById("image_path300_hidden").value = image300;
-            document.getElementById("image_path600_hidden").value = image600;
         }
     });
 </script>
