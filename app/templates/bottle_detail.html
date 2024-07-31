@@ -7,7 +7,6 @@
 {% endblock %}
 
 {% block style %}
-<style>
     .bottle-detail {
         display: flex;
         align-items: flex-start;
@@ -106,7 +105,6 @@
             opacity: 1;
         }
     }
-</style>
 {% endblock %}
 
 {% block content %}
@@ -245,6 +243,13 @@
 
         setupDropzone(dropzone300, 'image_path300_hidden', 'dropzone-300');
         setupDropzone(dropzone600, 'image_path600_hidden', 'dropzone-600');
+    });
+
+    document.getElementById("bottle-form").addEventListener("submit", function(event) {
+        if (!document.getElementById("image_path300_hidden").value || !document.getElementById("image_path600_hidden").value) {
+            alert("Please upload both images before submitting the form.");
+            event.preventDefault();
+        }
     });
 </script>
 {% endblock %}
