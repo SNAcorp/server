@@ -118,19 +118,9 @@ app.add_middleware(
 
 
 @app.get("/bottles", response_class=HTMLResponse)
-async def list_bottles(request: Request, query: str = None, session: AsyncSession = Depends(get_db)):
-    async with session.begin():
-        if query:
-            try:
-                bottle_id = int(query)
-                result = await session.execute(select(Bottle).filter(
-                    or_(Bottle.id == bottle_id, Bottle.name.ilike(f"%{query}%"))
-                ))
-            except ValueError:
-                result = await session.execute(select(Bottle).filter(Bottle.name.ilike(f"%{query}%")))
-        else:
-            result = await session.execute(select(Bottle))
-        bottles = result.scalars().all()
+async def list_bottles(request: Request, current_user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(Bottle))
+    bottles = result.scalars().all()
     return app_templates.TemplateResponse("bottle_list.html", {"request": request, "bottles": bottles})
 
 
