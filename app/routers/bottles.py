@@ -120,18 +120,13 @@ async def update_bottle(
         winery: str = Form(...),
         rating_average: float = Form(...),
         location: str = Form(...),
-        image_path300: UploadFile = File(None),
-        image_path600: UploadFile = File(None),
         image_path300_hidden: str = Form(...),
         image_path600_hidden: str = Form(...),
         description: str = Form(...),
         wine_type: str = Form(...),
         volume: float = Form(...),
-        current_user: User = Depends(get_current_user),
         session: AsyncSession = Depends(get_db)
 ):
-    if current_user is None:
-        raise HTTPException(status_code=401, detail="Unauthorized")
     if bottle_id < 0:
         raise HTTPException(status_code=404, detail="Bottle not found")
 
@@ -143,26 +138,12 @@ async def update_bottle(
         if not bottle:
             raise HTTPException(status_code=404, detail="Bottle not found")
 
-        if image_path300:
-            image_path300_filename = f"{UPLOAD_DIR}/{str(uuid.uuid4())}.png"
-            with open(image_path300_filename, "wb+") as buffer:
-                buffer.write(await image_path300.read())
-            bottle.image_path300 = image_path300_filename
-        else:
-            bottle.image_path300 = image_path300_hidden
-
-        if image_path600:
-            image_path600_filename = f"{UPLOAD_DIR}/{str(uuid.uuid4())}.png"
-            with open(image_path600_filename, "wb+") as buffer:
-                buffer.write(await image_path600.read())
-            bottle.image_path600 = image_path600_filename
-        else:
-            bottle.image_path600 = image_path600_hidden
-
         bottle.name = name
         bottle.winery = winery
         bottle.rating_average = rating_average
         bottle.location = location
+        bottle.image_path300 = image_path300_hidden
+        bottle.image_path600 = image_path600_hidden
         bottle.description = description
         bottle.wine_type = wine_type
         bottle.volume = volume
