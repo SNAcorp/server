@@ -196,12 +196,12 @@
             method: 'POST',
             body: formData
         })
-        .then(response => response.json())
-        .then(data => {
-            if (data.file_path) {
+        .then(response => {
+            if (response.ok) {
+                const data = response.json();
                 document.getElementById(hiddenInputId).value = data.file_path;
                 toastr.success('File uploaded successfully.');
-                document.getElementById(dropzoneId).innerHTML = '<div class="success-message">File uploaded successfully! ' + '</div>';
+                document.getElementById(dropzoneId).innerHTML = '<div class="success-message">File uploaded successfully!</div>';
             } else {
                 toastr.error('Upload failed.');
             }
