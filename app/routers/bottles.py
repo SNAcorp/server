@@ -87,18 +87,19 @@ async def get_bottle_image(bottle_id: int, resolution: str, db: AsyncSession = D
 
 
 @router.post("/update-bottle/{bottle_id}")
-async def update_bottle(bottle_id: int,
-                        name: str = Form(...),
-                        winery: str = Form(...),
-                        rating_average: float = Form(...),
-                        location: str = Form(...),
-                        image_path300: str = Form(...),
-                        image_path600: str = Form(...),
-                        description: str = Form(...),
-                        wine_type: str = Form(...),
-                        volume: float = Form(...),
-                        session: AsyncSession = Depends(get_db)
-                        ):
+async def update_bottle(
+        bottle_id: int,
+        name: str = Form(...),
+        winery: str = Form(...),
+        rating_average: float = Form(...),
+        location: str = Form(...),
+        image_path300_hidden: str = Form(...),
+        image_path600_hidden: str = Form(...),
+        description: str = Form(...),
+        wine_type: str = Form(...),
+        volume: float = Form(...),
+        session: AsyncSession = Depends(get_db)
+):
     if bottle_id < 0:
         raise HTTPException(status_code=404, detail="Bottle not found")
 
@@ -114,8 +115,8 @@ async def update_bottle(bottle_id: int,
         bottle.winery = winery
         bottle.rating_average = rating_average
         bottle.location = location
-        bottle.image_path300 = image_path300
-        bottle.image_path600 = image_path600
+        bottle.image_path300 = image_path300_hidden
+        bottle.image_path600 = image_path600_hidden
         bottle.description = description
         bottle.wine_type = wine_type
         bottle.volume = volume
