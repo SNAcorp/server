@@ -49,7 +49,7 @@
         {% for bottle in bottles %}
         <div class="bottle-item">
             <a href="/bottles/{{ bottle.id }}">
-                <img src="{{ bottle.image_path300 }}" alt="{{ bottle.name }}">
+                <img src="/bottles/image/{{bottle.id}}/{{300}}" alt="{{ bottle.name }}">
                 <h5>{{ bottle.name }}</h5>
                 <p>{{ bottle.winery }}</p>
             </a>
