@@ -12,8 +12,8 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
-COPY update_and_restart.sh /usr/local/bin/update_and_restart.sh
-RUN chmod +x /usr/local/bin/update_and_restart.sh
+COPY update_and_restart.sh /update_and_restart.sh
+RUN chmod +x /update_and_restart.sh
 
 COPY requirements.txt .
 
