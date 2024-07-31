@@ -359,14 +359,26 @@ async def reset_bottles_endpoint(request: IsServerOnline):
 
 @app.post("/deploy")
 async def deploy():
+    project_dir = '/home/sna/server'
+
     try:
-        # Выполняем сценарий обновления и перезапуска
-        result = subprocess.run(['docker exec autodeploy-main-1 /update_and_restart.sh'], check=True, capture_output=True, text=True)
-        script_output = result.stdout
+        # Обновить код из репозитория
+        result = subprocess.run(['git', 'pull'], cwd=project_dir, check=True, capture_output=True, text=True)
+        git_output = result.stdout
+
+        # Построить Docker образы
+        result = subprocess.run(['docker', 'compose', 'build'], cwd=project_dir, check=True, capture_output=True, text=True)
+        build_output = result.stdout
+
+        # Перезапустить контейнеры
+        result = subprocess.run(['docker', 'compose', 'up'], cwd=project_dir, check=True, capture_output=True, text=True)
+        up_output = result.stdout
 
         return JSONResponse(content={
             'status': 'success',
-            'output': script_output
+            'git_output': git_output,
+            'build_output': build_output,
+            'up_output': up_output
         })
 
     except subprocess.CalledProcessError as e:
@@ -374,7 +386,9 @@ async def deploy():
         return JSONResponse(status_code=500, content={
             'status': 'error',
             'message': error_message,
+            'output': e.output.decode()
         })
+
 
 
 def main():
