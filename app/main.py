@@ -362,6 +362,7 @@ async def deploy():
     project_dir = '/home/sna/server'
 
     try:
+
         # Обновить код из репозитория
         result = subprocess.run(['git', 'pull'], cwd=project_dir, check=True, capture_output=True, text=True)
         git_output = result.stdout
@@ -382,11 +383,11 @@ async def deploy():
         })
 
     except subprocess.CalledProcessError as e:
+        pwd = subprocess.run(['pwd'], capture_output=True, text=True)
         error_message = f"Command '{e.cmd}' returned non-zero exit status {e.returncode}."
         return JSONResponse(status_code=500, content={
             'status': 'error',
-            'message': error_message,
-            'output': e.output.decode()
+            'message': pwd
         })
 
 
