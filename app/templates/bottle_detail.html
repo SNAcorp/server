@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "Base.html" %}
 
 {% block title %}Bottle Detail{% endblock %}
 
@@ -201,7 +201,7 @@
             if (data.file_path) {
                 document.getElementById(hiddenInputId).value = data.file_path;
                 toastr.success('File uploaded successfully.');
-                document.getElementById(dropzoneId).innerHTML = '<div class="success-message">File uploaded successfully!</div>';
+                document.getElementById(dropzoneId).innerHTML = '<div class="success-message">File uploaded successfully: ' + data.file_path + '</div>';
             } else {
                 toastr.error('Upload failed.');
             }
