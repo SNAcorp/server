@@ -5,6 +5,7 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from app.models import Bottle
+from sqlalchemy.orm import selectinload
 from app.database import get_db
 import os
 
@@ -58,8 +59,13 @@ async def create_bottle_endpoint(
 
 @router.get("/{bottle_id}", response_class=HTMLResponse)
 async def read_bottle(bottle_id: int, request: Request, session: AsyncSession = Depends(get_db)):
+    if bottle_id < 0:
+        raise HTTPException(status_code=404, detail="Bottle not found")
+
     async with session.begin():
-        result = await session.execute(select(Bottle).filter(Bottle.id == bottle_id))
+        result = await session.execute(
+            select(Bottle).filter(Bottle.id == bottle_id)
+        )
         bottle = result.scalars().first()
         if not bottle:
             raise HTTPException(status_code=404, detail="Bottle not found")
@@ -94,9 +100,14 @@ async def update_bottle(bottle_id: int,
                         wine_type: str = Form(...),
                         volume: float = Form(...),
                         session: AsyncSession = Depends(get_db)
-                    ):
+                        ):
+    if bottle_id < 0:
+        raise HTTPException(status_code=404, detail="Bottle not found")
+
     async with session.begin():
-        result = await session.execute(select(Bottle).filter(Bottle.id == bottle_id))
+        result = await session.execute(
+            select(Bottle).filter(Bottle.id == bottle_id)
+        )
         bottle = result.scalars().first()
         if not bottle:
             raise HTTPException(status_code=404, detail="Bottle not found")
