@@ -4,7 +4,6 @@
 
 {% block link %}
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/dropzone@5.9.3/dist/dropzone.min.css" />
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastr@2.1.4/build/toastr.min.css" />
 {% endblock %}
 
 {% block style %}
@@ -180,7 +179,6 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/dropzone@5.9.3/dist/dropzone.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/toastr@2.1.4/build/toastr.min.js"></script>
 <script>
     document.getElementById("edit-button").addEventListener("click", function() {
         document.getElementById("bottle-details").classList.add("hidden");
@@ -200,14 +198,17 @@
         .then(data => {
             if (data.file_path) {
                 document.getElementById(hiddenInputId).value = data.file_path;
-                toastr.success('File uploaded successfully.');
-                document.getElementById(dropzoneId).innerHTML = '<div class="success-message">File uploaded successfully: ' + data.file_path + '</div>';
+                const successMessage = document.createElement('div');
+                successMessage.className = 'success-message';
+                successMessage.textContent = 'File uploaded successfully: ' + data.file_path;
+                document.getElementById(dropzoneId).innerHTML = '';
+                document.getElementById(dropzoneId).appendChild(successMessage);
             } else {
-                toastr.error('Upload failed.');
+                alert('Upload failed.');
             }
         })
         .catch(() => {
-            toastr.error('Upload failed.');
+            alert('Upload failed.');
         });
     }
 
