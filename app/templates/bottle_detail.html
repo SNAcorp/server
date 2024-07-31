@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "Base.html" %}
 
 {% block title %}Bottle Detail{% endblock %}
 
@@ -9,13 +9,20 @@
 {% block style %}
     .bottle-detail {
         display: flex;
-        flex-wrap: wrap;
+        align-items: flex-start;
+        margin-top: 20px;
+    }
+    .bottle-image-container {
+        flex: 1;
+        text-align: center;
     }
     .bottle-image-container img {
+        max-width: 100%;
         border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
     .bottle-info {
-        width: 70%;
+        flex: 2;
         padding: 20px;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         border-radius: 10px;
@@ -23,12 +30,14 @@
         margin-left: 20px;
     }
     .bottle-info h2 {
+        margin-bottom: 20px;
         color: #343a40;
     }
     .bottle-info label {
         font-weight: bold;
     }
     .bottle-info input, .bottle-info textarea {
+        width: 100%;
         margin-bottom: 10px;
         padding: 10px;
         border-radius: 5px;
@@ -101,6 +110,9 @@
 {% block content %}
 <div class="container">
     <div class="bottle-detail">
+        <div class="bottle-image-container">
+            <img src="/bottles/image/{{bottle_id}}/600" alt="{{ bottle.name }}" id="bottle-image">
+        </div>
         <div class="bottle-info">
             <h2>{{ bottle.name }}</h2>
             <div id="bottle-details">
@@ -112,7 +124,7 @@
                 <div class="detail-text"><strong>Wine Type:</strong> {{ bottle.wine_type }}</div>
                 <div class="detail-text"><strong>Volume (ml):</strong> {{ bottle.volume }}</div>
             </div>
-            <form id="bottle-form" action="/bottles/update-bottle/{{ bottle.id }}" method="post" enctype="multipart/form-data" class="hidden">
+            <form id="bottle-form" action="/update-bottle/{{ bottle.id }}" method="post" enctype="multipart/form-data" class="hidden">
                 <div class="form-group">
                     <label for="name">Name</label>
                     <input type="text" class="form-control" id="name" name="name" value="{{ bottle.name }}">
@@ -161,9 +173,6 @@
             </form>
             <button id="edit-button" class="btn btn-primary">Edit</button>
         </div>
-<!--        <div class="bottle-image-container">-->
-<!--                <img src="/bottles/image/{{bottle.id}}/{{600}}" alt="{{ bottle.name }}" id="bottle-image">-->
-<!--        </div>-->
     </div>
 </div>
 
@@ -189,15 +198,15 @@
                 document.getElementById(hiddenInputId).value = data.file_path;
                 const successMessage = document.createElement('div');
                 successMessage.className = 'success-message';
-                successMessage.textContent = 'File uploaded successfully!';
+                successMessage.textContent = 'File uploaded successfully: ' + data.file_path;
                 document.getElementById(dropzoneId).innerHTML = '';
                 document.getElementById(dropzoneId).appendChild(successMessage);
             } else {
-                alert('Upload failed. Please, reload the page and try again');
+                alert('Upload failed.');
             }
         })
         .catch(() => {
-            alert('Upload failed. Please, reload the page and try again');
+            alert('Upload failed.');
         });
     }
 
