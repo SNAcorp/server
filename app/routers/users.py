@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.templating import Jinja2Templates
 from fastapi import Form
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 
 from app import models
 from app.schemas import User
@@ -22,6 +22,8 @@ async def read_users(request: Request, skip: int = 0, limit: int = 10, db: Async
 
 @router.get("/me/", response_model=User)
 async def read_user_me(request: Request, current_user: User = Depends(get_current_user)):
+    if current_user is None:
+        return RedirectResponse("/login", 303)
     return templates.TemplateResponse("profile.html", {"request": request, "current_user": current_user})
 
 
