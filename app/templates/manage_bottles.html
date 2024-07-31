@@ -5,7 +5,9 @@
 {% block link %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/dropzone.min.css" integrity="sha512-3gLUBcy13u59To2K1kDSXZilDiFCXn2hV1hPCn2hLVF2nLlxxAcRTgHd9+oVoxP+iF7/bp8D6aMSHxa8Aq+Efnw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" integrity="sha512-MC7KwMtcwQZoxk71x4GZAKJxTYdY1IR1YtX7+FxrVdL8kpYYquSMqk4H8r9e6zYXZ5u+tqJXt0H7jATJ4um5P4w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-<style>
+{% endblock %}
+
+{% block style %}
     .manage-bottles-container {
         max-width: 900px;
         margin: 50px auto;
@@ -122,7 +124,7 @@
         color: white;
         transition: width 0.5s ease;
     }
-</style>
+
 {% endblock %}
 
 {% block content %}
