@@ -47,13 +47,14 @@
     </form>
     <div class="bottle-list">
         {% for bottle in bottles %}
+        <a href="/bottles/{{ bottle.id }}">
         <div class="bottle-item">
-            <a href="/bottles/{{ bottle.id }}">
-                <img src="/bottles/image/{{bottle.id}}/{{300}}" alt="{{ bottle.name }}">
+
+                <h4>{{ bottle.id }}</h4>
                 <h5>{{ bottle.name }}</h5>
                 <p>{{ bottle.winery }}</p>
-            </a>
-        </div>
+            </div>
+        </a>
         {% endfor %}
     </div>
 </div>
