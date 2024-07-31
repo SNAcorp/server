@@ -113,6 +113,7 @@
 <div class="container">
     <div class="bottle-detail">
         <div class="bottle-image-container">
+            <img src="{{ bottle.image_path600 }}" alt="{{ bottle.name }}" id="bottle-image">
         </div>
         <div class="bottle-info">
             <h2>{{ bottle.name }}</h2>
@@ -125,7 +126,7 @@
                 <div class="detail-text"><strong>Wine Type:</strong> {{ bottle.wine_type }}</div>
                 <div class="detail-text"><strong>Volume (ml):</strong> {{ bottle.volume }}</div>
             </div>
-            <form id="bottle-form" action="/bottles/update-bottle/{{ bottle.id }}" method="post" enctype="multipart/form-data" class="hidden">
+            <form id="bottle-form" action="/update-bottle/{{ bottle.id }}" method="post" enctype="multipart/form-data" class="hidden">
                 <div class="form-group">
                     <label for="name">Name</label>
                     <input type="text" class="form-control" id="name" name="name" value="{{ bottle.name }}">
@@ -196,6 +197,7 @@
         .then(response => response.json())
         .then(data => {
             if (data.file_path) {
+                console.log(`File uploaded successfully: ${data.file_path}`);
                 document.getElementById(hiddenInputId).value = data.file_path;
                 const successMessage = document.createElement('div');
                 successMessage.className = 'success-message';
@@ -203,10 +205,12 @@
                 document.getElementById(dropzoneId).innerHTML = '';
                 document.getElementById(dropzoneId).appendChild(successMessage);
             } else {
+                console.error('Upload failed.');
                 alert('Upload failed.');
             }
         })
-        .catch(() => {
+        .catch((error) => {
+            console.error('Upload failed.', error);
             alert('Upload failed.');
         });
     }
@@ -244,6 +248,21 @@
 
         setupDropzone(dropzone300, 'image_path300_hidden', 'dropzone-300');
         setupDropzone(dropzone600, 'image_path600_hidden', 'dropzone-600');
+    });
+
+    document.getElementById("bottle-form").addEventListener("submit", function(event) {
+        const image300 = document.getElementById("image_path300_hidden").value;
+        const image600 = document.getElementById("image_path600_hidden").value;
+
+        if (!image300 || !image600) {
+            console.error("Please upload both images before submitting the form.");
+            alert("Please upload both images before submitting the form.");
+            event.preventDefault();
+        } else {
+            console.log('Submitting form with:', image300, image600);
+            document.getElementById("image_path300_hidden").value = image300;
+            document.getElementById("image_path600_hidden").value = image600;
+        }
     });
 </script>
 {% endblock %}
