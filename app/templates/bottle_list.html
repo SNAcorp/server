@@ -1,0 +1,60 @@
+{% extends "Base.html" %}
+
+{% block title %}Bottles List{% endblock %}
+
+{% block style %}
+<style>
+    .bottle-list {
+        display: flex;
+        flex-wrap: wrap;
+    }
+    .bottle-item {
+        flex: 1 0 21%;
+        margin: 10px;
+        padding: 10px;
+        border: 1px solid #ced4da;
+        border-radius: 5px;
+        text-align: center;
+        transition: transform 0.3s;
+    }
+    .bottle-item:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .bottle-item img {
+        max-width: 100%;
+        border-radius: 5px;
+        margin-bottom: 10px;
+    }
+    .search-form {
+        margin-bottom: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="my-4">Bottles List</h2>
+    <form class="search-form" method="get" action="/bottles">
+        <div class="form-row">
+            <div class="col">
+                <input type="text" class="form-control" name="query" placeholder="Search by ID or Name">
+            </div>
+            <div class="col">
+                <button type="submit" class="btn btn-primary">Search</button>
+            </div>
+        </div>
+    </form>
+    <div class="bottle-list">
+        {% for bottle in bottles %}
+        <div class="bottle-item">
+            <a href="/bottles/{{ bottle.id }}">
+                <img src="{{ bottle.image_path300 }}" alt="{{ bottle.name }}">
+                <h5>{{ bottle.name }}</h5>
+                <p>{{ bottle.winery }}</p>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
