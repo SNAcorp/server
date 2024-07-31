@@ -1,4 +1,4 @@
-{% extends "Base.html" %}
+{% extends "base.html" %}
 
 {% block title %}Bottle Detail{% endblock %}
 
@@ -114,7 +114,7 @@
 <div class="container">
     <div class="bottle-detail">
         <div class="bottle-image-container">
-            <img src="{{ bottle.image_path600 }}" alt="{{ bottle.name }}" id="bottle-image">
+            <img src="/bottles/image/{{bottle.id}}/{{600}}" alt="{{ bottle.name }}" id="bottle-image">
         </div>
         <div class="bottle-info">
             <h2>{{ bottle.name }}</h2>
@@ -127,7 +127,7 @@
                 <div class="detail-text"><strong>Wine Type:</strong> {{ bottle.wine_type }}</div>
                 <div class="detail-text"><strong>Volume (ml):</strong> {{ bottle.volume }}</div>
             </div>
-            <form id="bottle-form" action="/update-bottle/{{ bottle.id }}" method="post" enctype="multipart/form-data" class="hidden">
+            <form id="bottle-form" action="/bottles/update-bottle/{{ bottle.id }}" method="post" enctype="multipart/form-data" class="hidden">
                 <div class="form-group">
                     <label for="name">Name</label>
                     <input type="text" class="form-control" id="name" name="name" value="{{ bottle.name }}">
@@ -201,7 +201,7 @@
             if (data.file_path) {
                 document.getElementById(hiddenInputId).value = data.file_path;
                 toastr.success('File uploaded successfully.');
-                document.getElementById(dropzoneId).innerHTML = '<div class="success-message">File uploaded successfully: ' + data.file_path + '</div>';
+                document.getElementById(dropzoneId).innerHTML = '<div class="success-message">File uploaded successfully!</div>';
             } else {
                 toastr.error('Upload failed.');
             }
