@@ -11,7 +11,7 @@ import os
 
 router = APIRouter()
 app_templates = Jinja2Templates(directory="app/templates")
-UPLOAD_DIR = "images"
+UPLOAD_DIR = "/images"
 
 
 @router.post("/upload-image")
