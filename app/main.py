@@ -357,38 +357,6 @@ async def reset_bottles_endpoint(request: IsServerOnline):
     return {"is_online": True}
 
 
-@app.post("/deploy")
-async def deploy():
-
-    try:
-
-        # Обновить код из репозитория
-        result = subprocess.run(['git', 'pull'], check=True, capture_output=True, text=True)
-        git_output = result.stdout
-
-        # Построить Docker образы
-        result = subprocess.run(['docker', 'compose', 'build'], check=True, capture_output=True, text=True)
-        build_output = result.stdout
-
-        # Перезапустить контейнеры
-        result = subprocess.run(['docker', 'compose', 'up'], check=True, capture_output=True, text=True)
-        up_output = result.stdout
-
-        return JSONResponse(content={
-            'status': 'success',
-            'git_output': git_output,
-            'build_output': build_output,
-            'up_output': up_output
-        })
-
-    except subprocess.CalledProcessError as e:
-        pwd = subprocess.run(['pwd'], capture_output=True, text=True)
-        error_message = f"Command '{e.cmd}' returned non-zero exit status {e.returncode}."
-        return JSONResponse(status_code=500, content={
-            'status': 'error',
-            'message': pwd
-        })
-
 
 
 def main():
