@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "Base.html" %}
 
 {% block title %}Bottle Detail{% endblock %}
 
@@ -13,14 +13,18 @@
         display: flex;
         align-items: flex-start;
     }
-    .bottle-detail img {
+    .bottle-image-container {
+        flex: 1;
+        text-align: center;
+    }
+    .bottle-image-container img {
         max-width: 300px;
         border-radius: 10px;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         margin-right: 20px;
     }
     .bottle-info {
-        flex: 1;
+        flex: 2;
     }
     .bottle-info h2 {
         margin-bottom: 20px;
@@ -82,13 +86,29 @@
     .hidden {
         display: none;
     }
+    .success-message {
+        background-color: #d4edda;
+        color: #155724;
+        padding: 10px;
+        border-radius: 5px;
+        margin-top: 20px;
+        animation: fadeIn 1s ease-in-out;
+    }
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="container">
     <div class="bottle-detail">
-        <div class="bottle-image">
+        <div class="bottle-image-container">
             <img src="/bottles/image/{{bottle.id}}/{{600}}" alt="{{ bottle.name }}" id="bottle-image">
         </div>
         <div class="bottle-info">
@@ -176,7 +196,7 @@
             if (data.file_path) {
                 document.getElementById(hiddenInputId).value = data.file_path;
                 toastr.success('File uploaded successfully.');
-                document.getElementById(dropzoneId).innerHTML = '<div class="detail-text">File uploaded successfully: ' + data.file_path + '</div>';
+                document.getElementById(dropzoneId).innerHTML = '<div class="success-message">File uploaded successfully: ' + data.file_path + '</div>';
             } else {
                 toastr.error('Upload failed.');
             }
