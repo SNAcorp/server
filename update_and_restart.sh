@@ -1,6 +1,8 @@
 #!/bin/sh
 set -e
 
+cd server
+
 # Обновить код из репозитория
 git pull
 
