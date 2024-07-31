@@ -16,18 +16,44 @@
         border-radius: 5px;
         text-align: center;
         transition: transform 0.3s;
+        text-decoration: none;
+        color: inherit;
     }
     .bottle-item:hover {
         transform: scale(1.05);
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
-    .bottle-item img {
-        max-width: 100px;
-        border-radius: 5px;
-        margin-bottom: 10px;
+    .bottle-item h4, .bottle-item h5, .bottle-item p {
+        margin: 0;
+    }
+    .bottle-item h4 {
+        margin-bottom: 5px;
+        font-size: 1.25rem;
+        color: #007bff;
+    }
+    .bottle-item h5 {
+        margin-bottom: 5px;
+        font-size: 1rem;
+    }
+    .bottle-item p {
+        font-size: 0.875rem;
+        color: #6c757d;
     }
     .search-form {
         margin-bottom: 20px;
+    }
+    .create-button {
+        display: inline-block;
+        margin-bottom: 20px;
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        transition: background-color 0.3s;
+    }
+    .create-button:hover {
+        background-color: #0056b3;
     }
 </style>
 {% endblock %}
@@ -35,6 +61,7 @@
 {% block content %}
 <div class="container">
     <h2 class="my-4">Bottles List</h2>
+    <a href="/bottles/create" class="create-button">Create New Bottle</a>
     <form class="search-form">
         <div class="form-row">
             <div class="col">

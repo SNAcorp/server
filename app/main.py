@@ -346,13 +346,6 @@ async def admin_panel(request: Request, db: AsyncSession = Depends(get_db),
     })
 
 
-@app.get("/manage-bottles", response_class=HTMLResponse)
-async def manage_bottles(request: Request,
-                         current_user: User = Depends(get_current_user)):
-    if current_user is None:
-        return RedirectResponse("/login", 303)
-    return app_templates.TemplateResponse("manage_bottles.html", {"request": request, "current_user": current_user})
-
 
 @app.post("/", response_class=JSONResponse)
 async def reset_bottles_endpoint(request: IsServerOnline):

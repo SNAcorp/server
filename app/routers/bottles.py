@@ -30,7 +30,15 @@ async def upload_image(file: UploadFile = File(...), current_user: User = Depend
     return {"file_path": f"/images/{file_id}.png"}
 
 
-@router.post("/create-bottle")
+@router.get("/create", response_class=HTMLResponse)
+async def manage_bottles(request: Request,
+                         current_user: User = Depends(get_current_user)):
+    if current_user is None:
+        return RedirectResponse("/login", 303)
+    return app_templates.TemplateResponse("manage_bottles.html", {"request": request, "current_user": current_user})
+
+
+@router.post("/create")
 async def create_bottle_endpoint(
         name: str = Form(...),
         winery: str = Form(...),
@@ -64,7 +72,8 @@ async def create_bottle_endpoint(
 
 
 @router.get("/{bottle_id}", response_class=HTMLResponse)
-async def read_bottle(bottle_id: int, request: Request, current_user: User = Depends(get_current_user), session: AsyncSession = Depends(get_db)):
+async def read_bottle(bottle_id: int, request: Request, current_user: User = Depends(get_current_user),
+                      session: AsyncSession = Depends(get_db)):
     if current_user is None:
         return RedirectResponse("/login", 303)
     if bottle_id < 0:
@@ -73,7 +82,8 @@ async def read_bottle(bottle_id: int, request: Request, current_user: User = Dep
                 select(Bottle).filter(Bottle.id == bottle_id)
             )
             bottle = result.scalars().first()
-            return app_templates.TemplateResponse("bottle_detail.html", {"request": request, "bottle": bottle, "current_user": current_user})
+            return app_templates.TemplateResponse("bottle_detail.html",
+                                                  {"request": request, "bottle": bottle, "current_user": current_user})
         else:
             raise HTTPException(status_code=404, detail="Bottle not found")
     result = await session.execute(
@@ -82,7 +92,8 @@ async def read_bottle(bottle_id: int, request: Request, current_user: User = Dep
     bottle = result.scalars().first()
     if not bottle:
         raise HTTPException(status_code=404, detail="Bottle not found")
-    return app_templates.TemplateResponse("bottle_detail.html", {"request": request, "bottle": bottle, "current_user": current_user})
+    return app_templates.TemplateResponse("bottle_detail.html",
+                                          {"request": request, "bottle": bottle, "current_user": current_user})
 
 
 @router.get("/image/{bottle_id}/{resolution}", response_class=FileResponse)
