@@ -10,7 +10,6 @@
 <style>
     .bottle-detail {
         display: flex;
-        align-items: flex-start;
         margin-top: 20px;
     }
     .bottle-image-container {
@@ -200,15 +199,15 @@
                 document.getElementById(hiddenInputId).value = data.file_path;
                 const successMessage = document.createElement('div');
                 successMessage.className = 'success-message';
-                successMessage.textContent = 'File uploaded successfully: ' + data.file_path;
+                successMessage.textContent = 'File uploaded successfully!';
                 document.getElementById(dropzoneId).innerHTML = '';
                 document.getElementById(dropzoneId).appendChild(successMessage);
             } else {
-                alert('Upload failed.');
+                alert('Upload failed. Please, reload the page and try again');
             }
         })
         .catch(() => {
-            alert('Upload failed.');
+            alert('Upload failed. Please, reload the page and try again');
         });
     }
 
