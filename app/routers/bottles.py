@@ -61,14 +61,12 @@ async def create_bottle_endpoint(
 async def read_bottle(bottle_id: int, request: Request, session: AsyncSession = Depends(get_db)):
     if bottle_id < 0:
         raise HTTPException(status_code=404, detail="Bottle not found")
-
-    async with session.begin():
-        result = await session.execute(
+    result = await session.execute(
             select(Bottle).filter(Bottle.id == bottle_id)
         )
-        bottle = result.scalars().first()
-        if not bottle:
-            raise HTTPException(status_code=404, detail="Bottle not found")
+    bottle = result.scalars().first()
+    if not bottle:
+        raise HTTPException(status_code=404, detail="Bottle not found")
     return app_templates.TemplateResponse("bottle_detail.html", {"request": request, "bottle": bottle})
 
 
