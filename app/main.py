@@ -361,7 +361,7 @@ async def reset_bottles_endpoint(request: IsServerOnline):
 async def deploy():
     try:
         # Выполняем сценарий обновления и перезапуска
-        result = subprocess.run(['docker exec autodeploy-main-1 /update_and_restart.sh'], check=True, capture_output=True, text=True)
+        result = subprocess.run(['docker exec autodeploy-main-1 /app/update_and_restart.sh'], check=True, capture_output=True, text=True)
         script_output = result.stdout
 
         return JSONResponse(content={
