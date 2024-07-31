@@ -1,98 +1,239 @@
 {% extends "base.html" %}
 
-{% block title %}Bottles List{% endblock %}
+{% block title %}Bottle Detail{% endblock %}
+
+{% block link %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/dropzone@5.9.3/dist/dropzone.min.css" />
+{% endblock %}
 
 {% block style %}
-    .bottle-list {
+    .bottle-detail {
         display: flex;
         flex-wrap: wrap;
     }
-    .bottle-item {
-        flex: 1 0 21%;
-        margin: 10px;
-        padding: 10px;
-        border: 1px solid #ced4da;
-        border-radius: 5px;
-        text-align: center;
-        transition: transform 0.3s;
-        text-decoration: none;
-        color: inherit;
+    .bottle-image-container img {
+        border-radius: 10px;
     }
-    .bottle-item:hover {
-        transform: scale(1.05);
+    .bottle-info {
+        width: 70%;
+        padding: 20px;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+        background: #fff;
+        margin-left: 20px;
     }
-    .bottle-item h4, .bottle-item h5, .bottle-item p {
-        margin: 0;
+    .bottle-info h2 {
+        color: #343a40;
     }
-    .bottle-item h4 {
-        margin-bottom: 5px;
-        font-size: 1.25rem;
-        color: #007bff;
+    .bottle-info label {
+        font-weight: bold;
     }
-    .bottle-item h5 {
-        margin-bottom: 5px;
-        font-size: 1rem;
+    .bottle-info input, .bottle-info textarea {
+        margin-bottom: 10px;
+        padding: 10px;
+        border-radius: 5px;
+        border: 1px solid #ced4da;
+        background-color: #f8f9fa;
     }
-    .bottle-item p {
-        font-size: 0.875rem;
-        color: #6c757d;
+    .bottle-info input[readonly], .bottle-info textarea[readonly] {
+        background-color: #e9ecef;
+        cursor: not-allowed;
     }
-    .search-form {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 20px;
+    .bottle-info .form-group {
+        margin-bottom: 15px;
     }
-    .search-input {
-        flex: 0 0 300px;
-    }
-    .create-button {
-        padding: 10px 20px;
+    .bottle-info .btn-primary {
         background-color: #007bff;
-        color: white;
-        text-decoration: none;
+        border: none;
+        padding: 10px 20px;
         border-radius: 5px;
         transition: background-color 0.3s;
     }
-    .create-button:hover {
+    .bottle-info .btn-primary:hover {
         background-color: #0056b3;
+    }
+    .dropzone {
+        border: 2px dashed #007bff;
+        border-radius: 10px;
+        background: #e9f4ff;
+        padding: 50px;
+        text-align: center;
+        cursor: pointer;
+        transition: background-color 0.3s, border-color 0.3s;
+        margin-top: 20px;
+    }
+    .dropzone:hover {
+        background-color: #d0e8ff;
+    }
+    .dropzone.drag-hover {
+        border-color: #0056b3;
+        background-color: #d0e8ff;
+    }
+    .dropzone input {
+        display: none;
+    }
+    .detail-text {
+        margin-bottom: 10px;
+        font-size: 16px;
+        color: #343a40;
+    }
+    .hidden {
+        display: none;
+    }
+    .success-message {
+        background-color: #d4edda;
+        color: #155724;
+        padding: 10px;
+        border-radius: 5px;
+        margin-top: 20px;
+        animation: fadeIn 1s ease-in-out;
+    }
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
     }
 {% endblock %}
 
 {% block content %}
 <div class="container">
-    <h2 class="my-4">Bottles List</h2>
-    <div class="search-form">
-        <input type="text" class="form-control search-input" id="search-query" placeholder="Search by ID or Name">
-        <a href="/bottles/create" class="create-button">Create New Bottle</a>
-    </div>
-    <div class="bottle-list" id="bottle-list">
-        {% for bottle in bottles %}
-        <a href="/bottles/{{ bottle.id }}" class="bottle-item" data-id="{{ bottle.id }}" data-name="{{ bottle.name }}">
-            <h4>{{ bottle.id }}</h4>
-            <h5>{{ bottle.name }}</h5>
-            <p>{{ bottle.winery }}</p>
-        </a>
-        {% endfor %}
+    <div class="bottle-detail">
+        <div class="bottle-info">
+            <h2>{{ bottle.name }}</h2>
+            <div id="bottle-details">
+                <div class="detail-text"><strong>Name:</strong> {{ bottle.name }}</div>
+                <div class="detail-text"><strong>Winery:</strong> {{ bottle.winery }}</div>
+                <div class="detail-text"><strong>Rating Average:</strong> {{ bottle.rating_average }}</div>
+                <div class="detail-text"><strong>Location:</strong> {{ bottle.location }}</div>
+                <div class="detail-text"><strong>Description:</strong> {{ bottle.description }}</div>
+                <div class="detail-text"><strong>Wine Type:</strong> {{ bottle.wine_type }}</div>
+                <div class="detail-text"><strong>Volume (ml):</strong> {{ bottle.volume }}</div>
+            </div>
+            <form id="bottle-form" action="/bottles/update-bottle/{{ bottle.id }}" method="post" enctype="multipart/form-data" class="hidden">
+                <div class="form-group">
+                    <label for="name">Name</label>
+                    <input type="text" class="form-control" id="name" name="name" value="{{ bottle.name }}">
+                </div>
+                <div class="form-group">
+                    <label for="winery">Winery</label>
+                    <input type="text" class="form-control" id="winery" name="winery" value="{{ bottle.winery }}">
+                </div>
+                <div class="form-group">
+                    <label for="rating_average">Rating Average</label>
+                    <input type="number" step="0.1" class="form-control" id="rating_average" name="rating_average" value="{{ bottle.rating_average }}">
+                </div>
+                <div class="form-group">
+                    <label for="location">Location</label>
+                    <input type="text" class="form-control" id="location" name="location" value="{{ bottle.location }}">
+                </div>
+                <div class="form-group">
+                    <label for="image_path300">Image Path 300:</label>
+                    <div class="dropzone" id="dropzone-300">
+                        <span>Drop image here or click to upload (300px)</span>
+                        <input type="file" id="image_path300" name="image_path300" accept="image/png">
+                        <input type="hidden" name="image_path300_hidden" id="image_path300_hidden" value="{{ bottle.image_path300 }}">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="image_path600">Image Path 600:</label>
+                    <div class="dropzone" id="dropzone-600">
+                        <span>Drop image here or click to upload (600px)</span>
+                        <input type="file" id="image_path600" name="image_path600" accept="image/png">
+                        <input type="hidden" name="image_path600_hidden" id="image_path600_hidden" value="{{ bottle.image_path600 }}">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="description">Description</label>
+                    <textarea class="form-control" id="description" name="description" rows="4">{{ bottle.description }}</textarea>
+                </div>
+                <div class="form-group">
+                    <label for="wine_type">Wine Type</label>
+                    <input type="text" class="form-control" id="wine_type" name="wine_type" value="{{ bottle.wine_type }}">
+                </div>
+                <div class="form-group">
+                    <label for="volume">Volume (ml)</label>
+                    <input type="number" class="form-control" id="volume" name="volume" value="{{ bottle.volume }}">
+                </div>
+                <button type="submit" class="btn btn-primary" id="save-button">Save Changes</button>
+            </form>
+            <button id="edit-button" class="btn btn-primary">Edit</button>
+        </div>
+<!--        <div class="bottle-image-container">-->
+<!--                <img src="/bottles/image/{{bottle.id}}/{{600}}" alt="{{ bottle.name }}" id="bottle-image">-->
+<!--        </div>-->
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/dropzone@5.9.3/dist/dropzone.min.js"></script>
 <script>
-    document.getElementById('search-query').addEventListener('input', function() {
-        const query = this.value.toLowerCase();
-        const bottles = document.querySelectorAll('.bottle-item');
+    document.getElementById("edit-button").addEventListener("click", function() {
+        document.getElementById("bottle-details").classList.add("hidden");
+        document.getElementById("bottle-form").classList.remove("hidden");
+        this.classList.add("hidden");
+    });
 
-        bottles.forEach(function(bottle) {
-            const id = bottle.getAttribute('data-id').toLowerCase();
-            const name = bottle.getAttribute('data-name').toLowerCase();
+    function handleFileUpload(fileInput, hiddenInputId, dropzoneId) {
+        const formData = new FormData();
+        formData.append('file', fileInput.files[0]);
 
-            if (id.includes(query) || name.includes(query)) {
-                bottle.style.display = 'block';
+        fetch('/bottles/upload-image', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.file_path) {
+                document.getElementById(hiddenInputId).value = data.file_path;
+                const successMessage = document.createElement('div');
+                successMessage.className = 'success-message';
+                successMessage.textContent = 'File uploaded successfully!';
+                document.getElementById(dropzoneId).innerHTML = '';
+                document.getElementById(dropzoneId).appendChild(successMessage);
             } else {
-                bottle.style.display = 'none';
+                alert('Upload failed. Please, reload the page and try again');
             }
+        })
+        .catch(() => {
+            alert('Upload failed. Please, reload the page and try again');
         });
+    }
+
+    function setupDropzone(dropzone, hiddenInputId, dropzoneId) {
+        dropzone.addEventListener('dragover', (event) => {
+            event.preventDefault();
+            dropzone.classList.add('drag-hover');
+        });
+
+        dropzone.addEventListener('dragleave', () => {
+            dropzone.classList.remove('drag-hover');
+        });
+
+        dropzone.addEventListener('drop', (event) => {
+            event.preventDefault();
+            dropzone.classList.remove('drag-hover');
+            const fileInput = dropzone.querySelector('input[type="file"]');
+            fileInput.files = event.dataTransfer.files;
+            handleFileUpload(fileInput, hiddenInputId, dropzoneId);
+        });
+
+        dropzone.querySelector('input[type="file"]').addEventListener('change', (event) => {
+            handleFileUpload(event.target, hiddenInputId, dropzoneId);
+        });
+
+        dropzone.addEventListener('click', () => {
+            dropzone.querySelector('input[type="file"]').click();
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const dropzone300 = document.getElementById('dropzone-300');
+        const dropzone600 = document.getElementById('dropzone-600');
+
+        setupDropzone(dropzone300, 'image_path300_hidden', 'dropzone-300');
+        setupDropzone(dropzone600, 'image_path600_hidden', 'dropzone-600');
     });
 </script>
 {% endblock %}

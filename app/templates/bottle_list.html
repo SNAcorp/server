@@ -3,7 +3,6 @@
 {% block title %}Bottles List{% endblock %}
 
 {% block style %}
-<style>
     .bottle-list {
         display: flex;
         flex-wrap: wrap;
@@ -40,11 +39,15 @@
         color: #6c757d;
     }
     .search-form {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
         margin-bottom: 20px;
     }
+    .search-input {
+        flex: 0 0 300px;
+    }
     .create-button {
-        display: inline-block;
-        margin-bottom: 20px;
         padding: 10px 20px;
         background-color: #007bff;
         color: white;
@@ -55,20 +58,15 @@
     .create-button:hover {
         background-color: #0056b3;
     }
-</style>
 {% endblock %}
 
 {% block content %}
 <div class="container">
     <h2 class="my-4">Bottles List</h2>
-    <a href="/bottles/create" class="create-button">Create New Bottle</a>
-    <form class="search-form">
-        <div class="form-row">
-            <div class="col">
-                <input type="text" class="form-control" id="search-query" placeholder="Search by ID or Name">
-            </div>
-        </div>
-    </form>
+    <div class="search-form">
+        <input type="text" class="form-control search-input" id="search-query" placeholder="Search by ID or Name">
+        <a href="/bottles/create" class="create-button">Create New Bottle</a>
+    </div>
     <div class="bottle-list" id="bottle-list">
         {% for bottle in bottles %}
         <a href="/bottles/{{ bottle.id }}" class="bottle-item" data-id="{{ bottle.id }}" data-name="{{ bottle.name }}">
