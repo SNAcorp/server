@@ -359,20 +359,19 @@ async def reset_bottles_endpoint(request: IsServerOnline):
 
 @app.post("/deploy")
 async def deploy():
-    project_dir = '/home/sna/server'
 
     try:
 
         # Обновить код из репозитория
-        result = subprocess.run(['git', 'pull'], cwd=project_dir, check=True, capture_output=True, text=True)
+        result = subprocess.run(['git', 'pull'], check=True, capture_output=True, text=True)
         git_output = result.stdout
 
         # Построить Docker образы
-        result = subprocess.run(['docker', 'compose', 'build'], cwd=project_dir, check=True, capture_output=True, text=True)
+        result = subprocess.run(['docker', 'compose', 'build'], check=True, capture_output=True, text=True)
         build_output = result.stdout
 
         # Перезапустить контейнеры
-        result = subprocess.run(['docker', 'compose', 'up'], cwd=project_dir, check=True, capture_output=True, text=True)
+        result = subprocess.run(['docker', 'compose', 'up'], check=True, capture_output=True, text=True)
         up_output = result.stdout
 
         return JSONResponse(content={
