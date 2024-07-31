@@ -7,7 +7,6 @@
 {% endblock %}
 
 {% block style %}
-
     .bottle-detail {
         display: flex;
         align-items: flex-start;
@@ -198,17 +197,12 @@
         .then(data => {
             if (data.file_path) {
                 document.getElementById(hiddenInputId).value = data.file_path;
+                alert(data.file_path)
                 const successMessage = document.createElement('div');
                 successMessage.className = 'success-message';
                 successMessage.textContent = 'File uploaded successfully!';
                 document.getElementById(dropzoneId).innerHTML = '';
                 document.getElementById(dropzoneId).appendChild(successMessage);
-                if(dropzoneId === "dropzone-300") {
-                    document.getElementById("image_path300_hidden").value = data.file_path;
-                }
-                else if(dropzoneId === "dropzone-600") {
-                    document.getElementById("image_path600_hidden").value = data.file_path;
-                }
             } else {
                 alert('Upload failed.');
             }
@@ -256,7 +250,7 @@
     document.getElementById("bottle-form").addEventListener("submit", function(event) {
         const image300 = document.getElementById("image_path300_hidden").value;
         const image600 = document.getElementById("image_path600_hidden").value;
-        alert(image300, image600)
+
         if (!image300 || !image600) {
             alert("Please upload both images before submitting the form.");
             event.preventDefault();
