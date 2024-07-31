@@ -11,20 +11,26 @@
 <style>
     .bottle-detail {
         display: flex;
+        flex-wrap: wrap;
         align-items: flex-start;
+        margin-top: 20px;
     }
     .bottle-image-container {
         flex: 1;
         text-align: center;
     }
     .bottle-image-container img {
-        max-width: 300px;
+        max-width: 100%;
+        max-height: 600px;
         border-radius: 10px;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        margin-right: 20px;
     }
     .bottle-info {
         flex: 2;
+        padding: 20px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+        background: #fff;
     }
     .bottle-info h2 {
         margin-bottom: 20px;
@@ -122,7 +128,7 @@
                 <div class="detail-text"><strong>Wine Type:</strong> {{ bottle.wine_type }}</div>
                 <div class="detail-text"><strong>Volume (ml):</strong> {{ bottle.volume }}</div>
             </div>
-            <form id="bottle-form" action="/bottles/update-bottle/{{ bottle.id }}" method="post" enctype="multipart/form-data" class="hidden">
+            <form id="bottle-form" action="/update-bottle/{{ bottle.id }}" method="post" enctype="multipart/form-data" class="hidden">
                 <div class="form-group">
                     <label for="name">Name</label>
                     <input type="text" class="form-control" id="name" name="name" value="{{ bottle.name }}">
