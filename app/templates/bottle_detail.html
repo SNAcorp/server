@@ -35,7 +35,6 @@
         font-weight: bold;
     }
     .bottle-info input, .bottle-info textarea {
-        width: 100%;
         margin-bottom: 10px;
         padding: 10px;
         border-radius: 5px;
@@ -111,7 +110,6 @@
     <div class="bottle-detail">
         <div class="bottle-image-container">
             <img src="/bottles/image/{{bottle.id}}/{{600}}" alt="{{ bottle.name }}" id="bottle-image">
-        </div>
         <div class="bottle-info">
             <h2>{{ bottle.name }}</h2>
             <div id="bottle-details">
@@ -171,6 +169,7 @@
                 <button type="submit" class="btn btn-primary" id="save-button">Save Changes</button>
             </form>
             <button id="edit-button" class="btn btn-primary">Edit</button>
+        </div>
         </div>
     </div>
 </div>
