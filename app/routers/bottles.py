@@ -73,7 +73,7 @@ async def read_bottle(bottle_id: int, request: Request, current_user: User = Dep
                 select(Bottle).filter(Bottle.id == bottle_id)
             )
             bottle = result.scalars().first()
-            return app_templates.TemplateResponse("bottle_detail.html", {"request": request, "bottle": bottle, "user": current_user})
+            return app_templates.TemplateResponse("bottle_detail.html", {"request": request, "bottle": bottle, "current_user": current_user})
         else:
             raise HTTPException(status_code=404, detail="Bottle not found")
     result = await session.execute(
@@ -82,7 +82,7 @@ async def read_bottle(bottle_id: int, request: Request, current_user: User = Dep
     bottle = result.scalars().first()
     if not bottle:
         raise HTTPException(status_code=404, detail="Bottle not found")
-    return app_templates.TemplateResponse("bottle_detail.html", {"request": request, "bottle": bottle, "user": current_user})
+    return app_templates.TemplateResponse("bottle_detail.html", {"request": request, "bottle": bottle, "current_user": current_user})
 
 
 @router.get("/image/{bottle_id}/{resolution}", response_class=FileResponse)
