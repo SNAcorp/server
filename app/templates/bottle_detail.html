@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "Base.html" %}
 
 {% block title %}Bottle Detail{% endblock %}
 
@@ -6,17 +6,16 @@
 <style>
     .bottle-detail {
         display: flex;
-        flex-wrap: wrap;
         align-items: flex-start;
     }
-    .bottle-image img {
-        max-width: 100%;
+    .bottle-detail img {
+        max-width: 300px;
         border-radius: 10px;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        margin-right: 20px;
     }
     .bottle-info {
         flex: 1;
-        margin-left: 20px;
     }
     .bottle-info h2 {
         margin-bottom: 20px;
@@ -31,6 +30,7 @@
         padding: 10px;
         border-radius: 5px;
         border: 1px solid #ced4da;
+        background-color: #f8f9fa;
     }
     .bottle-info .form-group {
         margin-bottom: 15px;
@@ -51,12 +51,12 @@
 {% block content %}
 <div class="container">
     <div class="bottle-detail">
-        <div class="bottle-image col-md-4">
+        <div class="bottle-image">
             <img src="/bottles/image/{{bottle.id}}/{{600}}" alt="{{ bottle.name }}" id="bottle-image">
         </div>
-        <div class="bottle-info col-md-8">
+        <div class="bottle-info">
             <h2>{{ bottle.name }}</h2>
-            <form action="/bottles/update-bottle/{{ bottle.id }}" method="post" enctype="multipart/form-data">
+            <form id="bottle-form" action="/bottlesz/update-bottle/{{ bottle.id }}" method="post" enctype="multipart/form-data" style="display: none;">
                 <div class="form-group">
                     <label for="name">Name</label>
                     <input type="text" class="form-control" id="name" name="name" value="{{ bottle.name }}">
@@ -95,7 +95,15 @@
                 </div>
                 <button type="submit" class="btn btn-primary">Save Changes</button>
             </form>
+            <button id="edit-button" class="btn btn-primary">Edit</button>
         </div>
     </div>
 </div>
+
+<script>
+    document.getElementById("edit-button").addEventListener("click", function() {
+        document.getElementById("bottle-form").style.display = "block";
+        this.style.display = "none";
+    });
+</script>
 {% endblock %}
