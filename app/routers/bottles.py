@@ -1,20 +1,19 @@
 import uuid
-
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
-from fastapi.responses import FileResponse
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, Request
+from fastapi.responses import FileResponse, HTMLResponse
+from fastapi.templating import Jinja2Templates
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from app.models import Bottle
 from app.database import get_db
-from app.schemas import BottleCreate
 import os
 
 router = APIRouter()
+app_templates = Jinja2Templates(directory="app/templates")
 
 
 @router.post("/upload-image")
 async def upload_image(file: UploadFile = File(...)):
-
     UPLOAD_DIR = "/images"
     os.makedirs(UPLOAD_DIR, exist_ok=True)
 
@@ -57,6 +56,16 @@ async def create_bottle_endpoint(
     return new_bottle
 
 
+@router.get("/{bottle_id}", response_class=HTMLResponse)
+async def read_bottle(bottle_id: int, request: Request, session: AsyncSession = Depends(get_db)):
+    async with session.begin():
+        result = await session.execute(select(Bottle).filter(Bottle.id == bottle_id))
+        bottle = result.scalars().first()
+        if not bottle:
+            raise HTTPException(status_code=404, detail="Bottle not found")
+    return app_templates.TemplateResponse("bottle_detail.html", {"request": request, "bottle": bottle})
+
+
 @router.get("/image/{bottle_id}/{resolution}", response_class=FileResponse)
 async def get_bottle_image(bottle_id: int, resolution: str, db: AsyncSession = Depends(get_db)):
     async with db as session:
@@ -71,3 +80,37 @@ async def get_bottle_image(bottle_id: int, resolution: str, db: AsyncSession = D
                 raise HTTPException(status_code=400, detail="Invalid resolution")
         else:
             raise HTTPException(status_code=404, detail="Bottle not found")
+
+
+@router.post("/update-bottle/{bottle_id}")
+async def update_bottle(bottle_id: int,
+                        name: str = Form(...),
+                        winery: str = Form(...),
+                        rating_average: float = Form(...),
+                        location: str = Form(...),
+                        image_path300: str = Form(...),
+                        image_path600: str = Form(...),
+                        description: str = Form(...),
+                        wine_type: str = Form(...),
+                        volume: float = Form(...),
+                        session: AsyncSession = Depends(get_db)
+                    ):
+    async with session.begin():
+        result = await session.execute(select(Bottle).filter(Bottle.id == bottle_id))
+        bottle = result.scalars().first()
+        if not bottle:
+            raise HTTPException(status_code=404, detail="Bottle not found")
+
+        bottle.name = name
+        bottle.winery = winery
+        bottle.rating_average = rating_average
+        bottle.location = location
+        bottle.image_path300 = image_path300
+        bottle.image_path600 = image_path600
+        bottle.description = description
+        bottle.wine_type = wine_type
+        bottle.volume = volume
+
+        session.add(bottle)
+        await session.commit()
+    return {"message": "Bottle updated successfully"}

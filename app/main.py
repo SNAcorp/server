@@ -20,6 +20,7 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
+from sqlalchemy import or_
 from app.models import Order, Terminal, Bottle
 from app.database import get_db
 from app.schemas import IsServerOnline, User
@@ -114,6 +115,23 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.get("/bottles", response_class=HTMLResponse)
+async def list_bottles(request: Request, query: str = None, session: AsyncSession = Depends(get_db)):
+    async with session.begin():
+        if query:
+            try:
+                bottle_id = int(query)
+                result = await session.execute(select(Bottle).filter(
+                    or_(Bottle.id == bottle_id, Bottle.name.ilike(f"%{query}%"))
+                ))
+            except ValueError:
+                result = await session.execute(select(Bottle).filter(Bottle.name.ilike(f"%{query}%")))
+        else:
+            result = await session.execute(select(Bottle))
+        bottles = result.scalars().all()
+    return app_templates.TemplateResponse("bottle_list.html", {"request": request, "bottles": bottles})
 
 
 @app.get("/orders", response_class=HTMLResponse)
@@ -311,10 +329,10 @@ async def manage_terminal(request: Request,
                                            "sorted": sorted_bottles,
                                            "current_user": current_user})
 
+
 @app.get("/admin/panel", response_class=HTMLResponse)
 async def admin_panel(request: Request, db: AsyncSession = Depends(get_db),
                       current_user: User = Depends(get_admin_user)):
-
     all_users = await get_all_users(db)
     unblocked_users = await get_unblocked_users(db)
     blocked_users = await get_blocked_users(db)
@@ -330,6 +348,7 @@ async def admin_panel(request: Request, db: AsyncSession = Depends(get_db),
         "blocked_users": blocked_users,
         "unverified_users": unverified_users
     })
+
 
 @app.get("/manage-bottles", response_class=HTMLResponse)
 async def manage_bottles(request: Request,
