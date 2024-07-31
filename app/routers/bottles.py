@@ -66,7 +66,7 @@ async def create_bottle_endpoint(
 @router.get("/{bottle_id}", response_class=HTMLResponse)
 async def read_bottle(bottle_id: int, request: Request, current_user: User = Depends(get_current_user), session: AsyncSession = Depends(get_db)):
     if current_user is None:
-        raise HTTPException(status_code=401, detail="Unauthorized")
+        return RedirectResponse("/login", 303)
     if bottle_id < 0:
         if current_user.is_superuser:
             result = await session.execute(
