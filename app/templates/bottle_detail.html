@@ -198,7 +198,7 @@
                 document.getElementById(hiddenInputId).value = data.file_path;
                 const successMessage = document.createElement('div');
                 successMessage.className = 'success-message';
-                successMessage.textContent = 'File uploaded successfully: ' + data.file_path;
+                successMessage.textContent = 'File uploaded successfully!';
                 document.getElementById(dropzoneId).innerHTML = '';
                 document.getElementById(dropzoneId).appendChild(successMessage);
             } else {
