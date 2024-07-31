@@ -103,7 +103,6 @@
 {% block content %}
 <div class="container">
     <div class="bottle-detail">
-        <div class="bottle-image-container">
         <div class="bottle-info">
             <h2>{{ bottle.name }}</h2>
             <div id="bottle-details">
@@ -163,8 +162,9 @@
                 <button type="submit" class="btn btn-primary" id="save-button">Save Changes</button>
             </form>
             <button id="edit-button" class="btn btn-primary">Edit</button>
-        </div>
-            <img src="/bottles/image/{{bottle.id}}/{{600}}" alt="{{ bottle.name }}" id="bottle-image">
+            <div class="bottle-image-container">
+                <img src="/bottles/image/{{bottle.id}}/{{600}}" alt="{{ bottle.name }}" id="bottle-image">
+            </div>
         </div>
     </div>
 </div>
