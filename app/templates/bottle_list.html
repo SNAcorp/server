@@ -22,7 +22,7 @@
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
     .bottle-item img {
-        max-width: 33%;
+        max-width: 100px;
         border-radius: 5px;
         margin-bottom: 10px;
     }
@@ -35,27 +35,39 @@
 {% block content %}
 <div class="container">
     <h2 class="my-4">Bottles List</h2>
-    <form class="search-form" method="get" action="/bottles">
+    <form class="search-form">
         <div class="form-row">
             <div class="col">
-                <input type="text" class="form-control" name="query" placeholder="Search by ID or Name">
-            </div>
-            <div class="col">
-                <button type="submit" class="btn btn-primary">Search</button>
+                <input type="text" class="form-control" id="search-query" placeholder="Search by ID or Name">
             </div>
         </div>
     </form>
-    <div class="bottle-list">
+    <div class="bottle-list" id="bottle-list">
         {% for bottle in bottles %}
-        <a href="/bottles/{{ bottle.id }}">
-        <div class="bottle-item">
-
-                <h4>{{ bottle.id }}</h4>
-                <h5>{{ bottle.name }}</h5>
-                <p>{{ bottle.winery }}</p>
-            </div>
+        <a href="/bottles/{{ bottle.id }}" class="bottle-item" data-id="{{ bottle.id }}" data-name="{{ bottle.name }}">
+            <h4>{{ bottle.id }}</h4>
+            <h5>{{ bottle.name }}</h5>
+            <p>{{ bottle.winery }}</p>
         </a>
         {% endfor %}
     </div>
 </div>
+
+<script>
+    document.getElementById('search-query').addEventListener('input', function() {
+        const query = this.value.toLowerCase();
+        const bottles = document.querySelectorAll('.bottle-item');
+
+        bottles.forEach(function(bottle) {
+            const id = bottle.getAttribute('data-id').toLowerCase();
+            const name = bottle.getAttribute('data-name').toLowerCase();
+
+            if (id.includes(query) || name.includes(query)) {
+                bottle.style.display = 'block';
+            } else {
+                bottle.style.display = 'none';
+            }
+        });
+    });
+</script>
 {% endblock %}
