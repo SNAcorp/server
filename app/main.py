@@ -1,4 +1,5 @@
 import os
+import subprocess
 
 from fastapi import FastAPI
 from sqlalchemy.ext.asyncio import create_async_engine
@@ -124,7 +125,8 @@ async def list_bottles(request: Request, current_user: User = Depends(get_curren
         return RedirectResponse("/login", 302)
     result = await session.execute(select(Bottle).filter(Bottle.id != -1))
     bottles = result.scalars().all()
-    return app_templates.TemplateResponse("bottle_list.html", {"request": request, "bottles": bottles, "current_user": current_user})
+    return app_templates.TemplateResponse("bottle_list.html",
+                                          {"request": request, "bottles": bottles, "current_user": current_user})
 
 
 @app.get("/orders", response_class=HTMLResponse)
@@ -235,7 +237,8 @@ async def create_order_page(request: Request,
 
 
 @app.post("/create-order", response_class=JSONResponse)
-async def create_order(request: Request, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
+async def create_order(request: Request, db: AsyncSession = Depends(get_db),
+                       current_user: User = Depends(get_current_user)):
     if current_user is None:
         return RedirectResponse("/login", 303)
     data = await request.json()
@@ -346,13 +349,33 @@ async def admin_panel(request: Request, db: AsyncSession = Depends(get_db),
     })
 
 
-
 @app.post("/", response_class=JSONResponse)
 async def reset_bottles_endpoint(request: IsServerOnline):
     payload = verify_terminal(request.token)
     if payload["terminal_id"] != request.terminal_id:
         raise HTTPException(status_code=403, detail="Invalid terminal ID")
     return {"is_online": True}
+
+
+@app.post("/deploy")
+async def deploy():
+    try:
+        # Выполняем сценарий обновления и перезапуска
+        result = subprocess.run(['/usr/local/bin/update_and_restart.sh'], check=True, capture_output=True, text=True)
+        script_output = result.stdout
+
+        return JSONResponse(content={
+            'status': 'success',
+            'output': script_output
+        })
+
+    except subprocess.CalledProcessError as e:
+        error_message = f"Command '{e.cmd}' returned non-zero exit status {e.returncode}."
+        return JSONResponse(status_code=500, content={
+            'status': 'error',
+            'message': error_message,
+            'output': e.output.decode()
+        })
 
 
 def main():

@@ -7,7 +7,6 @@
 {% endblock %}
 
 {% block style %}
-<style>
     .bottle-detail {
         display: flex;
         align-items: flex-start;
@@ -106,14 +105,13 @@
             opacity: 1;
         }
     }
-</style>
 {% endblock %}
 
 {% block content %}
 <div class="container">
     <div class="bottle-detail">
         <div class="bottle-image-container">
-            <img src="{{ bottle.image_path600 }}" alt="{{ bottle.name }}" id="bottle-image">
+            <img src="/bottles/image/{{bottle.id}}/600" alt="{{ bottle.name }}" id="bottle-image">
         </div>
         <div class="bottle-info">
             <h2>{{ bottle.name }}</h2>
