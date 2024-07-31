@@ -1,10 +1,10 @@
-{% extends "base.html" %}
+{% extends "Base.html" %}
 
 {% block title %}Bottle Detail{% endblock %}
 
 {% block link %}
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/dropzone.min.css" integrity="sha512-3gLUBcy13u59To2K1kDSXZilDiFCXn2hV1hPCn2hLVF2nLlxxAcRTgHd9+oVoxP+iF7/bp8D6aMSHxa8Aq+Efnw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" integrity="sha512-MC7KwMtcwQZoxk71x4GZAKJxTYdY1IR1YtX7+FxrVdL8kpYYquSMqk4H8r9e6zYXZ5u+tqJXt0H7jATJ4um5P4w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/dropzone@5.9.3/dist/dropzone.min.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastr@2.1.4/build/toastr.min.css" />
 {% endblock %}
 
 {% block style %}
@@ -114,7 +114,7 @@
 <div class="container">
     <div class="bottle-detail">
         <div class="bottle-image-container">
-            <img src="/bottles/image/{{bottle.id}}/{{600}}" alt="{{ bottle.name }}" id="bottle-image">
+            <img src="{{ bottle.image_path600 }}" alt="{{ bottle.name }}" id="bottle-image">
         </div>
         <div class="bottle-info">
             <h2>{{ bottle.name }}</h2>
@@ -127,7 +127,7 @@
                 <div class="detail-text"><strong>Wine Type:</strong> {{ bottle.wine_type }}</div>
                 <div class="detail-text"><strong>Volume (ml):</strong> {{ bottle.volume }}</div>
             </div>
-            <form id="bottle-form" action="/bottles/update-bottle/{{ bottle.id }}" method="post" enctype="multipart/form-data" class="hidden">
+            <form id="bottle-form" action="/update-bottle/{{ bottle.id }}" method="post" enctype="multipart/form-data" class="hidden">
                 <div class="form-group">
                     <label for="name">Name</label>
                     <input type="text" class="form-control" id="name" name="name" value="{{ bottle.name }}">
@@ -179,8 +179,8 @@
     </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/dropzone.min.js" integrity="sha512-EFR6PRuH2y+haIGxJGoS5niij4OoxocUaq0yMgK9pqHzcwkTn5M0qg1nK8xQhgudWofpJ8yC1yX1L7Yq+bsBGA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js" integrity="sha512-DK5OqgZLa3fuw8U0T8HkRhzCkBL69Gk7VslB3JhIf8zV7Tu+BCoox8YWVQMjRYb7/txO4d3EdyCQNfp9zzgF7g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdn.jsdelivr.net/npm/dropzone@5.9.3/dist/dropzone.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/toastr@2.1.4/build/toastr.min.js"></script>
 <script>
     document.getElementById("edit-button").addEventListener("click", function() {
         document.getElementById("bottle-details").classList.add("hidden");
@@ -196,12 +196,12 @@
             method: 'POST',
             body: formData
         })
-        .then(response => {
-            if (response.ok) {
-                const data = response.json();
+        .then(response => response.json())
+        .then(data => {
+            if (data.file_path) {
                 document.getElementById(hiddenInputId).value = data.file_path;
                 toastr.success('File uploaded successfully.');
-                document.getElementById(dropzoneId).innerHTML = '<div class="success-message">File uploaded successfully!</div>';
+                document.getElementById(dropzoneId).innerHTML = '<div class="success-message">File uploaded successfully: ' + data.file_path + '</div>';
             } else {
                 toastr.error('Upload failed.');
             }
