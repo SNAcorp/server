@@ -297,9 +297,9 @@ async def dashboard(request: Request,
                                            "current_user": current_user})
 
 
-@app.get("/", response_class=JSONResponse)
-async def for_huckers():
-    return {"msg": "Hello, how are you mr/mrs?)"}
+# @app.get("/", response_class=JSONResponse)
+# async def for_huckers():
+#     return {"msg": "Hello, how are you mr/mrs?)"}
 
 
 @app.get("/terminals/{terminal_id}", response_class=HTMLResponse)
