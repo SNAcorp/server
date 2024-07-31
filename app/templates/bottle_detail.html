@@ -32,6 +32,10 @@
         border: 1px solid #ced4da;
         background-color: #f8f9fa;
     }
+    .bottle-info input[readonly], .bottle-info textarea[readonly] {
+        background-color: #e9ecef;
+        cursor: not-allowed;
+    }
     .bottle-info .form-group {
         margin-bottom: 15px;
     }
@@ -56,44 +60,44 @@
         </div>
         <div class="bottle-info">
             <h2>{{ bottle.name }}</h2>
-            <form id="bottle-form" action="/bottlesz/update-bottle/{{ bottle.id }}" method="post" enctype="multipart/form-data" style="display: none;">
+            <form id="bottle-form" action="/bottles/update-bottle/{{ bottle.id }}" method="post" enctype="multipart/form-data">
                 <div class="form-group">
                     <label for="name">Name</label>
-                    <input type="text" class="form-control" id="name" name="name" value="{{ bottle.name }}">
+                    <input type="text" class="form-control" id="name" name="name" value="{{ bottle.name }}" readonly>
                 </div>
                 <div class="form-group">
                     <label for="winery">Winery</label>
-                    <input type="text" class="form-control" id="winery" name="winery" value="{{ bottle.winery }}">
+                    <input type="text" class="form-control" id="winery" name="winery" value="{{ bottle.winery }}" readonly>
                 </div>
                 <div class="form-group">
                     <label for="rating_average">Rating Average</label>
-                    <input type="number" step="0.1" class="form-control" id="rating_average" name="rating_average" value="{{ bottle.rating_average }}">
+                    <input type="number" step="0.1" class="form-control" id="rating_average" name="rating_average" value="{{ bottle.rating_average }}" readonly>
                 </div>
                 <div class="form-group">
                     <label for="location">Location</label>
-                    <input type="text" class="form-control" id="location" name="location" value="{{ bottle.location }}">
+                    <input type="text" class="form-control" id="location" name="location" value="{{ bottle.location }}" readonly>
                 </div>
                 <div class="form-group">
                     <label for="image_path300">Image (300x300)</label>
-                    <input type="file" class="form-control-file" id="image_path300" name="image_path300">
+                    <input type="file" class="form-control-file" id="image_path300" name="image_path300" disabled>
                 </div>
                 <div class="form-group">
                     <label for="image_path600">Image (600x600)</label>
-                    <input type="file" class="form-control-file" id="image_path600" name="image_path600">
+                    <input type="file" class="form-control-file" id="image_path600" name="image_path600" disabled>
                 </div>
                 <div class="form-group">
                     <label for="description">Description</label>
-                    <textarea class="form-control" id="description" name="description" rows="4">{{ bottle.description }}</textarea>
+                    <textarea class="form-control" id="description" name="description" rows="4" readonly>{{ bottle.description }}</textarea>
                 </div>
                 <div class="form-group">
                     <label for="wine_type">Wine Type</label>
-                    <input type="text" class="form-control" id="wine_type" name="wine_type" value="{{ bottle.wine_type }}">
+                    <input type="text" class="form-control" id="wine_type" name="wine_type" value="{{ bottle.wine_type }}" readonly>
                 </div>
                 <div class="form-group">
                     <label for="volume">Volume (ml)</label>
-                    <input type="number" class="form-control" id="volume" name="volume" value="{{ bottle.volume }}">
+                    <input type="number" class="form-control" id="volume" name="volume" value="{{ bottle.volume }}" readonly>
                 </div>
-                <button type="submit" class="btn btn-primary">Save Changes</button>
+                <button type="submit" class="btn btn-primary" style="display: none;" id="save-button">Save Changes</button>
             </form>
             <button id="edit-button" class="btn btn-primary">Edit</button>
         </div>
@@ -102,7 +106,13 @@
 
 <script>
     document.getElementById("edit-button").addEventListener("click", function() {
-        document.getElementById("bottle-form").style.display = "block";
+        var form = document.getElementById("bottle-form");
+        var inputs = form.querySelectorAll("input, textarea");
+        for (var i = 0; i < inputs.length; i++) {
+            inputs[i].removeAttribute("readonly");
+            inputs[i].removeAttribute("disabled");
+        }
+        document.getElementById("save-button").style.display = "block";
         this.style.display = "none";
     });
 </script>
