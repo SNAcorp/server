@@ -9,6 +9,8 @@ router = APIRouter()
 
 @router.put("/verify/{user_id}")
 async def verify_user(user_id: int, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_superadmin_user)):
+    if current_user is None:
+        raise HTTPException(401, "Unauthorized")
     user = await get_user(db, user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -18,6 +20,8 @@ async def verify_user(user_id: int, db: AsyncSession = Depends(get_db), current_
 
 @router.put("/reject/{user_id}")
 async def reject_user(user_id: int, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_superadmin_user)):
+    if current_user is None:
+        raise HTTPException(401, "Unauthorized")
     user = await get_user(db, user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -30,6 +34,8 @@ async def reject_user(user_id: int, db: AsyncSession = Depends(get_db), current_
 @router.put("/superadmin/{user_id}")
 async def make_superadmin(user_id: int, db: AsyncSession = Depends(get_db),
                           current_user: User = Depends(get_superadmin_user)):
+    if current_user is None:
+        raise HTTPException(401, "Unauthorized")
     user = await get_user(db, user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")

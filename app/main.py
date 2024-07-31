@@ -120,6 +120,8 @@ app.add_middleware(
 @app.get("/bottles", response_class=HTMLResponse)
 async def list_bottles(request: Request, current_user: User = Depends(get_current_user),
                        session: AsyncSession = Depends(get_db)):
+    if current_user is None:
+        return RedirectResponse("/login", 302)
     result = await session.execute(select(Bottle).filter(Bottle.id != -1))
     bottles = result.scalars().all()
     return app_templates.TemplateResponse("bottle_list.html", {"request": request, "bottles": bottles})
@@ -129,6 +131,8 @@ async def list_bottles(request: Request, current_user: User = Depends(get_curren
 async def read_orders(request: Request,
                       db: AsyncSession = Depends(get_db),
                       current_user: User = Depends(get_current_user)):
+    if current_user is None:
+        return RedirectResponse("/login", 302)
     result = await db.execute(select(Order))
     orders = result.scalars().all()
     return app_templates.TemplateResponse("orders.html",
@@ -137,16 +141,13 @@ async def read_orders(request: Request,
                                            "current_user": current_user})
 
 
-@app.get("/lol", response_class=HTMLResponse)
-async def lol():
-    return RedirectResponse("/dashboard", 302)
-
-
 @app.post("/order/{order_id}/add_rfid")
 async def add_rfid_to_order(order_id: int,
                             rfid_code: str = Form(...),
                             db: AsyncSession = Depends(get_db),
                             current_user: User = Depends(get_current_user)):
+    if current_user is None:
+        raise HTTPException(status_code=401, detail="Unauthorized")
     result = await db.execute(select(Order).where(Order.id == order_id))
     order = result.scalars().first()
     if order is None:
@@ -234,7 +235,9 @@ async def create_order_page(request: Request,
 
 
 @app.post("/create-order", response_class=JSONResponse)
-async def create_order(request: Request, db: AsyncSession = Depends(get_db)):
+async def create_order(request: Request, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
+    if current_user is None:
+        return RedirectResponse("/login", 303)
     data = await request.json()
     rfids = data.get('rfids', [])
     order = Order()
@@ -324,6 +327,8 @@ async def manage_terminal(request: Request,
 @app.get("/admin/panel", response_class=HTMLResponse)
 async def admin_panel(request: Request, db: AsyncSession = Depends(get_db),
                       current_user: User = Depends(get_admin_user)):
+    if current_user is None:
+        return RedirectResponse("/login", 303)
     all_users = await get_all_users(db)
     unblocked_users = await get_unblocked_users(db)
     blocked_users = await get_blocked_users(db)

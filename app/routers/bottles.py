@@ -1,11 +1,12 @@
 import uuid
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, Request
-from fastapi.responses import FileResponse, HTMLResponse
+from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from app.models import Bottle
-from sqlalchemy.orm import selectinload
+
+from app.dependencies import get_current_user
+from app.models import Bottle, User
 from app.database import get_db
 import os
 
@@ -15,7 +16,9 @@ UPLOAD_DIR = "/images"
 
 
 @router.post("/upload-image")
-async def upload_image(file: UploadFile = File(...)):
+async def upload_image(file: UploadFile = File(...), current_user: User = Depends(get_current_user)):
+    if current_user is None:
+        raise HTTPException(status_code=401, detail="Unauthorized")
     os.makedirs(UPLOAD_DIR, exist_ok=True)
 
     file_id = str(uuid.uuid4())
@@ -38,8 +41,11 @@ async def create_bottle_endpoint(
         description: str = Form(...),
         wine_type: str = Form(...),
         volume: float = Form(...),
+        current_user: User = Depends(get_current_user),
         db: AsyncSession = Depends(get_db)
 ):
+    if current_user is None:
+        raise HTTPException(status_code=401, detail="Unauthorized")
     new_bottle = Bottle(
         name=name,
         winery=winery,
@@ -58,20 +64,30 @@ async def create_bottle_endpoint(
 
 
 @router.get("/{bottle_id}", response_class=HTMLResponse)
-async def read_bottle(bottle_id: int, request: Request, session: AsyncSession = Depends(get_db)):
+async def read_bottle(bottle_id: int, request: Request, current_user: User = Depends(get_current_user), session: AsyncSession = Depends(get_db)):
+    if current_user is None:
+        raise HTTPException(status_code=401, detail="Unauthorized")
     if bottle_id < 0:
-        raise HTTPException(status_code=404, detail="Bottle not found")
+        if current_user.is_superuser:
+            result = await session.execute(
+                select(Bottle).filter(Bottle.id == bottle_id)
+            )
+            bottle = result.scalars().first()
+            return app_templates.TemplateResponse("bottle_detail.html", {"request": request, "bottle": bottle, "user": current_user})
+        else:
+            raise HTTPException(status_code=404, detail="Bottle not found")
     result = await session.execute(
         select(Bottle).filter(Bottle.id == bottle_id)
     )
     bottle = result.scalars().first()
     if not bottle:
         raise HTTPException(status_code=404, detail="Bottle not found")
-    return app_templates.TemplateResponse("bottle_detail.html", {"request": request, "bottle": bottle})
+    return app_templates.TemplateResponse("bottle_detail.html", {"request": request, "bottle": bottle, "user": current_user})
 
 
 @router.get("/image/{bottle_id}/{resolution}", response_class=FileResponse)
-async def get_bottle_image(bottle_id: int, resolution: str, db: AsyncSession = Depends(get_db)):
+async def get_bottle_image(bottle_id: int, resolution: str, current_user: User = Depends(get_current_user),
+                           db: AsyncSession = Depends(get_db)):
     async with db as session:
         result = await session.execute(select(Bottle).filter(Bottle.id == bottle_id))
         bottle = result.scalars().first()
@@ -100,8 +116,11 @@ async def update_bottle(
         description: str = Form(...),
         wine_type: str = Form(...),
         volume: float = Form(...),
+        current_user: User = Depends(get_current_user),
         session: AsyncSession = Depends(get_db)
 ):
+    if current_user is None:
+        raise HTTPException(status_code=401, detail="Unauthorized")
     if bottle_id < 0:
         raise HTTPException(status_code=404, detail="Bottle not found")
 

@@ -11,6 +11,8 @@ router = APIRouter()
 @router.put("/role/{user_id}")
 async def change_user_role(request: Request, user_id: int, db: AsyncSession = Depends(get_db),
                            current_user: User = Depends(get_admin_user)):
+    if current_user is None:
+        raise HTTPException(401, "Unauthorized")
     user = await get_user(db, user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -22,7 +24,10 @@ async def change_user_role(request: Request, user_id: int, db: AsyncSession = De
 
 
 @router.get("/user/{user_id}", response_class=JSONResponse)
-async def get_user_details(user_id: int, db: AsyncSession = Depends(get_db)):
+async def get_user_details(user_id: int, current_user: User = Depends(get_admin_user),
+                           db: AsyncSession = Depends(get_db)):
+    if current_user is None:
+        raise HTTPException(401, "Unauthorized")
     user = await get_user(db, user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -31,7 +36,10 @@ async def get_user_details(user_id: int, db: AsyncSession = Depends(get_db)):
 
 
 @router.put("/user/{user_id}", response_class=JSONResponse)
-async def update_user_details(user_id: int, user_data: dict, db: AsyncSession = Depends(get_db)):
+async def update_user_details(user_id: int, user_data: dict, current_user: User = Depends(get_admin_user),
+                              db: AsyncSession = Depends(get_db)):
+    if current_user is None:
+        raise HTTPException(401, "Unauthorized")
     user = await get_user(db, user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -41,7 +49,11 @@ async def update_user_details(user_id: int, user_data: dict, db: AsyncSession = 
 
 
 @router.put("/user/{user_id}", response_class=HTMLResponse)
-async def update_user_details(user_id: int, user_data: dict, db: AsyncSession = Depends(get_db)):
+async def update_user_details(user_id: int, user_data: dict, current_user: User = Depends(get_admin_user),
+                              db: AsyncSession = Depends(get_db)):
+    if current_user is None:
+        raise HTTPException(401, "Unauthorized")
+
     user = await get_user(db, user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -52,6 +64,8 @@ async def update_user_details(user_id: int, user_data: dict, db: AsyncSession = 
 @router.put("/block/{user_id}")
 async def block_user_route(user_id: int, db: AsyncSession = Depends(get_db),
                            current_user: User = Depends(get_admin_user)):
+    if current_user is None:
+        raise HTTPException(401, "Unauthorized")
     user = await get_user(db, user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -64,6 +78,9 @@ async def block_user_route(user_id: int, db: AsyncSession = Depends(get_db),
 @router.put("/unblock/{user_id}")
 async def unblock_user_route(user_id: int, db: AsyncSession = Depends(get_db),
                              current_user: User = Depends(get_admin_user)):
+    if current_user is None:
+        raise HTTPException(401, "Unauthorized")
+
     user = await get_user(db, user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
