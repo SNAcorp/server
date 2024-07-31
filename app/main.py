@@ -177,7 +177,7 @@ async def add_rfid_to_order(order_id: int,
 def admin_panel(request: Request,
                 current_user: User = Depends(get_current_user)):
     if current_user:
-        return RedirectResponse("/dashboard", 303)
+        return RedirectResponse("/orders", 303)
     return app_templates.TemplateResponse("login_register.html",
                                           {"request": request})
 
