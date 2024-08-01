@@ -207,9 +207,9 @@
                         hiddenInput.value = response.file_path;
 
                         const dropzoneElement = document.querySelector(dropzoneElement);
-                        const inputElements = dropzoneElement.getElementsByTagName('input');
-                        for (let i = 0; i < inputElements.length; i++) {
-                            inputElements[i].classList.add('hidden');
+                        const childElements = dropzoneElement.getElementsByTagName('*');
+                        for (let i = 0; i < childElements.length; i++) {
+                            childElements[i].classList.add('hidden');
                         }
 
                         const successIcon = document.createElement('div');
