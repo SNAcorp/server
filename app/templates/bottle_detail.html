@@ -207,19 +207,19 @@
                         hiddenInput.value = response.file_path;
 
                         // Отображение сообщения об успешной загрузке файла
-                        const dropzoneElement = document.querySelector(dropzoneElement);
-                        dropzoneElement.innerHTML = '';
+                        const dropzone = document.querySelector(dropzoneElement);
+                        dropzone.innerHTML = '';
                         const successIcon = document.createElement('div');
                         successIcon.className = 'success-icon';
                         successIcon.innerHTML = '&#10004;';
                         const successMessage = document.createElement('div');
                         successMessage.className = 'success-message';
                         successMessage.innerHTML = 'File uploaded successfully';
-                        dropzoneElement.appendChild(successMessage);
+                        dropzone.appendChild(successMessage);
                         successMessage.insertAdjacentElement('afterbegin', successIcon);
 
                         // Удаление класса hidden для отображения анимации
-
+                        successMessage.classList.remove('hidden');
                     } else {
                         console.error('Upload failed.');
                         alert('Upload failed.');
