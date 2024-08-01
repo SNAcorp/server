@@ -16,7 +16,7 @@ from app.models import Base, EMPTY_BOTTLE_ID, RFID, OrderItem, OrderRFID, Termin
 from app.routers import terminals, orders, bottles, rfid
 
 from fastapi import Depends, HTTPException, Request, Form
-from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, FileResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
@@ -302,6 +302,16 @@ async def for_huckers():
     return {"msg": "Hello, how are you mr/mrs?)"}
 
 
+@app.get("/static/{image_name}")
+async def get_image(image_name: str):
+    file_path = f"app/static/{image_name}"
+    if os.path.isfile(file_path):
+        return FileResponse(file_path)
+    else:
+        raise HTTPException(status_code=404, detail="Image not found")
+
+
+
 @app.get("/terminals/{terminal_id}", response_class=HTMLResponse)
 async def manage_terminal(request: Request,
                           terminal_id: int,
@@ -355,8 +365,6 @@ async def reset_bottles_endpoint(request: IsServerOnline):
     if payload["terminal_id"] != request.terminal_id:
         raise HTTPException(status_code=403, detail="Invalid terminal ID")
     return {"is_online": True}
-
-
 
 
 def main():
