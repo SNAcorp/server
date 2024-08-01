@@ -19,22 +19,103 @@
         body {
             display: flex;
             flex-direction: column;
+            transition: background-color 0.3s, color 0.3s;
         }
         main {
             flex: 1;
         }
-        {% block style %}
-        {% endblock %}
+        .dark {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+        }
+        .dark .navbar {
+            background-color: #34495e;
+        }
+        .dark .footer {
+            background-color: #34495e;
+        }
+        .dark .navbar-brand, .dark .nav-link {
+            color: #ecf0f1 !important;
+        }
+        .dark .card {
+            background-color: #3e4b5b;
+            color: #ecf0f1;
+        }
+        #theme-switch {
+            display: inline-block;
+            position: relative;
+            width: 34px;
+            height: 20px;
+        }
+        #theme-switch input {
+            display: none;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 12px;
+            width: 12px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: #2196F3;
+        }
+        input:checked + .slider:before {
+            transform: translateX(14px);
+        }
+        #burger-menu {
+            display: none;
+            position: fixed;
+            top: 0;
+            right: -250px;
+            width: 250px;
+            height: 100%;
+            background-color: #34495e;
+            z-index: 1000;
+            transition: right 0.3s;
+        }
+        #burger-menu.show {
+            right: 0;
+        }
+        #burger-menu ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        #burger-menu li {
+            padding: 15px;
+            text-align: center;
+        }
+        #burger-menu a {
+            color: #ecf0f1;
+            text-decoration: none;
+            font-size: 1.2em;
+        }
     </style>
 </head>
 <body>
     <header>
         <nav class="navbar navbar-expand-lg navbar-light bg-light">
             <a class="navbar-brand" href="/">Vinotech</a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <button class="navbar-toggler" type="button" onclick="toggleBurgerMenu()">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
+            <div class="collapse navbar-collapse">
                 <ul class="navbar-nav mr-auto">
                     <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
                     {% if current_user %}
@@ -54,10 +135,33 @@
                     {% endif %}
                 </ul>
                 <div class="form-inline">
-                    <button id="theme-toggle" class="btn btn-secondary">Toggle Theme</button>
+                    <label id="theme-switch">
+                        <input type="checkbox" id="theme-toggle">
+                        <span class="slider"></span>
+                    </label>
                 </div>
             </div>
         </nav>
+        <div id="burger-menu">
+            <ul>
+                <li><a href="/">Home</a></li>
+                {% if current_user %}
+                    <li><a href="/users/me">My Profile</a></li>
+                    <li><a href="/terminals">Terminals</a></li>
+                    <li><a href="/orders">Orders</a></li>
+                    {% if current_user.is_admin %}
+                    <li><a href="/bottles">Manage Bottles</a></li>
+                    <li><a href="/admin/panel">Admin Panel</a></li>
+                    {% endif %}
+                    {% if current_user.is_superuser %}
+                    <li><a href="/bottles">Manage Bottles</a></li>
+                    <li><a href="/admin/panel">Admin Panel</a></li>
+                    {% endif %}
+                {% else %}
+                <li><a href="/login">Login/Register</a></li>
+                {% endif %}
+            </ul>
+        </div>
     </header>
     <main class="container mt-4">
         {% block content %}{% endblock %}
@@ -72,32 +176,26 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', (event) => {
-            const themeToggleBtn = document.getElementById('theme-toggle');
+            const themeToggle = document.getElementById('theme-toggle');
             const currentTheme = localStorage.getItem('theme') || 'light';
             document.body.classList.add(currentTheme);
 
-            themeToggleBtn.addEventListener('click', () => {
-                const newTheme = document.body.classList.contains('light') ? 'dark' : 'light';
+            if (currentTheme === 'dark') {
+                themeToggle.checked = true;
+            }
+
+            themeToggle.addEventListener('change', () => {
+                const newTheme = themeToggle.checked ? 'dark' : 'light';
                 document.body.classList.remove('light', 'dark');
                 document.body.classList.add(newTheme);
                 localStorage.setItem('theme', newTheme);
             });
         });
+
+        function toggleBurgerMenu() {
+            const burgerMenu = document.getElementById('burger-menu');
+            burgerMenu.classList.toggle('show');
+        }
     </script>
-    <style>
-        .dark {
-            background-color: #121212;
-            color: white;
-        }
-        .dark .navbar {
-            background-color: #1f1f1f;
-        }
-        .dark .footer {
-            background-color: #1f1f1f;
-        }
-        .dark .navbar-brand, .dark .nav-link {
-            color: white;
-        }
-    </style>
 </body>
 </html>
