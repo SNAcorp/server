@@ -203,20 +203,19 @@
             init: function() {
                 this.on("success", function(file, response) {
                     if (response.file_path) {
-                        const dropzone = document.getElementById(dropzoneElement)
-                        dropzone.innerHTML = '';
                         alert("lol1")
                         const hiddenInput = document.getElementById(hiddenInputId);
                         hiddenInput.value = response.file_path;
                         alert("lol2")
+                        const dropzoneEl = document.querySelector(dropzoneElement);
+                        dropzoneEl.innerHTML = '';
                         const successIcon = document.createElement('div');
                         successIcon.className = 'success-icon';
                         successIcon.innerHTML = '&#10004;';
-                        alert("lol3")
                         const successMessage = document.createElement('div');
                         successMessage.className = 'success-message';
                         successMessage.innerHTML = 'File uploaded successfully';
-                        dropzone.appendChild(successMessage);
+                        dropzoneEl.appendChild(successMessage);
                         successMessage.insertAdjacentElement('afterbegin', successIcon);
                         alert("lol4")
                         // Удаление класса hidden для отображения анимации
