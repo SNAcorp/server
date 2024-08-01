@@ -205,11 +205,6 @@
                     if (response.file_path) {
                         const hiddenInput = document.getElementById(hiddenInputId);
                         hiddenInput.value = response.file_path;
-
-                        const childElements = dropzone.getElementsByTagName('*');
-                        for (let i = 0; i < childElements.length; i++) {
-                            childElements[i].classList.add('hidden');
-                        }
                         this.removeAllFiles(true);
                         const successIcon = document.createElement('div');
                         successIcon.className = 'success-icon';
@@ -217,7 +212,7 @@
                         const successMessage = document.createElement('div');
                         successMessage.className = 'success-message';
                         successMessage.innerHTML = 'File uploaded successfully';
-                        dropzone.appendChild(successMessage);
+                        dropzoneElement.appendChild(successMessage);
                         successMessage.insertAdjacentElement('afterbegin', successIcon);
 
                         // Удаление класса hidden для отображения анимации
