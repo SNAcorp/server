@@ -44,29 +44,33 @@
             right: -100%;
             width: 250px;
             height: 100%;
-            background-color: #f8f9fa;
+            background: linear-gradient(to right, #f8f9fa, #e9ecef);
             transition: 0.4s;
             padding-top: 60px;
             z-index: 1040;
+            box-shadow: -2px 0 5px rgba(0, 0, 0, 0.5);
         }
         .menu-content ul {
             list-style: none;
             padding: 0;
         }
         .menu-content ul li {
-            padding: 8px 16px;
+            margin: 10px 0;
         }
         .menu-content ul li a {
             color: #000;
             text-decoration: none;
             display: block;
-            padding: 10px;
+            padding: 10px 20px;
             border-radius: 5px;
-            transition: background-color 0.3s, color 0.3s;
+            background: #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s, color 0.3s, transform 0.3s;
         }
         .menu-content ul li a:hover {
             background-color: #007bff;
             color: #fff;
+            transform: scale(1.05);
         }
         .open .line1 {
             transform: rotate(-45deg) translate(-5px, 6px);
@@ -104,6 +108,8 @@
                 display: none;
             }
         }
+        {% block style %}
+        {% endblock %}
     </style>
 </head>
 <body>
