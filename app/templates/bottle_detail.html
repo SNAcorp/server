@@ -215,12 +215,13 @@
                         const successMessage = document.createElement('div');
                         successMessage.className = 'success-message';
                         successMessage.innerHTML = 'File uploaded successfully';
-                        dropzone.appendChild(successMessage);
+                        dropzoneElement.appendChild(successMessage);
                         successMessage.insertAdjacentElement('afterbegin', successIcon);
-
+                        alert("lol")
                         // Удаление класса hidden для отображения анимации
                         successMessage.classList.remove('hidden');
                         this.removeAllFiles(true);
+                        alert("lol")
                     } else {
                         console.error('Upload failed.');
                         alert('Upload failed.');
