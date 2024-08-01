@@ -70,7 +70,7 @@ async def create_bottle_endpoint(
     db.add(new_bottle)
     await db.commit()
     await db.refresh(new_bottle)
-    return new_bottle
+    return RedirectResponse("/bottles", 303)
 
 
 @router.get("/{bottle_id}", response_class=HTMLResponse)
