@@ -218,6 +218,7 @@
                         successMessage.insertAdjacentElement('afterbegin', successIcon);
 
                         const dropzoneElement = document.querySelector(dropzoneElement);
+                        dropzoneElement.innerHTML = '';
                         successMessage.className = 'success-message';
                         successMessage.innerHTML = 'File uploaded successfully';
                         dropzoneElement.appendChild(successMessage);
