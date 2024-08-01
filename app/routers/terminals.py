@@ -213,7 +213,7 @@ async def update_terminal_bottle(terminal_id: int, request: Request, db: AsyncSe
 
     await db.commit()
 
-    return RedirectResponse(f"/terminal/{terminal_id}", 303)
+    return RedirectResponse(f"/terminals/{terminal_id}", 303)
 
 
 @router.post("/reset_bottles")
