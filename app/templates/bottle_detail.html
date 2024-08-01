@@ -206,7 +206,6 @@
                         const hiddenInput = document.getElementById(hiddenInputId);
                         hiddenInput.value = response.file_path;
 
-                        // Отображение сообщения об успешной загрузке файла
                         const dropzone = document.querySelector(dropzoneElement);
                         dropzone.innerHTML = '';
                         const successIcon = document.createElement('div');
@@ -218,9 +217,14 @@
                         dropzone.appendChild(successMessage);
                         successMessage.insertAdjacentElement('afterbegin', successIcon);
 
+                        const dropzoneElement = document.querySelector(dropzoneElement);
+                        successMessage.className = 'success-message';
+                        successMessage.innerHTML = 'File uploaded successfully';
+                        dropzoneElement.appendChild(successMessage);
+                        successMessage.insertAdjacentElement('afterbegin', successIcon);
+
                         // Удаление класса hidden для отображения анимации
                         successMessage.classList.remove('hidden');
-                        this.removeAllFiles(true);
                     } else {
                         console.error('Upload failed.');
                         alert('Upload failed.');
@@ -240,10 +244,10 @@
     });
 
     document.getElementById("save-button").addEventListener("click", function(event) {
-        const imagePath300Element = document.getElementById("image_path300_hidden").value;
-        const imagePath600Element = document.getElementById("image_path600_hidden").value;
+        const imagePath300Element = document.getElementById("image_path300_hidden");
+        const imagePath600Element = document.getElementById("image_path600_hidden");
 
-        if (!imagePath300Element || !imagePath600Element) {
+        if (!imagePath300Element.value || !imagePath600Element.value) {
             console.error("Please upload both images before submitting the form.");
             alert("Please upload both images before submitting the form.");
             return;
@@ -252,13 +256,13 @@
         const formData = {
             name: document.getElementById("name").value,
             winery: document.getElementById("winery").value,
-            rating_average: parseFloat(document.getElementById("rating_average").value),
+            rating_average: parseInt(document.getElementById("rating_average").value),
             location: document.getElementById("location").value,
-            image_path300: imagePath300Element,
-            image_path600: imagePath600Element,
+            image_path300: imagePath300Element.value,
+            image_path600: imagePath600Element.value,
             description: document.getElementById("description").value,
             wine_type: document.getElementById("wine_type").value,
-            volume: parseFloat(document.getElementById("volume").value)
+            volume: parseInt(document.getElementById("volume").value)
         };
 
         fetch(`/bottles/update-bottle/{{ bottle.id }}`, {
