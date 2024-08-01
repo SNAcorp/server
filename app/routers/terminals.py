@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Request
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, HTMLResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload, joinedload
@@ -213,7 +213,7 @@ async def update_terminal_bottle(terminal_id: int, request: Request, db: AsyncSe
 
     await db.commit()
 
-    return RedirectResponse(f"/terminals/{terminal_id}", 303)
+    return HTMLResponse(None, 200)
 
 
 @router.post("/reset_bottles")
