@@ -206,10 +206,6 @@
                         alert("lol1")
                         const hiddenInput = document.getElementById(hiddenInputId);
                         hiddenInput.value = response.file_path;
-                        const childElements = dropzoneElement.getElementsByTagName('*');
-                        for (let i = 0; i < childElements.length; i++) {
-                            childElements[i].classList.add('hidden');
-                        }
                         alert("lol2")
                         const successIcon = document.createElement('div');
                         successIcon.className = 'success-icon';
