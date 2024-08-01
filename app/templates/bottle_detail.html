@@ -207,10 +207,9 @@
                         hiddenInput.value = response.file_path;
 
                         const dropzone = document.querySelector(dropzoneElement);
-                        dropzone.innerHTML = '';
                         const successIcon = document.createElement('div');
                         const successMessage = document.createElement('div');
-                        successMessage.insertAdjacentElement('afterbegin', successIcon);
+
 
                         const dropzoneElement = document.querySelector(dropzoneElement);
                         dropzoneElement.innerHTML = '';
