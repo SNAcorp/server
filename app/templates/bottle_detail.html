@@ -220,6 +220,7 @@
 
                         // Удаление класса hidden для отображения анимации
                         successMessage.classList.remove('hidden');
+                        this.removeAllFiles(true);
                     } else {
                         console.error('Upload failed.');
                         alert('Upload failed.');
