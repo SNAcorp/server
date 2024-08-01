@@ -75,13 +75,13 @@ class Bottle(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String)
     winery = Column(String)
-    rating_average = Column(Float)
+    rating_average = Column(Integer)
     location = Column(String)
     image_path300 = Column(String)
     image_path600 = Column(String)
     description = Column(String)
     wine_type = Column(String)
-    volume = Column(Float)  # Total volume of the bottle
+    volume = Column(Integer)  # Total volume of the bottle
 
 
 class BottleUsageLog(Base):

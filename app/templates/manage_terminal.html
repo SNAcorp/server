@@ -109,7 +109,7 @@
 <div id="svgContainer"></div>
 {% for i in range(8) %}
     <div id="popup{{ i+1 }}" class="popup-content">
-        <p>{{ (sorted[i].remaining_volume * 1000) | round(0) }} мл</p>
+        <p>{{ (sorted[i].remaining_volume) }} мл</p>
     </div>
     <div id="popup{{ i }}bottle" class="popups">
         <div class="popup-contents">

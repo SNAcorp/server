@@ -144,7 +144,7 @@
                 </div>
                 <div class="form-group">
                     <label for="rating_average">Rating Average</label>
-                    <input type="number" step="0.1" class="form-control" id="rating_average" name="rating_average" value="{{ bottle.rating_average }}">
+                    <input type="number" class="form-control" id="rating_average" name="rating_average" value="{{ bottle.rating_average }}">
                 </div>
                 <div class="form-group">
                     <label for="location">Location</label>
@@ -245,13 +245,13 @@
         const formData = {
             name: document.getElementById("name").value,
             winery: document.getElementById("winery").value,
-            rating_average: parseFloat(document.getElementById("rating_average").value),
+            rating_average: parseInt(document.getElementById("rating_average").value),
             location: document.getElementById("location").value,
             image_path300: imagePath300Element.value,
             image_path600: imagePath600Element.value,
             description: document.getElementById("description").value,
             wine_type: document.getElementById("wine_type").value,
-            volume: parseFloat(document.getElementById("volume").value)
+            volume: parseInt(document.getElementById("volume").value)
         };
 
         if (!formData.image_path300 || !formData.image_path600) {
