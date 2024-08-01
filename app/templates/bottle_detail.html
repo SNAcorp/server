@@ -212,9 +212,6 @@
                         successIcon.className = 'success-icon';
                         successIcon.innerHTML = '&#10004;';
                         const successMessage = document.createElement('div');
-                        successMessage.className = 'success-message';
-                        successMessage.innerHTML = 'File uploaded successfully';
-                        dropzone.appendChild(successMessage);
                         successMessage.insertAdjacentElement('afterbegin', successIcon);
 
                         const dropzoneElement = document.querySelector(dropzoneElement);
