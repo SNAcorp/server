@@ -151,18 +151,16 @@
                     <input type="text" class="form-control" id="location" name="location" value="{{ bottle.location }}">
                 </div>
                 <div class="form-group">
-                    <label for="image_path300">Image Path 300:</label>
+                    <label for="image_path300">Image Path 300 px:</label>
                     <div class="dropzone" id="dropzone-300">
-                        <span>Drop image here or click to upload (300px)</span>
                         <input type="file" id="image_path300" name="image_path300" accept="image/png">
                         <input type="hidden" name="image_path300_hidden" id="image_path300_hidden" value="{{ bottle.image_path300 }}">
-                        <div class="success-icon">&#10004;</div>
+                        <div class="success-icon hidden">&#10004;</div>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label for="image_path600">Image Path 600:</label>
+                    <label for="image_path600">Image Path 600 px:</label>
                     <div class="dropzone" id="dropzone-600">
-                        <span>Drop image here or click to upload (600px)</span>
                         <input type="file" id="image_path600" name="image_path600" accept="image/png">
                         <input type="hidden" name="image_path600_hidden" id="image_path600_hidden" value="{{ bottle.image_path600 }}">
                         <div class="success-icon hidden">&#10004;</div>
