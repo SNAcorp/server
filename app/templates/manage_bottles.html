@@ -55,6 +55,7 @@
         cursor: pointer;
         transition: background-color 0.3s, border-color 0.3s;
         margin-top: 20px;
+        position: relative;
     }
     .dropzone:hover {
         background-color: #d0e8ff;
@@ -170,7 +171,7 @@
             </div>
             <label for="rating_average">Rating Average:</label>
             <div class="input-group" id="group-rating_average">
-                <input type="number" id="rating_average" name="rating_average" class="form-field" required>
+                <input type="text" id="rating_average" name="rating_average" class="form-field" required>
                 <span class="valid-icon valid">✔</span>
                 <span class="valid-icon invalid">✖</span>
             </div>
@@ -188,7 +189,7 @@
             <div class="dropzone" id="dropzone-300">
                 <span>Drop image here or click to upload (300px)</span>
                 <input type="file" id="image_path300" name="image_path300" accept="image/png" class="form-field">
-                <input type="hidden" name="image_path300_hidden" id="image_path300_hidden" class="form-field">
+                <input type="hidden" name="image_path300_hidden" class="form-field">
                 <div class="success-icon">&#10004;</div>
             </div>
         </div>
@@ -199,7 +200,7 @@
             <div class="dropzone" id="dropzone-600">
                 <span>Drop image here or click to upload (600px)</span>
                 <input type="file" id="image_path600" name="image_path600" accept="image/png" class="form-field">
-                <input type="hidden" name="image_path600_hidden" id="image_path600_hidden" class="form-field">
+                <input type="hidden" name="image_path600_hidden" class="form-field">
                 <div class="success-icon">&#10004;</div>
             </div>
         </div>
@@ -224,7 +225,7 @@
             </div>
             <label for="volume">Volume:</label>
             <div class="input-group" id="group-volume">
-                <input type="number" id="volume" name="volume" class="form-field" required>
+                <input type="text" id="volume" name="volume" class="form-field" required>
                 <span class="valid-icon valid">✔</span>
                 <span class="valid-icon invalid">✖</span>
             </div>
@@ -241,12 +242,12 @@
 
 <div class="progress-container">
     <div class="progress">
-        <div class="progress-bar" id="progress-bar">0%</div>
+        <div class="progress-bar" id="progress-bar">0%</</div>
     </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/min/dropzone.min.js" integrity="sha512-0HXYXslEvkHrH2eGF4YJwZtJh5nTLF1RtEd3Ny+k+qbeIQ6ds6MeBh/WXtV5mP8xpo8de5F9G7EtBnddvMcT3w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js" integrity="sha512-KJxet4M3gPYbGzI57Y9U7ljBfPC6GB9nMPSXIW5iqbcTkEwT/HmOUxLSVsGw3xL7l1oVhBzPyhlgDFmHVYd1tg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/dropzone.min.js" integrity="sha512-EFR6PRuH2y+haIGxJGoS5niij4OoxocUaq0yMgK9pqHzcwkTn5M0qg1nK8xQhgudWofpJ8yC1yX1L7Yq+bsBGA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js" integrity="sha512-DK5OqgZLa3fuw8U0T8HkRhzCkBL69Gk7VslB3JhIf8zV7Tu+BCoox8YWVQMjRYb7/txO4d3EdyCQNfp9zzgF7g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 let currentStep = 1;
 const totalSteps = 5;
