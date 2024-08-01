@@ -196,23 +196,29 @@
     Dropzone.autoDiscover = false;
 
     function setupDropzone(dropzoneElement, hiddenInputId) {
-        new Dropzone(dropzoneElement, {
+        const dropzone = new Dropzone(dropzoneElement, {
             url: "/bottles/upload-image",
             maxFiles: 1,
             acceptedFiles: "image/png",
             init: function() {
                 this.on("success", function(file, response) {
                     if (response.file_path) {
-                        document.getElementById(hiddenInputId).value = response.file_path;
-                        const dropzone = document.querySelector(dropzoneElement);
-                        dropzone.innerHTML = '';
+                        const hiddenInput = document.getElementById(hiddenInputId);
+                        hiddenInput.value = response.file_path;
+
+                        // Clear the dropzone
+                        this.removeAllFiles(true);
+
+                        // Display success message
+                        const dropzoneElement = document.querySelector(dropzoneElement);
+                        dropzoneElement.innerHTML = '';
                         const successIcon = document.createElement('div');
                         successIcon.className = 'success-icon';
                         successIcon.innerHTML = '&#10004;';
                         const successMessage = document.createElement('div');
                         successMessage.className = 'success-message';
                         successMessage.innerHTML = 'File uploaded successfully';
-                        dropzone.appendChild(successMessage);
+                        dropzoneElement.appendChild(successMessage);
                         successMessage.insertAdjacentElement('afterbegin', successIcon);
                     } else {
                         console.error('Upload failed.');
@@ -236,7 +242,7 @@
         const imagePath300Element = document.getElementById("image_path300_hidden");
         const imagePath600Element = document.getElementById("image_path600_hidden");
 
-        if (!imagePath300Element || !imagePath600Element) {
+        if (!imagePath300Element.value || !imagePath600Element.value) {
             console.error("Please upload both images before submitting the form.");
             alert("Please upload both images before submitting the form.");
             return;
@@ -253,12 +259,6 @@
             wine_type: document.getElementById("wine_type").value,
             volume: parseInt(document.getElementById("volume").value)
         };
-
-        if (!formData.image_path300 || !formData.image_path600) {
-            console.error("Please upload both images before submitting the form.");
-            alert("Please upload both images before submitting the form.");
-            return;
-        }
 
         fetch(`/bottles/update-bottle/{{ bottle.id }}`, {
             method: 'POST',
@@ -282,5 +282,7 @@
             alert('Update failed.');
         });
     });
+
+
 </script>
 {% endblock %}
