@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi.responses import RedirectResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload, joinedload
@@ -10,8 +11,8 @@ from app.schemas import TerminalBottleCreate, UseTerminalRequest, TerminalRespon
     ResetTerminalRequest, RegisterTerminalRequest
 
 router = APIRouter()
-SMALL_PORTION = 0.03
-BIG_PORTION = 0.12
+SMALL_PORTION = 30
+BIG_PORTION = 120
 SMALL_PORTION_TIME = 3
 BIG_PORTION_TIME = 9
 
@@ -165,7 +166,7 @@ async def get_terminal_bottles(terminal_id: int, db: AsyncSession = Depends(get_
             "volumes": {"big": BIG_PORTION_TIME, "small": SMALL_PORTION_TIME}}
 
 
-@router.post("/{terminal_id}/update-bottle", response_model=TerminalResponse)
+@router.post("/{terminal_id}/update-bottle", response_model=RedirectResponse)
 async def update_terminal_bottle(terminal_id: int, request: Request, db: AsyncSession = Depends(get_db)):
     form = await request.form()
     bottles_data = {}
@@ -212,11 +213,7 @@ async def update_terminal_bottle(terminal_id: int, request: Request, db: AsyncSe
 
     await db.commit()
 
-    terminal_data = await db.execute(
-        select(Terminal).filter(Terminal.id == terminal_id).options(selectinload(Terminal.bottles)))
-    terminal_data = terminal_data.scalars().first()
-
-    return TerminalResponse.from_orm(terminal_data)
+    return RedirectResponse(f"/terminal/{terminal_id}", 303)
 
 
 @router.post("/reset_bottles")
