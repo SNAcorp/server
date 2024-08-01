@@ -206,9 +206,10 @@
                         const hiddenInput = document.getElementById(hiddenInputId);
                         hiddenInput.value = response.file_path;
 
+                        // Очистка Dropzone после успешной загрузки файла
+                        this.removeAllFiles(true);
 
-
-                        // Display success message
+                        // Отображение сообщения об успешной загрузке файла
                         const dropzoneElement = document.querySelector(dropzoneElement);
                         dropzoneElement.innerHTML = '';
                         const successIcon = document.createElement('div');
@@ -217,8 +218,11 @@
                         const successMessage = document.createElement('div');
                         successMessage.className = 'success-message';
                         successMessage.innerHTML = 'File uploaded successfully';
-                        dropzoneElement.appendChild(successMessage);
                         successMessage.insertAdjacentElement('afterbegin', successIcon);
+                        dropzoneElement.appendChild(successMessage);
+
+                        // Удаление класса hidden для отображения анимации
+                        successMessage.classList.remove('hidden');
                     } else {
                         console.error('Upload failed.');
                         alert('Upload failed.');
@@ -281,6 +285,7 @@
             alert('Update failed.');
         });
     });
+
 
 
 </script>
