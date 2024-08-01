@@ -91,36 +91,29 @@
         display: none;
     }
     .success-message {
-    background-color: #d4edda;
-    color: #155724;
-    padding: 10px;
-    border-radius: 5px;
-    margin-top: 20px;
-    animation: fadeIn 1s ease-in-out;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
+        background-color: #d4edda;
+        color: #155724;
+        padding: 10px;
+        border-radius: 5px;
+        margin-top: 20px;
+        animation: fadeIn 1s ease-in-out;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
     }
-    to {
-        opacity: 1;
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
     }
-}
-
-.hidden {
-    display: none;
-}
-
-.success-icon {
-    font-size: 24px;
-    color: #28a745;
-}
-
+    .success-icon {
+        font-size: 24px;
+        color: #28a745;
+    }
 {% endblock %}
 
 {% block content %}
@@ -212,24 +205,16 @@
                     if (response.file_path) {
                         const hiddenInput = document.getElementById(hiddenInputId);
                         hiddenInput.value = response.file_path;
-
-                        // Очистка Dropzone после успешной загрузки файла
-                        this.removeAllFiles(true);
-
-                        // Отображение сообщения об успешной загрузке файла
-                        const dropzoneElement = document.querySelector(dropzoneElement);
-                        dropzoneElement.innerHTML = '';
+                        const dropzone = document.querySelector(dropzoneElement);
+                        dropzone.innerHTML = '';
                         const successIcon = document.createElement('div');
                         successIcon.className = 'success-icon';
                         successIcon.innerHTML = '&#10004;';
                         const successMessage = document.createElement('div');
                         successMessage.className = 'success-message';
                         successMessage.innerHTML = 'File uploaded successfully';
+                        dropzone.appendChild(successMessage);
                         successMessage.insertAdjacentElement('afterbegin', successIcon);
-                        dropzoneElement.appendChild(successMessage);
-
-                        // Удаление класса hidden для отображения анимации
-                        successMessage.classList.remove('hidden');
                     } else {
                         console.error('Upload failed.');
                         alert('Upload failed.');
