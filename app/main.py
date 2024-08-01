@@ -125,8 +125,9 @@ async def list_bottles(request: Request, current_user: User = Depends(get_curren
         return RedirectResponse("/login", 302)
     result = await session.execute(select(Bottle).filter(Bottle.id != -1))
     bottles = result.scalars().all()
+    sorted_bottles = sorted(bottles, key=lambda x: x.id)
     return app_templates.TemplateResponse("bottle_list.html",
-                                          {"request": request, "bottles": bottles, "current_user": current_user})
+                                          {"request": request, "bottles": sorted_bottles, "current_user": current_user})
 
 
 @app.get("/orders", response_class=HTMLResponse)
