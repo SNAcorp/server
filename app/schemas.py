@@ -30,6 +30,18 @@ class BottleCreate(BaseModel):
     volume: float
 
 
+class BottleUpdateModel(BaseModel):
+    name: str
+    winery: str
+    rating_average: float
+    location: str
+    image_path300: str
+    image_path600: str
+    description: str
+    wine_type: str
+    volume: float
+
+
 class BottleResponse(BaseModel):
     id: int
 

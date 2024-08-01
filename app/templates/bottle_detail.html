@@ -124,7 +124,7 @@
                 <div class="detail-text"><strong>Wine Type:</strong> {{ bottle.wine_type }}</div>
                 <div class="detail-text"><strong>Volume (ml):</strong> {{ bottle.volume }}</div>
             </div>
-            <form id="bottle-form" action="/bottles/update-bottle/{{ bottle.id }}" method="post" enctype="multipart/form-data" class="hidden">
+            <form id="bottle-form" class="hidden">
                 <div class="form-group">
                     <label for="name">Name</label>
                     <input type="text" class="form-control" id="name" name="name" value="{{ bottle.name }}">
@@ -169,7 +169,7 @@
                     <label for="volume">Volume (ml)</label>
                     <input type="number" class="form-control" id="volume" name="volume" value="{{ bottle.volume }}">
                 </div>
-                <button type="submit" class="btn btn-primary" id="save-button">Save Changes</button>
+                <button type="button" class="btn btn-primary" id="save-button">Save Changes</button>
             </form>
             <button id="edit-button" class="btn btn-primary">Edit</button>
         </div>
@@ -248,19 +248,46 @@
         setupDropzone(dropzone600, 'image_path600_hidden', 'dropzone-600');
     });
 
-    document.getElementById("bottle-form").addEventListener("submit", function(event) {
-        const image300 = document.getElementById("image_path300_hidden").value;
-        const image600 = document.getElementById("image_path600_hidden").value;
+    document.getElementById("save-button").addEventListener("click", function(event) {
+        const formData = {
+            name: document.getElementById("name").value,
+            winery: document.getElementById("winery").value,
+            rating_average: parseFloat(document.getElementById("rating_average").value),
+            location: document.getElementById("location").value,
+            image_path300: document.getElementById("image_path300_hidden").value,
+            image_path600: document.getElementById("image_path600_hidden").value,
+            description: document.getElementById("description").value,
+            wine_type: document.getElementById("wine_type").value,
+            volume: parseFloat(document.getElementById("volume").value)
+        };
 
-        if (!image300 || !image600) {
+        if (!formData.image_path300 || !formData.image_path600) {
             console.error("Please upload both images before submitting the form.");
             alert("Please upload both images before submitting the form.");
-            event.preventDefault();
-        } else {
-            console.log('Submitting form with:', image300, image600);
-            document.getElementById("image_path300_hidden").value = image300;
-            document.getElementById("image_path600_hidden").value = image600;
+            return;
         }
+
+        fetch(`/bottles/update-bottle/{{ bottle.id }}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                alert('Bottle updated successfully');
+                location.reload();
+            } else {
+                console.error('Update failed.');
+                alert('Update failed.');
+            }
+        })
+        .catch((error) => {
+            console.error('Update failed.', error);
+            alert('Update failed.');
+        });
     });
 </script>
 {% endblock %}

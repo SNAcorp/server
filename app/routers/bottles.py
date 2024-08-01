@@ -10,6 +10,8 @@ from app.models import Bottle, User
 from app.database import get_db
 import os
 
+from app.schemas import BottleUpdateModel
+
 router = APIRouter()
 app_templates = Jinja2Templates(directory="app/templates")
 UPLOAD_DIR = "/images"
@@ -116,15 +118,7 @@ async def get_bottle_image(bottle_id: int, resolution: str, current_user: User =
 @router.post("/update-bottle/{bottle_id}")
 async def update_bottle(
         bottle_id: int,
-        name: str = Form(...),
-        winery: str = Form(...),
-        rating_average: float = Form(...),
-        location: str = Form(...),
-        image_path300_hidden: str = Form(...),
-        image_path600_hidden: str = Form(...),
-        description: str = Form(...),
-        wine_type: str = Form(...),
-        volume: float = Form(...),
+        bottle_data: BottleUpdateModel,
         session: AsyncSession = Depends(get_db)
 ):
     if bottle_id < 0:
@@ -138,15 +132,15 @@ async def update_bottle(
         if not bottle:
             raise HTTPException(status_code=404, detail="Bottle not found")
 
-        bottle.name = name
-        bottle.winery = winery
-        bottle.rating_average = rating_average
-        bottle.location = location
-        bottle.image_path300 = image_path300_hidden
-        bottle.image_path600 = image_path600_hidden
-        bottle.description = description
-        bottle.wine_type = wine_type
-        bottle.volume = volume
+        bottle.name = bottle_data.name
+        bottle.winery = bottle_data.winery
+        bottle.rating_average = bottle_data.rating_average
+        bottle.location = bottle_data.location
+        bottle.image_path300 = bottle_data.image_path300
+        bottle.image_path600 = bottle_data.image_path600
+        bottle.description = bottle_data.description
+        bottle.wine_type = bottle_data.wine_type
+        bottle.volume = bottle_data.volume
 
         session.add(bottle)
         await session.commit()
