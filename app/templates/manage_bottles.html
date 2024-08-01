@@ -161,21 +161,21 @@
 
         <!-- Image Path 300 -->
         <div class="form-step" id="step-2">
-            <label for="image_path300">Image Path 300:</label>
+            <label for="image_path300">Image Path 300 px:</label>
             <div class="dropzone" id="dropzone-300">
-                <span>Drop image here or click to upload (300px)</span>
-                <input type="file" id="image_path300" name="image_path300" accept="image/png" class="form-field">
-                <input type="hidden" name="image_path300_hidden" class="form-field">
+                <input type="file" id="image_path300" name="image_path300" accept="image/png">
+                <input type="hidden" name="image_path300_hidden" id="image_path300_hidden">
+                <div class="success-icon hidden">&#10004;</div>
             </div>
         </div>
 
         <!-- Image Path 600 -->
         <div class="form-step" id="step-3">
-            <label for="image_path600">Image Path 600:</label>
+            <label for="image_path600">Image Path 600 px:</label>
             <div class="dropzone" id="dropzone-600">
-                <span>Drop image here or click to upload (600px)</span>
-                <input type="file" id="image_path600" name="image_path600" accept="image/png" class="form-field">
-                <input type="hidden" name="image_path600_hidden" class="form-field">
+                <input type="file" id="image_path600" name="image_path600" accept="image/png">
+                <input type="hidden" name="image_path600_hidden" id="image_path600_hidden">
+                <div class="success-icon hidden">&#10004;</div>
             </div>
         </div>
 
@@ -260,31 +260,7 @@ function prevStep() {
 
 document.addEventListener('DOMContentLoaded', () => {
 
-
-    function handleFileUpload(fileInput) {
-        const formData = new FormData();
-        formData.append('file', fileInput.files[0]);
-
-        fetch('/bottles/upload-image', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.file_path) {
-                const hiddenInput = fileInput.nextElementSibling;
-                hiddenInput.value = data.file_path;
-                toastr.success('File uploaded successfully.');
-                updateProgress();
-            } else {
-                toastr.error('Upload failed.');
-            }
-        })
-        .catch(() => {
-            toastr.error('Upload failed.');
-        });
-    }
-
+    ropzone.autoDiscover = false;
     function setupDropzone(dropzoneElement, hiddenInputId) {
         new Dropzone(dropzoneElement, {
             url: "/bottles/upload-image",
