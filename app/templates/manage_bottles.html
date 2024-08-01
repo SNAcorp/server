@@ -259,25 +259,28 @@ function prevStep() {
 }
 
 Dropzone.autoDiscover = false;
+
 function setupDropzone(dropzoneElement, hiddenInputId) {
-    new Dropzone(dropzoneElement, {
+    const dropzone = new Dropzone(dropzoneElement, {
         url: "/bottles/upload-image",
         maxFiles: 1,
         acceptedFiles: "image/png",
         init: function() {
             this.on("success", function(file, response) {
                 if (response.file_path) {
-                    document.getElementById(hiddenInputId).value = response.file_path;
-                    const dropzone = document.querySelector(dropzoneElement);
-                    dropzone.innerHTML = '';
+                    const hiddenInput = document.getElementById(hiddenInputId);
+                    hiddenInput.value = response.file_path;
+                    const dropzoneEl = document.querySelector(dropzoneElement);
                     const successIcon = document.createElement('div');
                     successIcon.className = 'success-icon';
                     successIcon.innerHTML = '&#10004;';
                     const successMessage = document.createElement('div');
                     successMessage.className = 'success-message';
                     successMessage.innerHTML = 'File uploaded successfully';
-                    dropzone.appendChild(successMessage);
+                    dropzoneEl.appendChild(successMessage);
                     successMessage.insertAdjacentElement('afterbegin', successIcon);
+                    // Удаление класса hidden для отображения анимации
+                    successMessage.classList.remove('hidden');
                 } else {
                     console.error('Upload failed.');
                     alert('Upload failed.');
