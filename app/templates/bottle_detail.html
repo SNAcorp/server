@@ -17,7 +17,7 @@
         text-align: center;
     }
     .bottle-image-container img {
-        width: 70%;
+        width: 50%;
         border-radius: 10px;
     }
     .bottle-info {
@@ -61,6 +61,10 @@
     .bottle-info .btn-primary:hover {
         background-color: #0056b3;
     }
+    .hidden {
+        display: none;
+    }
+    {% if current_user.is_superuser %}
     .dropzone {
         border: 2px dashed #007bff;
         border-radius: 10px;
@@ -87,9 +91,6 @@
         font-size: 16px;
         color: #343a40;
     }
-    .hidden {
-        display: none;
-    }
     .success-message {
         background-color: #d4edda;
         color: #155724;
@@ -114,6 +115,7 @@
         font-size: 24px;
         color: #28a745;
     }
+    {% endif %}
 {% endblock %}
 
 {% block content %}
@@ -133,6 +135,7 @@
                 <div class="detail-text"><strong>Wine Type:</strong> {{ bottle.wine_type }}</div>
                 <div class="detail-text"><strong>Volume (ml):</strong> {{ bottle.volume }}</div>
             </div>
+            {% if current_user.is_superuser %}
             <form id="bottle-form" class="hidden">
                 <div class="form-group">
                     <label for="name">Name</label>
@@ -181,10 +184,11 @@
                 <button type="button" class="btn btn-primary" id="save-button">Save Changes</button>
             </form>
             <button id="edit-button" class="btn btn-primary">Edit</button>
+            {% endif %}
         </div>
     </div>
 </div>
-
+{% if current_user.is_superuser %}
 <script src="https://cdn.jsdelivr.net/npm/dropzone@5.9.3/dist/dropzone.min.js"></script>
 <script>
     document.getElementById("edit-button").addEventListener("click", function() {
@@ -282,4 +286,5 @@
 
 
 </script>
+{% endif %}
 {% endblock %}
