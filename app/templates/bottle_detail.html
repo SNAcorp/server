@@ -239,10 +239,10 @@
     });
 
     document.getElementById("save-button").addEventListener("click", function(event) {
-        const imagePath300Element = document.getElementById("image_path300_hidden");
-        const imagePath600Element = document.getElementById("image_path600_hidden");
+        const imagePath300Element = document.getElementById("image_path300_hidden").value;
+        const imagePath600Element = document.getElementById("image_path600_hidden").value;
 
-        if (!imagePath300Element.value || !imagePath600Element.value) {
+        if (!imagePath300Element || !imagePath600Element) {
             console.error("Please upload both images before submitting the form.");
             alert("Please upload both images before submitting the form.");
             return;
@@ -253,8 +253,8 @@
             winery: document.getElementById("winery").value,
             rating_average: parseFloat(document.getElementById("rating_average").value),
             location: document.getElementById("location").value,
-            image_path300: imagePath300Element.value,
-            image_path600: imagePath600Element.value,
+            image_path300: imagePath300Element,
+            image_path600: imagePath600Element,
             description: document.getElementById("description").value,
             wine_type: document.getElementById("wine_type").value,
             volume: parseFloat(document.getElementById("volume").value)
