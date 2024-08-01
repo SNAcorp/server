@@ -166,7 +166,7 @@ async def get_terminal_bottles(terminal_id: int, db: AsyncSession = Depends(get_
             "volumes": {"big": BIG_PORTION_TIME, "small": SMALL_PORTION_TIME}}
 
 
-@router.post("/{terminal_id}/update-bottle", response_model=RedirectResponse)
+@router.post("/{terminal_id}/update-bottle")
 async def update_terminal_bottle(terminal_id: int, request: Request, db: AsyncSession = Depends(get_db)):
     form = await request.form()
     bottles_data = {}
