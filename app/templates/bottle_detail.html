@@ -203,25 +203,28 @@
             init: function() {
                 this.on("success", function(file, response) {
                     if (response.file_path) {
+                        alert("lol1")
                         const hiddenInput = document.getElementById(hiddenInputId);
                         hiddenInput.value = response.file_path;
                         const childElements = dropzone.getElementsByTagName('*');
                         for (let i = 0; i < childElements.length; i++) {
                             childElements[i].classList.add('hidden');
                         }
+                        alert("lol2")
                         const successIcon = document.createElement('div');
                         successIcon.className = 'success-icon';
                         successIcon.innerHTML = '&#10004;';
+                        alert("lol3")
                         const successMessage = document.createElement('div');
                         successMessage.className = 'success-message';
                         successMessage.innerHTML = 'File uploaded successfully';
                         dropzoneElement.appendChild(successMessage);
                         successMessage.insertAdjacentElement('afterbegin', successIcon);
-                        alert("lol")
+                        alert("lol4")
                         // Удаление класса hidden для отображения анимации
                         successMessage.classList.remove('hidden');
                         this.removeAllFiles(true);
-                        alert("lol")
+                        alert("lol5")
                     } else {
                         console.error('Upload failed.');
                         alert('Upload failed.');
