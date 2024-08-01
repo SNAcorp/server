@@ -204,6 +204,7 @@
                 this.on("success", function(file, response) {
                     if (response.file_path) {
                         const dropzone = document.getElementById(dropzoneElement)
+                        dropzone.innerHTML = '';
                         alert("lol1")
                         const hiddenInput = document.getElementById(hiddenInputId);
                         hiddenInput.value = response.file_path;
@@ -215,7 +216,7 @@
                         const successMessage = document.createElement('div');
                         successMessage.className = 'success-message';
                         successMessage.innerHTML = 'File uploaded successfully';
-                        dropzoneElement.appendChild(successMessage);
+                        dropzone.appendChild(successMessage);
                         successMessage.insertAdjacentElement('afterbegin', successIcon);
                         alert("lol4")
                         // Удаление класса hidden для отображения анимации
