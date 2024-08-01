@@ -205,7 +205,6 @@
                     if (response.file_path) {
                         const hiddenInput = document.getElementById(hiddenInputId);
                         hiddenInput.value = response.file_path;
-                        this.removeAllFiles(true);
                         const childElements = dropzone.getElementsByTagName('*');
                         for (let i = 0; i < childElements.length; i++) {
                             childElements[i].classList.add('hidden');
@@ -221,6 +220,7 @@
 
                         // Удаление класса hidden для отображения анимации
                         successMessage.classList.remove('hidden');
+                        this.removeAllFiles(true);
                     } else {
                         console.error('Upload failed.');
                         alert('Upload failed.');
