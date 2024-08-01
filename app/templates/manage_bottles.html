@@ -260,7 +260,7 @@ function prevStep() {
 
 document.addEventListener('DOMContentLoaded', () => {
 
-    ropzone.autoDiscover = false;
+    Dropzone.autoDiscover = false;
     function setupDropzone(dropzoneElement, hiddenInputId) {
         new Dropzone(dropzoneElement, {
             url: "/bottles/upload-image",
@@ -292,14 +292,9 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-    const dropzone300 = document.getElementById('dropzone-300');
-    const dropzone300hidden = document.getElementById('image_path600_hidden');
 
-    const dropzone600 = document.getElementById('dropzone-300');
-    const dropzone600hidden = document.getElementById('image_path600_hidden');
-
-    setupDropzone(dropzone300, dropzone300hidden);
-    setupDropzone(dropzone600, dropzone600hidden);
+    setupDropzone("#dropzone-300", "image_path300_hidden");
+    setupDropzone("#dropzone-600", "image_path600_hidden");
 
     function validateField(field) {
         const group = field.closest('.input-group');
