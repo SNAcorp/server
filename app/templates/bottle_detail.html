@@ -199,7 +199,7 @@
                 document.getElementById(hiddenInputId).value = data.file_path;
                 const successMessage = document.createElement('div');
                 successMessage.className = 'success-message';
-                successMessage.textContent = 'File uploaded successfully: ' + data.file_path;
+                successMessage.textContent = 'File uploaded successfully!';
                 document.getElementById(dropzoneId).innerHTML = '';
                 document.getElementById(dropzoneId).appendChild(successMessage);
             } else {
@@ -244,13 +244,13 @@
         const dropzone300 = document.getElementById('dropzone-300');
         const dropzone600 = document.getElementById('dropzone-600');
 
-        setupDropzone(dropzone300, 'image_path300', 'dropzone-300');
-        setupDropzone(dropzone600, 'image_path600', 'dropzone-600');
+        setupDropzone(dropzone300, 'image_path300_hidden', 'dropzone-300');
+        setupDropzone(dropzone600, 'image_path600_hidden', 'dropzone-600');
     });
 
     document.getElementById("bottle-form").addEventListener("submit", function(event) {
-        const image300 = document.getElementById("image_path300").value;
-        const image600 = document.getElementById("image_path600").value;
+        const image300 = document.getElementById("image_path300_hidden").value;
+        const image600 = document.getElementById("image_path600_hidden").value;
 
         if (!image300 || !image600) {
             console.error("Please upload both images before submitting the form.");
@@ -258,8 +258,8 @@
             event.preventDefault();
         } else {
             console.log('Submitting form with:', image300, image600);
-            document.getElementById("image_path300").value = image300;
-            document.getElementById("image_path600").value = image600;
+            document.getElementById("image_path300_hidden").value = image300;
+            document.getElementById("image_path600_hidden").value = image600;
         }
     });
 </script>
