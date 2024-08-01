@@ -97,6 +97,7 @@
         border-radius: 5px;
         margin-top: 20px;
         animation: fadeIn 1s ease-in-out;
+        text-align: center;
     }
     @keyframes fadeIn {
         from {
@@ -108,16 +109,19 @@
     }
     .success-icon {
         display: none;
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
         font-size: 48px;
         color: #28a745;
         animation: fadeIn 1s ease-in-out;
+        text-align: center;
     }
-    .success-icon.show {
-        display: block;
+    .success-container {
+        display: none;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+    }
+    .success-container.show {
+        display: flex;
     }
 {% endblock %}
 
@@ -161,7 +165,10 @@
                         <span>Drop image here or click to upload (300px)</span>
                         <input type="file" id="image_path300" name="image_path300" accept="image/png">
                         <input type="hidden" name="image_path300_hidden" id="image_path300_hidden" value="{{ bottle.image_path300 }}">
-                        <div class="success-icon">&#10004;</div>
+                        <div class="success-container">
+                            <div class="success-icon">&#10004;</div>
+                            <div class="success-message">File uploaded successfully</div>
+                        </div>
                     </div>
                 </div>
                 <div class="form-group">
@@ -170,7 +177,10 @@
                         <span>Drop image here or click to upload (600px)</span>
                         <input type="file" id="image_path600" name="image_path600" accept="image/png">
                         <input type="hidden" name="image_path600_hidden" id="image_path600_hidden" value="{{ bottle.image_path600 }}">
-                        <div class="success-icon">&#10004;</div>
+                        <div class="success-container">
+                            <div class="success-icon">&#10004;</div>
+                            <div class="success-message">File uploaded successfully</div>
+                        </div>
                     </div>
                 </div>
                 <div class="form-group">
@@ -215,18 +225,11 @@
             if (data.file_path) {
                 console.log(`File uploaded successfully: ${data.file_path}`);
                 document.getElementById(hiddenInputId).value = data.file_path;
-                const dropzone = document.getElementById(dropzoneId);
-                dropzone.innerHTML = '';
-                const successIcon = document.createElement('div');
-                successIcon.className = 'success-icon show';
-                successIcon.innerHTML = '&#10004;';
-                dropzone.appendChild(successIcon);
+                const successContainer = document.querySelector(`#${dropzoneId} .success-container`);
+                successContainer.classList.add("show");
                 setTimeout(() => {
-                    const successMessage = document.createElement('div');
-                    successMessage.className = 'success-message';
-                    successMessage.textContent = 'File uploaded successfully';
-                    dropzone.appendChild(successMessage);
-                }, 1000);
+                    successContainer.classList.remove("show");
+                }, 3000);
             } else {
                 console.error('Upload failed.');
                 alert('Upload failed.');
@@ -247,18 +250,11 @@
                 this.on("success", function(file, response) {
                     if (response.file_path) {
                         document.getElementById(hiddenInputId).value = response.file_path;
-                        const dropzone = document.querySelector(dropzoneElement);
-                        dropzone.innerHTML = '';
-                        const successIcon = document.createElement('div');
-                        successIcon.className = 'success-icon show';
-                        successIcon.innerHTML = '&#10004;';
-                        dropzone.appendChild(successIcon);
+                        const successContainer = document.querySelector(`${dropzoneElement} .success-container`);
+                        successContainer.classList.add("show");
                         setTimeout(() => {
-                            const successMessage = document.createElement('div');
-                            successMessage.className = 'success-message';
-                            successMessage.textContent = 'File uploaded successfully';
-                            dropzone.appendChild(successMessage);
-                        }, 1000);
+                            successContainer.classList.remove("show");
+                        }, 3000);
                     } else {
                         console.error('Upload failed.');
                         alert('Upload failed.');
