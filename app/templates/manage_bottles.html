@@ -258,9 +258,7 @@ function prevStep() {
     }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-
-    Dropzone.autoDiscover = false;
+Dropzone.autoDiscover = false;
     function setupDropzone(dropzoneElement, hiddenInputId) {
         new Dropzone(dropzoneElement, {
             url: "/bottles/upload-image",
@@ -292,6 +290,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+document.addEventListener('DOMContentLoaded', () => {
 
     setupDropzone("#dropzone-300", "image_path300_hidden");
     setupDropzone("#dropzone-600", "image_path600_hidden");
