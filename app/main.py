@@ -26,7 +26,7 @@ from app.models import Order, Terminal, Bottle
 from app.database import get_db
 from app.schemas import IsServerOnline, User
 from datetime import timedelta, datetime
-
+from sqlalchemy.sql import func
 app = FastAPI()
 
 # DATABASE_URL = "postgresql+asyncpg://nikitastepanov@localhost/terminals"
@@ -69,7 +69,7 @@ async def startup():
         await conn.run_sync(Base.metadata.reflect)
         order_items = Table("order_items", Base.metadata, autoload_with=engine)
         await conn.execute(
-            order_items.append_column(Column('timestamp', DateTime, server_default=datetime.utcnow(), nullable=False))
+            order_items.append_column(Column('timestamp', DateTime, server_default=func.now(), nullable=False))
         )
         await conn.run_sync(Base.metadata.create_all)
 
