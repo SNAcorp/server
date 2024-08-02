@@ -199,7 +199,9 @@ async def read_order(order_id: int, request: Request,
     if order is None:
         raise HTTPException(status_code=404, detail="Order not found")
 
-    print("items:", order.items)  # Добавим отладочный вывод для проверки содержимого
+    # Проверим, является ли order.items итерируемым объектом
+    if not hasattr(order.items, '__iter__'):
+        raise HTTPException(status_code=500, detail="Order items are not iterable")
 
     order_details = {
         "id": order.id,
