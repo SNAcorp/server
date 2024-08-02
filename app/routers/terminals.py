@@ -4,7 +4,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload, joinedload
 from datetime import datetime, timedelta, timezone
-from app.models import Terminal, TerminalBottle, RFID, Order, OrderItem, Bottle, EMPTY_BOTTLE_ID, BottleUsageLog
+from app.models import Terminal, TerminalBottle, RFID, Order, OrderItem, Bottle, EMPTY_BOTTLE_ID, BottleUsageLog, \
+    OrderRFID
 from app.database import get_db
 from app.jwt_auth import create_terminal_token, verify_terminal
 from app.schemas import TerminalBottleCreate, UseTerminalRequest, TerminalResponse, \
@@ -58,8 +59,11 @@ async def use_terminal(request: UseTerminalRequest, db: AsyncSession = Depends(g
     if payload["terminal_id"] != request.terminal_id:
         raise HTTPException(status_code=403, detail="Invalid terminal ID")
 
-    result = await db.execute(select(RFID).where(RFID.code == request.rfid_code))
-    rfid = result.scalars().first()
+    rfid_result = await db.execute(select(RFID).where(RFID.code == request.rfid_code))
+    stmt = select(Order.id).join(OrderRFID).join(RFID).where(RFID.code == request.rfid_code)
+    result = await db.execute(stmt)
+    order = result.scalars().first()
+    rfid = rfid_result.scalars().first()
     if rfid is None:
         raise HTTPException(status_code=404, detail="RFID not found")
 
@@ -96,10 +100,6 @@ async def use_terminal(request: UseTerminalRequest, db: AsyncSession = Depends(g
         terminal_bottle.remaining_volume -= BIG_PORTION
     else:
         raise HTTPException(status_code=404, detail="Portion not found")
-
-    order = Order()
-    db.add(order)
-    await db.flush()
 
     order_item = OrderItem(order_id=order.id, bottle_id=terminal_bottle.bottle_id, volume=request.volume)
     db.add(order_item)
