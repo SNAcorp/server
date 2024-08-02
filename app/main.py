@@ -25,6 +25,7 @@ from sqlalchemy import or_
 from app.models import Order, Terminal, Bottle
 from app.database import get_db
 from app.schemas import IsServerOnline, User
+from datetime import timedelta, datetime
 
 app = FastAPI()
 
@@ -195,6 +196,8 @@ async def read_order(order_id: int, request: Request,
     if order is None:
         raise HTTPException(status_code=404, detail="Order not found")
 
+    print(order.items)  # Добавим отладочный вывод для проверки содержимого
+
     order_details = {
         "id": order.id,
         "is_completed": order.is_completed,
@@ -202,26 +205,12 @@ async def read_order(order_id: int, request: Request,
         "items": []
     }
 
-    wine_details = {}
     for item in order.items:
-        bottle_name = item.bottle.name
-        if bottle_name not in wine_details:
-            wine_details[bottle_name] = {
-                "bottle_id": item.bottle.id,
-                "total_volume": 0,
-                "timestamps": []
-            }
-        wine_details[bottle_name]["total_volume"] += item.volume
-
-    order_details["items"] = [
-        {
-            "bottle_name": bottle_name,
-            "bottle_id": details["bottle_id"],
-            "total_volume": details["total_volume"],
-            "timestamps": details["timestamps"]
-        }
-        for bottle_name, details in wine_details.items()
-    ]
+        order_details["items"].append({
+            "bottle_name": item.bottle.name,
+            "bottle_id": item.bottle.id,
+            "total_volume": item.volume
+        })
 
     return app_templates.TemplateResponse("order_detail.html",
                                           {"request": request,
