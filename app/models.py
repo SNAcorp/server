@@ -94,7 +94,7 @@ class BottleUsageLog(Base):
 
 
 class OrderItem(Base):
-    __tablename__ = "order_items"
+    __tablename__ = "order_item"
     id = Column(Integer, primary_key=True, index=True)
     order_id = Column(Integer, ForeignKey("orders.id"))
     bottle_id = Column(Integer, ForeignKey("bottles.id"))
