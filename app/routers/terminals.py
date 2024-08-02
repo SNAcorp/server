@@ -77,10 +77,10 @@ async def use_terminal(request: UseTerminalRequest, db: AsyncSession = Depends(g
                 raise HTTPException(status_code=403, detail="RFID usage limit reached. Try again later.")
         else:
             # Сброс счетчика, если прошло более 10 минут
-            rfid.usage_count = 1
+            rfid.usage_count = 0
             rfid.last_used = datetime.utcnow()
     else:
-        rfid.usage_count = 1
+        rfid.usage_count = 0
         rfid.last_used = datetime.utcnow()
 
     rfid.limit = True
