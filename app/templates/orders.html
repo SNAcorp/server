@@ -25,16 +25,16 @@
     <div class="tab-content" id="orderTabsContent">
         <div class="tab-pane fade show active" id="active-orders" role="tabpanel" aria-labelledby="active-orders-tab">
             <ul class="list-group mt-3" id="activeOrdersList">
-                {% for order in orders if not order.is_completed or (order.is_completed and (order.completed_at + timedelta(hours=24)) > datetime.utcnow()) %}
+                {% for order in orders if not order.is_completed %}
                 <li class="list-group-item">
-                    <a href="/order/{{ order.id }}">Order ID: {{ order.id }} - {{ 'Completed' if order.is_completed else 'Pending' }}</a>
+                    <a href="/order/{{ order.id }}">Order ID: {{ order.id }} - {{ 'Pending' }}</a>
                 </li>
                 {% endfor %}
             </ul>
         </div>
         <div class="tab-pane fade" id="archived-orders" role="tabpanel" aria-labelledby="archived-orders-tab">
             <ul class="list-group mt-3" id="archivedOrdersList">
-                {% for order in orders if order.is_completed and (order.completed_at + timedelta(hours=24)) <= datetime.utcnow() %}
+                {% for order in orders if order.is_completed %}
                 <li class="list-group-item">
                     <a href="/order/{{ order.id }}">Order ID: {{ order.id }} - Completed</a>
                 </li>
