@@ -33,6 +33,8 @@
                 <strong>Bottle ID:</strong> {{ item.bottle_id }} <br>
                 <strong>Total Volume:</strong> {{ item.total_volume }} L
             </li>
+            {% else %}
+            <li class="list-group-item">No items found for this order.</li>
             {% endfor %}
         </ul>
     </div>

@@ -183,6 +183,7 @@ async def read_order(order_id: int, request: Request,
                      current_user: User = Depends(get_current_user)):
     if current_user is None:
         return RedirectResponse("/login", 303)
+
     result = await db.execute(
         select(Order).options(
             selectinload(Order.rfids).selectinload(OrderRFID.rfid),
@@ -190,6 +191,7 @@ async def read_order(order_id: int, request: Request,
         ).where(Order.id == order_id)
     )
     order = result.scalars().first()
+
     if order is None:
         raise HTTPException(status_code=404, detail="Order not found")
 
