@@ -101,7 +101,7 @@ async def use_terminal(request: UseTerminalRequest, db: AsyncSession = Depends(g
     else:
         raise HTTPException(status_code=404, detail="Portion not found")
 
-    order_item = OrderItem(order_id=order.id, bottle_id=terminal_bottle.bottle_id, volume=request.volume)
+    order_item = OrderItem(order_id=order, bottle_id=terminal_bottle.bottle_id, volume=request.volume)
     db.add(order_item)
     await db.commit()
 
