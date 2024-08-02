@@ -66,11 +66,6 @@ app.mount("/static", StaticFiles(directory="app/static"), name="static")
 @app.on_event("startup")
 async def startup():
     async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.reflect)
-        order_items = Table("order_items", Base.metadata, autoload_with=engine)
-        await conn.execute(
-            order_items.append_column(Column('timestamp', DateTime, server_default=func.now(), nullable=False))
-        )
         await conn.run_sync(Base.metadata.create_all)
 
     async with AsyncSession(engine) as session:
