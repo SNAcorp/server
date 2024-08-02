@@ -29,9 +29,10 @@
         <ul class="list-group">
             {% for item in items %}
             <li class="list-group-item">
-                <strong>Bottle Name:</strong> {{ item.bottle_name }} <br>
+                <strong>Bottle Name:</strong> {{ item.bottle.name }} <br>
                 <strong>Bottle ID:</strong> {{ item.bottle_id }} <br>
-                <strong>Total Volume:</strong> {{ item.total_volume }} L
+                <strong>Total Volume:</strong> {{ item.volume }} L
+
             </li>
             {% else %}
             <li class="list-group-item">No items found for this order.</li>
