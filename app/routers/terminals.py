@@ -67,24 +67,24 @@ async def use_terminal(request: UseTerminalRequest, db: AsyncSession = Depends(g
     if rfid is None:
         raise HTTPException(status_code=404, detail="RFID not found")
 
-    # Проверка, если RFID не валиден и есть ограничение
-    if not rfid.is_valid and rfid.limit and rfid.last_used:
-        elapsed_time = datetime.utcnow() - rfid.last_used
-        if elapsed_time < timedelta(minutes=10):
-            if rfid.usage_count < 2:
-                rfid.usage_count += 1
-            else:
-                raise HTTPException(status_code=403, detail="RFID usage limit reached. Try again later.")
-        else:
-            # Сброс счетчика, если прошло более 10 минут
-            rfid.usage_count = 0
-            rfid.last_used = datetime.utcnow()
-    else:
-        rfid.usage_count = 0
-        rfid.last_used = datetime.utcnow()
-
-    rfid.limit = True
-    rfid.is_valid = False
+    # # Проверка, если RFID не валиден и есть ограничение
+    # if not rfid.is_valid and rfid.limit and rfid.last_used:
+    #     elapsed_time = datetime.utcnow() - rfid.last_used
+    #     if elapsed_time < timedelta(minutes=10):
+    #         if rfid.usage_count < 2:
+    #             rfid.usage_count += 1
+    #         else:
+    #             raise HTTPException(status_code=403, detail="RFID usage limit reached. Try again later.")
+    #     else:
+    #         # Сброс счетчика, если прошло более 10 минут
+    #         rfid.usage_count = 0
+    #         rfid.last_used = datetime.utcnow()
+    # else:
+    #     rfid.usage_count = 0
+    #     rfid.last_used = datetime.utcnow()
+    #
+    # rfid.limit = True
+    # rfid.is_valid = False
 
     result = await db.execute(select(TerminalBottle).where(TerminalBottle.terminal_id == request.terminal_id,
                                                            TerminalBottle.slot_number == request.slot_number))
