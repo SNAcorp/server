@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 import jwt
 from app.crud import get_user_by_email
+from app.database import get_db
 from app.schemas import User
 
 # DATABASE_URL = "postgresql+asyncpg://nikitastepanov@localhost/terminals"
@@ -18,11 +19,6 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 SECRET_KEY = "YOUR_SECRET_KEY"
 ALGORITHM = "HS256"
-
-
-async def get_db():
-    async with SessionLocal() as session:
-        yield session
 
 
 async def get_current_user(request: Request, db: AsyncSession = Depends(get_db)):

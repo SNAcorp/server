@@ -27,10 +27,10 @@ from app.database import get_db
 from app.schemas import IsServerOnline, User
 from datetime import timedelta, datetime
 from sqlalchemy.sql import func
+from database import DATABASE_URL
 app = FastAPI()
 
 # DATABASE_URL = "postgresql+asyncpg://nikitastepanov@localhost/terminals"
-DATABASE_URL = os.getenv('DATABASE_URL')
 #
 # engine = create_engine("postgresql://server:v9023aSH@db:5432/terminals", echo=True)
 #
