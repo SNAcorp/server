@@ -65,8 +65,6 @@ app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 @app.on_event("startup")
 async def startup():
-    metadata = MetaData()
-
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
