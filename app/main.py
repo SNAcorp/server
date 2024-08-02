@@ -210,16 +210,13 @@ async def read_order(order_id: int, request: Request,
         "items": []
     }
 
-    for item in order.items:
-        order_details["items"].append({
-            "bottle_name": item.bottle.name,
-            "bottle_id": item.bottle.id,
-            "total_volume": item.volume
-        })
+    items = order.items
+    print("items", items)
 
     return app_templates.TemplateResponse("order_detail.html",
                                           {"request": request,
                                            "order": order_details,
+                                           "items": items,
                                            "current_user": current_user})
 
 
