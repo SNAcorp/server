@@ -136,12 +136,15 @@ async def read_orders(request: Request,
                       db: AsyncSession = Depends(get_db),
                       current_user: User = Depends(get_current_user)):
     if current_user is None:
-        return RedirectResponse("/login", 302)
-    result = await db.execute(select(Order))
+        return RedirectResponse("/login", 303)
+
+    result = await db.execute(select(Order).options(selectinload(Order.items)))
     orders = result.scalars().all()
+
     return app_templates.TemplateResponse("orders.html",
                                           {"request": request,
                                            "orders": orders,
+                                           "timedelta": timedelta,
                                            "current_user": current_user})
 
 
@@ -196,7 +199,7 @@ async def read_order(order_id: int, request: Request,
     if order is None:
         raise HTTPException(status_code=404, detail="Order not found")
 
-    print(order.items)  # Добавим отладочный вывод для проверки содержимого
+    print("items:", order.items)  # Добавим отладочный вывод для проверки содержимого
 
     order_details = {
         "id": order.id,
