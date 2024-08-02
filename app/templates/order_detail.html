@@ -3,29 +3,54 @@
 {% block title %}Order Details{% endblock %}
 
 {% block content %}
-<h2>Order Details</h2>
-<p>Order ID: {{ order.id }}</p>
-<p>Completed: {{ order.is_completed }}</p>
+<div class="container">
+    <h2 class="mt-4">Order Details</h2>
+    <div class="card mt-4">
+        <div class="card-body">
+            <h4 class="card-title">Order ID: {{ order.id }}</h4>
+            <p class="card-text">Completed: {{ order.is_completed }}</p>
+        </div>
+    </div>
 
-<h3>RFIDs</h3>
-<ul>
-    {% for rfid in order.rfids %}
-        <li>RFID: {{ rfid.code }} ({{ rfid.timestamp }})</li>
-    {% endfor %}
-</ul>
+    <div class="mt-4">
+        <h3>RFIDs</h3>
+        <ul class="list-group">
+            {% for rfid in order.rfids %}
+            <li class="list-group-item">
+                <strong>RFID:</strong> {{ rfid.code }} <br>
+                <small class="text-muted">Timestamp: {{ rfid.timestamp }}</small>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
 
-<h3>Items</h3>
-<ul>
- В РАЗРАБОТКЕ
-</ul>
+    <div class="mt-4">
+        <h3>Items</h3>
+        <ul class="list-group">
+            {% for item in order.items %}
+            <li class="list-group-item">
+                <strong>Bottle Name:</strong> {{ item.bottle_name }} <br>
+                <strong>Bottle ID:</strong> {{ item.bottle_id }} <br>
+                <strong>Total Volume:</strong> {{ item.total_volume }} L
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
 
-<h3>Add RFID</h3>
-<form action="/order/{{ order.id }}/add_rfid" method="post">
-    <input type="text" name="rfid_code" placeholder="Enter RFID code" required>
-    <button type="submit">Add RFID</button>
-</form>
+    <div class="mt-4">
+        <h3>Add RFID</h3>
+        <form action="/order/{{ order.id }}/add_rfid" method="post" class="form-inline">
+            <div class="form-group mb-2">
+                <input type="text" name="rfid_code" class="form-control" placeholder="Enter RFID code" required>
+            </div>
+            <button type="submit" class="btn btn-primary mb-2 ml-2">Add RFID</button>
+        </form>
+    </div>
 
-<form action="/orders/order/{{ order.id }}/complete" method="post">
-    <button type="submit">Complete Order</button>
-</form>
+    <div class="mt-4">
+        <form action="/orders/order/{{ order.id }}/complete" method="post">
+            <button type="submit" class="btn btn-success">Complete Order</button>
+        </form>
+    </div>
+</div>
 {% endblock %}

@@ -3,11 +3,78 @@
 {% block title %}Orders{% endblock %}
 
 {% block content %}
-<h2>Orders</h2>
-<ul>
-    {% for order in orders %}
-        <li><a href="/order/{{ order.id }}">{{ order.id }}</a></li>
-    {% endfor %}
-</ul>
-<a href="/create-order">Create New Order</a>
+<div class="container mt-4">
+    <h2>Orders</h2>
+
+    <div class="input-group mb-3">
+        <input type="text" class="form-control" id="searchInput" placeholder="Search by Order ID" aria-label="Search by Order ID">
+        <div class="input-group-append">
+            <button class="btn btn-outline-secondary" type="button" onclick="searchOrder()">Search</button>
+        </div>
+    </div>
+
+    <ul class="nav nav-tabs" id="orderTabs" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link active" id="active-orders-tab" data-toggle="tab" href="#active-orders" role="tab" aria-controls="active-orders" aria-selected="true">Active Orders</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="archived-orders-tab" data-toggle="tab" href="#archived-orders" role="tab" aria-controls="archived-orders" aria-selected="false">Archived Orders</a>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="orderTabsContent">
+        <div class="tab-pane fade show active" id="active-orders" role="tabpanel" aria-labelledby="active-orders-tab">
+            <ul class="list-group mt-3" id="activeOrdersList">
+                {% for order in orders if not order.is_completed or (order.is_completed and (order.completed_at + timedelta(hours=24)) > datetime.utcnow()) %}
+                <li class="list-group-item">
+                    <a href="/order/{{ order.id }}">Order ID: {{ order.id }} - {{ 'Completed' if order.is_completed else 'Pending' }}</a>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="tab-pane fade" id="archived-orders" role="tabpanel" aria-labelledby="archived-orders-tab">
+            <ul class="list-group mt-3" id="archivedOrdersList">
+                {% for order in orders if order.is_completed and (order.completed_at + timedelta(hours=24)) <= datetime.utcnow() %}
+                <li class="list-group-item">
+                    <a href="/order/{{ order.id }}">Order ID: {{ order.id }} - Completed</a>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <a href="/create-order" class="btn btn-primary mt-4">Create New Order</a>
+</div>
+
+<script>
+    function searchOrder() {
+        var input, filter, activeOrders, archivedOrders, li, a, i, txtValue;
+        input = document.getElementById('searchInput');
+        filter = input.value.toUpperCase();
+        activeOrders = document.getElementById("activeOrdersList");
+        archivedOrders = document.getElementById("archivedOrdersList");
+        li = activeOrders.getElementsByTagName('li');
+
+        for (i = 0; i < li.length; i++) {
+            a = li[i].getElementsByTagName("a")[0];
+            txtValue = a.textContent || a.innerText;
+            if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                li[i].style.display = "";
+            } else {
+                li[i].style.display = "none";
+            }
+        }
+
+        li = archivedOrders.getElementsByTagName('li');
+        for (i = 0; i < li.length; i++) {
+            a = li[i].getElementsByTagName("a")[0];
+            txtValue = a.textContent || a.innerText;
+            if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                li[i].style.display = "";
+            } else {
+                li[i].style.display = "none";
+            }
+        }
+    }
+</script>
 {% endblock %}
