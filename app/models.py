@@ -101,6 +101,7 @@ class OrderItem(Base):
     volume = Column(Float)
     order = relationship("Order", back_populates="items")
     bottle = relationship("Bottle")
+    timestamp = Column(DateTime, default=datetime.utcnow)
 
 
 class OrderRFID(Base):
