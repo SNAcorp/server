@@ -27,7 +27,7 @@ from app.database import get_db
 from app.schemas import IsServerOnline, User
 from datetime import timedelta, datetime
 from sqlalchemy.sql import func
-from database import DATABASE_URL
+from app.database import DATABASE_URL
 app = FastAPI()
 
 # DATABASE_URL = "postgresql+asyncpg://nikitastepanov@localhost/terminals"
