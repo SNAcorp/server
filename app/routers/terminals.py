@@ -91,15 +91,8 @@ async def use_terminal(request: UseTerminalRequest, db: AsyncSession = Depends(g
     terminal_bottle = result.scalars().first()
     if terminal_bottle is None:
         raise HTTPException(status_code=404, detail="Bottle not found in the terminal")
-    if terminal_bottle.remaining_volume < 0.12:
-        raise HTTPException(status_code=400, detail=f"Not enough volume in the bottle: {terminal_bottle.remaining_volume, SMALL_PORTION if request.volume == 0 else BIG_PORTION}")
 
-    if request.volume == 0:
-        terminal_bottle.remaining_volume -= SMALL_PORTION
-    elif request.volume == 1:
-        terminal_bottle.remaining_volume -= BIG_PORTION
-    else:
-        raise HTTPException(status_code=404, detail="Portion not found")
+    terminal_bottle.remaining_volume -= request.volume
 
     order_item = OrderItem(order_id=order, bottle_id=terminal_bottle.bottle_id, volume=request.volume)
     db.add(order_item)
@@ -163,7 +156,8 @@ async def get_terminal_bottles(terminal_id: int, db: AsyncSession = Depends(get_
 
     return {"terminal_id": terminal_id,
             "bottles": bottle_info,
-            "volumes": {"big": BIG_PORTION_TIME, "small": SMALL_PORTION_TIME}}
+            "volumes": {"big": BIG_PORTION_TIME, "small": SMALL_PORTION_TIME},
+            "portions": {"big": BIG_PORTION, "small": SMALL_PORTION}}
 
 
 @router.post("/{terminal_id}/update-bottle")
