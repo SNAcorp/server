@@ -789,7 +789,7 @@ async def read_learn(request: Request):
             ]
         }
     ]
-    return app_templates.TemplateResponse("index.html", {"request": request, "topics": topics})
+    return app_templates.TemplateResponse("lol.html", {"request": request, "topics": topics})
 
 
 @app.get("/bottles", response_class=HTMLResponse)
