@@ -65,7 +65,7 @@
     <h2 class="my-4">Bottles List</h2>
     <div class="search-form">
         <input type="text" class="form-control search-input" id="search-query" placeholder="Search by ID or Name">
-        {% if current_user.is_admin %}
+        {% if current_user.is_admin or current_user.is_superuser%}
         <a href="/bottles/create" class="create-button">Create New Bottle</a>
         {% endif %}
     </div>

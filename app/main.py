@@ -28,6 +28,7 @@ from app.schemas import IsServerOnline, User
 from datetime import timedelta, datetime
 from sqlalchemy.sql import func
 from app.database import DATABASE_URL
+
 app = FastAPI()
 
 # DATABASE_URL = "postgresql+asyncpg://nikitastepanov@localhost/terminals"
@@ -117,6 +118,12 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.get("/learning", response_class=HTMLResponse)
+async def list_bottles(request: Request):
+    return app_templates.TemplateResponse("lol.html",
+                                          {"request": request})
 
 
 @app.get("/bottles", response_class=HTMLResponse)
@@ -293,7 +300,7 @@ async def dashboard(request: Request,
 
 @app.get("/", response_class=JSONResponse)
 async def for_huckers():
-    return {"msg": "Hello, how are you mr/mrs?)"}
+    return {"msg": "Hello, how are you mr/mrs?) What are you need at this website?"}
 
 
 @app.get("/static/{image_name}")
@@ -303,7 +310,6 @@ async def get_image(image_name: str):
         return FileResponse(file_path)
     else:
         raise HTTPException(status_code=404, detail="Image not found")
-
 
 
 @app.get("/terminals/{terminal_id}", response_class=HTMLResponse)
