@@ -71,7 +71,7 @@
             el: '#app',
             data: {
                 searchQuery: '',
-                topics: {{ topics | tojson }}
+                topics: {{ topics | tojson | safe }}
             },
             computed: {
                 filteredTopics() {
