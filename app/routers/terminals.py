@@ -185,7 +185,7 @@ async def update_terminal_bottle(terminal_id: int, request: Request, db: AsyncSe
         query = select(TerminalBottle).filter(
             TerminalBottle.terminal_id == terminal_id,
             TerminalBottle.slot_number == slot_number
-        )
+        ).options(selectinload(TerminalBottle.bottle))
         result = await db.execute(query)
         terminal_bottle = result.scalars().first()
 
