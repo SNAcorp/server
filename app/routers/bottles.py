@@ -81,6 +81,7 @@ async def read_bottle_usage_log(request: Request, current_user: User = Depends(g
     # Преобразование результатов в список словарей для более явного представления данных
     logs = [
         {
+            "id": log.id,
             "terminal_id": log.terminal_id,
             "bottle_id": log.bottle_id,
             "usage_date": log.usage_date,
