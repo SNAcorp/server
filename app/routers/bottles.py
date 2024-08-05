@@ -75,10 +75,22 @@ async def create_bottle_endpoint(
 
 @router.get("/usages", response_class=HTMLResponse)
 async def read_bottle_usage_log(request: Request, db: AsyncSession = Depends(get_db)):
-    logs = await db.execute(select(BottleUsageLog))
-    result = logs.all()
-    print(result)
-    return app_templates.TemplateResponse("bottle_usage_log.html", {"request": request, "logs": result})
+    query = select(BottleUsageLog)
+    result = (await db.execute(query)).scalars().all()
+
+    # Преобразование результатов в список словарей для более явного представления данных
+    logs = [
+        {
+            "terminal_id": log.terminal_id,
+            "bottle_id": log.bottle_id,
+            "usage_date": log.usage_date,
+            "used_volume": log.used_volume
+        }
+        for log in result
+    ]
+
+    return app_templates.TemplateResponse("bottle_usage_log.html", {"request": request, "logs": logs})
+
 
 @router.get("/{bottle_id}", response_class=HTMLResponse)
 async def read_bottle(bottle_id: int, request: Request, current_user: User = Depends(get_current_user),
