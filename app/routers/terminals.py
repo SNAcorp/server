@@ -190,10 +190,11 @@ async def update_terminal_bottle(terminal_id: int, request: Request, db: AsyncSe
         terminal_bottle = result.scalars().first()
 
         if terminal_bottle:
+            bottle = terminal_bottle.bottle
+            initial_volume = bottle.volume
+            used_volume = initial_volume - terminal_bottle.remaining_volume
+
             if terminal_bottle.bottle_id != bottle_id:
-                bottle = terminal_bottle.bottle
-                initial_volume = bottle.volume
-                used_volume = initial_volume - terminal_bottle.remaining_volume
                 if used_volume > 0:
                     usage_log = BottleUsageLog(
                         terminal_id=terminal.id,
@@ -207,6 +208,19 @@ async def update_terminal_bottle(terminal_id: int, request: Request, db: AsyncSe
                 terminal_bottle.remaining_volume = (
                     await db.execute(select(Bottle.volume).where(Bottle.id == bottle_id))
                 ).scalar()
+            else:
+                # Если бутылка заменяется на ту же самую
+                if used_volume > 0:
+                    usage_log = BottleUsageLog(
+                        terminal_id=terminal.id,
+                        bottle_id=bottle.id,
+                        usage_date=datetime.utcnow(),
+                        used_volume=used_volume
+                    )
+                    db.add(usage_log)
+
+                # Сбрасываем объем
+                terminal_bottle.remaining_volume = initial_volume
         else:
             terminal_bottle = TerminalBottle(
                 terminal_id=terminal_id,

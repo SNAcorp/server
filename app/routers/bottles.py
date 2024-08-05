@@ -5,7 +5,7 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
-from app.dependencies import get_current_user
+from app.dependencies import get_current_user, get_admin_user
 from app.models import Bottle, User, BottleUsageLog
 from app.database import get_db
 import os
@@ -74,7 +74,7 @@ async def create_bottle_endpoint(
 
 
 @router.get("/usages", response_class=HTMLResponse)
-async def read_bottle_usage_log(request: Request, db: AsyncSession = Depends(get_db)):
+async def read_bottle_usage_log(request: Request, current_user: User = Depends(get_admin_user), db: AsyncSession = Depends(get_db)):
     query = select(BottleUsageLog)
     result = (await db.execute(query)).scalars().all()
 
@@ -89,7 +89,7 @@ async def read_bottle_usage_log(request: Request, db: AsyncSession = Depends(get
         for log in result
     ]
 
-    return app_templates.TemplateResponse("bottle_usage_log.html", {"request": request, "logs": logs})
+    return app_templates.TemplateResponse("bottle_usage_log.html", {"request": request, "logs": logs, "current_user": current_user})
 
 
 @router.get("/{bottle_id}", response_class=HTMLResponse)
