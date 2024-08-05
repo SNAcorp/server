@@ -67,8 +67,8 @@
         <input type="text" class="form-control search-input" id="search-query" placeholder="Search by ID or Name">
         {% if current_user.role == "admin" or current_user.is_superuser%}
         <div style="display: flex">
-            <a href="/bottles/create" class="create-button">Create New Bottle</a>
-            <a href="/bottles/usages" class="create-button">Usage Log</a>
+            <a href="/bottles/create" class="create-button" style="margin-right: 5px">Create New Bottle</a>
+            <a href="/bottles/usages" class="create-button" style="margin-left: 5px">Usage Log</a>
         </div>
         {% endif %}
     </div>
