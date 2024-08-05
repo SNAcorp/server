@@ -122,7 +122,7 @@
                         <li class="nav-item"><a class="nav-link" href="/users/me">My Profile</a></li>
                         <li class="nav-item"><a class="nav-link" href="/terminals">Terminals</a></li>
                         <li class="nav-item"><a class="nav-link" href="/orders">Orders</a></li>
-                        {% if current_user.is_admin %}
+                        {% if current_user.role == "admin" %}
                         <li class="nav-item"><a class="nav-link" href="/admin/panel">Admin Panel</a></li>
                         {% endif %}
                         {% if current_user.is_superuser %}
@@ -146,7 +146,7 @@
                         <li><a href="/users/me">My Profile</a></li>
                         <li><a href="/terminals">Terminals</a></li>
                         <li><a href="/orders">Orders</a></li>
-                        {% if current_user.is_admin %}
+                        {% if current_user.role == "admin" %}
                         <li><a href="/bottles">Manage Bottles</a></li>
                         <li><a href="/admin/panel">Admin Panel</a></li>
                         {% endif %}
