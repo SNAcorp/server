@@ -91,8 +91,8 @@ async def use_terminal(request: UseTerminalRequest, db: AsyncSession = Depends(g
     terminal_bottle = result.scalars().first()
     if terminal_bottle is None:
         raise HTTPException(status_code=404, detail="Bottle not found in the terminal")
-
     terminal_bottle.remaining_volume -= request.volume
+
 
     order_item = OrderItem(order_id=order, bottle_id=terminal_bottle.bottle_id, volume=request.volume)
     db.add(order_item)
