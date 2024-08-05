@@ -9,7 +9,7 @@
         <li class="nav-item">
             <a class="nav-link active" id="admin-functions-tab" data-toggle="tab" href="#admin-functions" role="tab" aria-controls="admin-functions" aria-selected="true">Admin Functions</a>
         </li>
-        {% if current_user.is_superuser %}
+        {% if current_user.role == "admin" or current_user.is_superuser %}
         <li class="nav-item">
             <a class="nav-link" id="verification-requests-tab" data-toggle="tab" href="#verification-requests" role="tab" aria-controls="verification-requests" aria-selected="false">Verification Requests</a>
         </li>
