@@ -47,24 +47,8 @@
     .search-input {
         flex: 0 0 300px;
     }
-    .usage-button{
-        padding-bottom: 10px;
-        padding-top: 10px;
-        padding-right: 20px;
-        padding-left: 5px;
-        background-color: #007bff;
-        color: white;
-        text-decoration: none;
-        border-radius: 5px;
-        transition: background-color 0.3s;
-    }
-    .usage-button:hover {
-        background-color: #007bf0;
-    }
     .create-button {
-        padding-bottom: 10px;
-        padding-top: 10px;
-        padding-left: 20px;
+        padding: 10px 20px;
         background-color: #007bff;
         color: white;
         text-decoration: none;
@@ -82,8 +66,10 @@
     <div class="search-form">
         <input type="text" class="form-control search-input" id="search-query" placeholder="Search by ID or Name">
         {% if current_user.role == "admin" or current_user.is_superuser%}
-        <a href="/bottles/create" class="create-button">Create New Bottle</a>
-        <a href="/bottles/usages" class="usage-button">Usage Log</a>
+        <div style="display: flex">
+            <a href="/bottles/create" class="create-button">Create New Bottle</a>
+            <a href="/bottles/usages" class="create-button">Usage Log</a>
+        </div>
         {% endif %}
     </div>
     <div class="bottle-list" id="bottle-list">
