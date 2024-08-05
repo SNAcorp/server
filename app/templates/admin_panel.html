@@ -224,10 +224,12 @@
             <div class="modal-body" id="viewUserDetails">
                 <!-- View user form will be loaded here -->
             </div>
+            {% if current_user.is_superuser %}
             <div class="modal-footer">
                 <button type="button" class="btn btn-primary" id="enableEditUserBtn" onclick="enableEditUser()">Enable Edit</button>
                 <button type="button" class="btn btn-primary" id="saveUserDetailsBtn" onclick="saveUserDetails()" style="display: none;">Save Changes</button>
             </div>
+            {% endif %}
         </div>
     </div>
 </div>
@@ -356,7 +358,7 @@
             document.getElementById('viewUserModal').dataset.userId = user.id;
         }
     }
-
+    {% if current_user.is_superuser %}
     async function enableEditUser() {
         const form = document.getElementById('viewUserForm');
         for (let element of form.elements) {
@@ -367,7 +369,7 @@
         document.getElementById('saveUserDetailsBtn').style.display = 'inline-block';
         document.getElementById('enableEditUserBtn').style.display = 'none';
     }
-
+    {% endif %}
     async function verifyUser() {
         const userId = document.getElementById('userModal').dataset.userId;
         const response = await fetch(`/superadmin/verify/${userId}`, {
@@ -393,7 +395,7 @@
             alert('Error rejecting user');
         }
     }
-
+    {% if current_user.is_superuser %}
     async function saveUserDetails() {
         const userId = document.getElementById('viewUserModal').dataset.userId;
         const form = document.getElementById('viewUserForm');
@@ -413,5 +415,6 @@
             alert('Error updating user details');
         }
     }
+    {% endif %}
 </script>
 {% endblock %}
