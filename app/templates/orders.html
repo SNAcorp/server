@@ -42,8 +42,9 @@
             </ul>
         </div>
     </div>
-
+    {% if current_user.is_admin or current_user.is_superuser %}
     <a href="/create-order" class="btn btn-primary mt-4">Create New Order</a>
+    {% endif %}
 </div>
 
 <script>
