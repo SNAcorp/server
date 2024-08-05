@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
 from app.dependencies import get_current_user
-from app.models import Bottle, User
+from app.models import Bottle, User, BottleUsageLog
 from app.database import get_db
 import os
 
@@ -72,6 +72,11 @@ async def create_bottle_endpoint(
     await db.refresh(new_bottle)
     return RedirectResponse("/bottles", 303)
 
+
+@router.get("/usages", response_class=HTMLResponse)
+async def read_bottle_usage_log(request: Request, db: AsyncSession = Depends(get_db)):
+    logs = await db.query(BottleUsageLog).all()
+    return app_templates.TemplateResponse("bottle_usage_log.html", {"request": request, "logs": logs})
 
 @router.get("/{bottle_id}", response_class=HTMLResponse)
 async def read_bottle(bottle_id: int, request: Request, current_user: User = Depends(get_current_user),

@@ -57,7 +57,7 @@ async def create_user(db: AsyncSession, user: UserCreate):
 
 
 async def get_unverified_users(db: AsyncSession):
-    result = await db.execute(select(User).where(User.is_verified == False))
+    result = await db.execute(select(User).where(not User.is_verified))
     return result.scalars().all()
 
 

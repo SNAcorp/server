@@ -12,7 +12,7 @@ from app.crud import get_unverified_users, get_all_users, get_blocked_users, get
 from app.dependencies import get_current_user, get_admin_user
 from app.routers import auth, users, admin, superadmin
 from app.jwt_auth import verify_terminal
-from app.models import Base, EMPTY_BOTTLE_ID, RFID, OrderItem, OrderRFID, TerminalState
+from app.models import Base, EMPTY_BOTTLE_ID, RFID, OrderItem, OrderRFID, TerminalState, BottleUsageLog
 from app.routers import terminals, orders, bottles, rfid
 
 from fastapi import Depends, HTTPException, Request, Form
@@ -131,15 +131,18 @@ async def read_learn(request: Request):
                     "links": [
                         {"text": "Основы HTTP", "url": "https://developer.mozilla.org/ru/docs/Web/HTTP/Overview"},
                         {"text": "HTTP Methods", "url": "https://www.restapitutorial.com/lessons/httpmethods.html"},
-                        {"text": "Разница между PUT и POST", "url": "https://stackoverflow.com/questions/630453/put-vs-post-in-rest"}
+                        {"text": "Разница между PUT и POST",
+                         "url": "https://stackoverflow.com/questions/630453/put-vs-post-in-rest"}
                     ],
                     "projectIdea": "Создание простого REST API для управления списком задач (To-Do List)."
                 },
                 {
                     "subtitle": "Структура HTTP-запросов и ответов",
                     "links": [
-                        {"text": "Структура HTTP-запросов и ответов", "url": "https://developer.mozilla.org/ru/docs/Web/HTTP/Messages"},
-                        {"text": "HTTP Message Structure", "url": "https://www.tutorialspoint.com/http/http_message_structure.htm"}
+                        {"text": "Структура HTTP-запросов и ответов",
+                         "url": "https://developer.mozilla.org/ru/docs/Web/HTTP/Messages"},
+                        {"text": "HTTP Message Structure",
+                         "url": "https://www.tutorialspoint.com/http/http_message_structure.htm"}
                     ],
                     "projectIdea": "Реализация сервера, который обрабатывает и возвращает различные виды HTTP-запросов."
                 },
@@ -147,7 +150,8 @@ async def read_learn(request: Request):
                     "subtitle": "Заголовки HTTP и их использование",
                     "links": [
                         {"text": "Заголовки HTTP", "url": "https://developer.mozilla.org/ru/docs/Web/HTTP/Headers"},
-                        {"text": "HTTP Headers Overview", "url": "https://www.ntu.edu.sg/home/ehchua/programming/webprogramming/HTTP_Basics.html"}
+                        {"text": "HTTP Headers Overview",
+                         "url": "https://www.ntu.edu.sg/home/ehchua/programming/webprogramming/HTTP_Basics.html"}
                     ],
                     "projectIdea": "Создание API, который использует различные заголовки для управления кэшированием и авторизацией."
                 },
@@ -162,8 +166,10 @@ async def read_learn(request: Request):
                 {
                     "subtitle": "Сертификаты и их проверка",
                     "links": [
-                        {"text": "Что такое SSL-сертификаты", "url": "https://habr.com/ru/company/ua-hosting/blog/267405/"},
-                        {"text": "How SSL Certificates Work", "url": "https://www.digicert.com/how-ssl-certificates-work"}
+                        {"text": "Что такое SSL-сертификаты",
+                         "url": "https://habr.com/ru/company/ua-hosting/blog/267405/"},
+                        {"text": "How SSL Certificates Work",
+                         "url": "https://www.digicert.com/how-ssl-certificates-work"}
                     ],
                     "projectIdea": "Настройка собственного сертификата для веб-сайта и проверка его правильной установки."
                 }
@@ -175,8 +181,10 @@ async def read_learn(request: Request):
                 {
                     "subtitle": "Принципы работы WebSocket",
                     "links": [
-                        {"text": "Что такое WebSocket", "url": "https://developer.mozilla.org/ru/docs/Web/API/WebSockets_API/Writing_WebSocket_servers"},
-                        {"text": "Introduction to WebSockets", "url": "https://www.tutorialspoint.com/websockets/index.htm"}
+                        {"text": "Что такое WebSocket",
+                         "url": "https://developer.mozilla.org/ru/docs/Web/API/WebSockets_API/Writing_WebSocket_servers"},
+                        {"text": "Introduction to WebSockets",
+                         "url": "https://www.tutorialspoint.com/websockets/index.htm"}
                     ],
                     "projectIdea": "Создание чата в реальном времени с использованием WebSocket."
                 },
@@ -191,8 +199,10 @@ async def read_learn(request: Request):
                 {
                     "subtitle": "Примеры использования WebSocket",
                     "links": [
-                        {"text": "Использование WebSocket", "url": "https://developer.mozilla.org/ru/docs/Web/API/WebSockets_API"},
-                        {"text": "WebSocket Use Cases", "url": "https://www.smashingmagazine.com/2018/02/simplified-websockets-example/"}
+                        {"text": "Использование WebSocket",
+                         "url": "https://developer.mozilla.org/ru/docs/Web/API/WebSockets_API"},
+                        {"text": "WebSocket Use Cases",
+                         "url": "https://www.smashingmagazine.com/2018/02/simplified-websockets-example/"}
                     ],
                     "projectIdea": "Реализация системы уведомлений в реальном времени для веб-приложения."
                 }
@@ -213,7 +223,8 @@ async def read_learn(request: Request):
                     "subtitle": "Работа сетевых протоколов",
                     "links": [
                         {"text": "Протоколы сетей", "url": "https://losst.ru/protokoly-setej"},
-                        {"text": "Network Protocols", "url": "https://www.cisco.com/c/en/us/solutions/enterprise-networks/network-protocols.html"}
+                        {"text": "Network Protocols",
+                         "url": "https://www.cisco.com/c/en/us/solutions/enterprise-networks/network-protocols.html"}
                     ],
                     "projectIdea": "Реализация простого сетевого эмулятора, который демонстрирует работу различных протоколов."
                 },
@@ -221,7 +232,8 @@ async def read_learn(request: Request):
                     "subtitle": "Анализ сетевого трафика",
                     "links": [
                         {"text": "Анализ сетевого трафика", "url": "https://habr.com/ru/company/itsumma/blog/271109/"},
-                        {"text": "Network Traffic Analysis", "url": "https://www.varonis.com/blog/network-traffic-analysis"}
+                        {"text": "Network Traffic Analysis",
+                         "url": "https://www.varonis.com/blog/network-traffic-analysis"}
                     ],
                     "projectIdea": "Анализ трафика на локальном сервере с помощью Wireshark и представление результатов."
                 }
@@ -234,7 +246,8 @@ async def read_learn(request: Request):
                     "subtitle": "Основные команды и их использование",
                     "links": [
                         {"text": "Основные команды Linux", "url": "https://losst.ru/komandnaya-stroka-linux"},
-                        {"text": "Linux Command Line Basics", "url": "https://ubuntu.com/tutorials/command-line-for-beginners#1-overview"}
+                        {"text": "Linux Command Line Basics",
+                         "url": "https://ubuntu.com/tutorials/command-line-for-beginners#1-overview"}
                     ],
                     "projectIdea": "Создание набора скриптов для автоматизации повседневных задач."
                 },
@@ -250,7 +263,8 @@ async def read_learn(request: Request):
                     "subtitle": "Примеры bash-скриптов",
                     "links": [
                         {"text": "Примеры bash-скриптов", "url": "https://losst.ru/primeri-bash-scenariev"},
-                        {"text": "Bash Script Examples", "url": "https://www.cyberciti.biz/tips/linux-showcase-10-umask-examples.html"}
+                        {"text": "Bash Script Examples",
+                         "url": "https://www.cyberciti.biz/tips/linux-showcase-10-umask-examples.html"}
                     ],
                     "projectIdea": "Написание скрипта для мониторинга системных ресурсов и уведомления об их использовании."
                 }
@@ -263,7 +277,8 @@ async def read_learn(request: Request):
                     "subtitle": "Установка и настройка Linux",
                     "links": [
                         {"text": "Установка Linux", "url": "https://losst.ru/kak-ustanovit-linux"},
-                        {"text": "Installing Linux", "url": "https://ubuntu.com/tutorials/install-ubuntu-desktop#1-overview"}
+                        {"text": "Installing Linux",
+                         "url": "https://ubuntu.com/tutorials/install-ubuntu-desktop#1-overview"}
                     ],
                     "projectIdea": "Развертывание собственного веб-сервера на базе Linux."
                 },
@@ -271,15 +286,18 @@ async def read_learn(request: Request):
                     "subtitle": "Администрирование системы",
                     "links": [
                         {"text": "Администрирование Linux", "url": "https://habr.com/ru/company/ruvds/blog/450312/"},
-                        {"text": "Linux System Administration", "url": "https://linuxize.com/post/basic-linux-system-administration-tasks/"}
+                        {"text": "Linux System Administration",
+                         "url": "https://linuxize.com/post/basic-linux-system-administration-tasks/"}
                     ],
                     "projectIdea": "Настройка системы мониторинга и логирования на Linux-сервере."
                 },
                 {
                     "subtitle": "Управление пользователями и правами доступа",
                     "links": [
-                        {"text": "Управление пользователями в Linux", "url": "https://losst.ru/upravlenie-polzovatelyami-v-linux"},
-                        {"text": "Managing Users in Linux", "url": "https://www.tecmint.com/manage-users-and-groups-in-linux/"}
+                        {"text": "Управление пользователями в Linux",
+                         "url": "https://losst.ru/upravlenie-polzovatelyami-v-linux"},
+                        {"text": "Managing Users in Linux",
+                         "url": "https://www.tecmint.com/manage-users-and-groups-in-linux/"}
                     ],
                     "projectIdea": "Создание и управление несколькими пользователями и группами на сервере."
                 }
@@ -300,7 +318,8 @@ async def read_learn(request: Request):
                     "subtitle": "Docker-compose: управление многоконтейнерными приложениями",
                     "links": [
                         {"text": "Docker-compose", "url": "https://docs.docker.com/compose/"},
-                        {"text": "Introduction to Docker Compose", "url": "https://docs.docker.com/compose/gettingstarted/"}
+                        {"text": "Introduction to Docker Compose",
+                         "url": "https://docs.docker.com/compose/gettingstarted/"}
                     ],
                     "projectIdea": "Создание многоконтейнерного приложения с использованием docker-compose."
                 },
@@ -308,7 +327,8 @@ async def read_learn(request: Request):
                     "subtitle": "Различия между docker-compose и docker compose",
                     "links": [
                         {"text": "Docker compose v2", "url": "https://docs.docker.com/compose/cli-command/"},
-                        {"text": "Docker Compose V2", "url": "https://collabnix.com/docker-compose-v2-now-generally-available/"}
+                        {"text": "Docker Compose V2",
+                         "url": "https://collabnix.com/docker-compose-v2-now-generally-available/"}
                     ],
                     "projectIdea": "Обновление старого проекта на docker-compose v1 до docker-compose v2."
                 }
@@ -321,7 +341,8 @@ async def read_learn(request: Request):
                     "subtitle": "Pydantic: валидация данных",
                     "links": [
                         {"text": "Документация Pydantic", "url": "https://pydantic-docs.helpmanual.io/"},
-                        {"text": "Introduction to Pydantic", "url": "https://towardsdatascience.com/introduction-to-pydantic-1ef4a90556d8"}
+                        {"text": "Introduction to Pydantic",
+                         "url": "https://towardsdatascience.com/introduction-to-pydantic-1ef4a90556d8"}
                     ],
                     "projectIdea": "Создание API с использованием FastAPI и валидацией данных через Pydantic."
                 },
@@ -337,7 +358,8 @@ async def read_learn(request: Request):
                     "subtitle": "Что такое ORM и зачем они нужны",
                     "links": [
                         {"text": "Что такое ORM", "url": "https://habr.com/ru/post/193380/"},
-                        {"text": "Introduction to ORM", "url": "https://www.fullstackpython.com/object-relational-mappers-orms.html"}
+                        {"text": "Introduction to ORM",
+                         "url": "https://www.fullstackpython.com/object-relational-mappers-orms.html"}
                     ],
                     "projectIdea": "Реализация простого блога с использованием ORM."
                 }
@@ -350,7 +372,8 @@ async def read_learn(request: Request):
                     "subtitle": "Реляционные базы данных: Postgres, MySQL",
                     "links": [
                         {"text": "Введение в PostgreSQL", "url": "https://www.postgresql.org/docs/"},
-                        {"text": "Introduction to PostgreSQL", "url": "https://www.tutorialspoint.com/postgresql/index.htm"},
+                        {"text": "Introduction to PostgreSQL",
+                         "url": "https://www.tutorialspoint.com/postgresql/index.htm"},
                         {"text": "Введение в MySQL", "url": "https://dev.mysql.com/doc/"},
                         {"text": "Introduction to MySQL", "url": "https://www.tutorialspoint.com/mysql/index.htm"}
                     ],
@@ -427,7 +450,8 @@ async def read_learn(request: Request):
                     "subtitle": "Стратегии авторизации",
                     "links": [
                         {"text": "Авторизация и аутентификация", "url": "https://habr.com/ru/company/vk/blog/465691/"},
-                        {"text": "Authorization Strategies", "url": "https://www.csoonline.com/article/3242947/what-is-authorization-how-it-differs-from-authentication.html"}
+                        {"text": "Authorization Strategies",
+                         "url": "https://www.csoonline.com/article/3242947/what-is-authorization-how-it-differs-from-authentication.html"}
                     ],
                     "projectIdea": "Реализация ролевой модели доступа для управления правами пользователей."
                 },
@@ -435,7 +459,8 @@ async def read_learn(request: Request):
                     "subtitle": "Безопасность аутентификации",
                     "links": [
                         {"text": "Безопасность аутентификации", "url": "https://habr.com/ru/company/vk/blog/465691/"},
-                        {"text": "Authentication Security", "url": "https://owasp.org/www-project-authentication-cheat-sheet/"}
+                        {"text": "Authentication Security",
+                         "url": "https://owasp.org/www-project-authentication-cheat-sheet/"}
                     ],
                     "projectIdea": "Внедрение многофакторной аутентификации для повышения безопасности приложения."
                 }
@@ -464,7 +489,8 @@ async def read_learn(request: Request):
                     "subtitle": "Безопасность куков",
                     "links": [
                         {"text": "Безопасность куков", "url": "https://habr.com/ru/post/437512/"},
-                        {"text": "Cookie Security", "url": "https://owasp.org/www-community/controls/SecureCookieAttribute"}
+                        {"text": "Cookie Security",
+                         "url": "https://owasp.org/www-community/controls/SecureCookieAttribute"}
                     ],
                     "projectIdea": "Защита куков от XSS и CSRF атак в веб-приложении."
                 }
@@ -477,7 +503,8 @@ async def read_learn(request: Request):
                     "subtitle": "Основные виды кибер атак (SQL Injection, XSS, CSRF и т.д.)",
                     "links": [
                         {"text": "Виды кибер атак", "url": "https://owasp.org/www-project-top-ten/"},
-                        {"text": "Common Cyber Attacks", "url": "https://www.csoonline.com/article/3237324/top-cybersecurity-threats.html"}
+                        {"text": "Common Cyber Attacks",
+                         "url": "https://www.csoonline.com/article/3237324/top-cybersecurity-threats.html"}
                     ],
                     "projectIdea": "Создание веб-приложения с имитацией различных атак для обучения."
                 },
@@ -485,7 +512,8 @@ async def read_learn(request: Request):
                     "subtitle": "Методы предотвращения атак",
                     "links": [
                         {"text": "Методы предотвращения атак", "url": "https://habr.com/ru/post/244991/"},
-                        {"text": "Preventing Cyber Attacks", "url": "https://www.csoonline.com/article/3237325/how-to-prevent-cyber-attacks.html"}
+                        {"text": "Preventing Cyber Attacks",
+                         "url": "https://www.csoonline.com/article/3237325/how-to-prevent-cyber-attacks.html"}
                     ],
                     "projectIdea": "Внедрение защиты от XSS и CSRF в существующее веб-приложение."
                 },
@@ -522,7 +550,8 @@ async def read_learn(request: Request):
                     "subtitle": "Примеры полезных скриптов",
                     "links": [
                         {"text": "Полезные bash-скрипты", "url": "https://losst.ru/primeri-bash-scenariev"},
-                        {"text": "Useful Shell Scripts", "url": "https://www.linuxshelltips.com/useful-linux-bash-scripts/"}
+                        {"text": "Useful Shell Scripts",
+                         "url": "https://www.linuxshelltips.com/useful-linux-bash-scripts/"}
                     ],
                     "projectIdea": "Написание скрипта для мониторинга и уведомления о состоянии сервера."
                 }
@@ -543,7 +572,8 @@ async def read_learn(request: Request):
                     "subtitle": "Celery: распределенная система задач",
                     "links": [
                         {"text": "Документация Celery", "url": "https://docs.celeryproject.org/"},
-                        {"text": "Introduction to Celery", "url": "https://realpython.com/asynchronous-tasks-with-django-and-celery/"}
+                        {"text": "Introduction to Celery",
+                         "url": "https://realpython.com/asynchronous-tasks-with-django-and-celery/"}
                     ],
                     "projectIdea": "Создание системы отложенных задач и планировщика с использованием Celery."
                 }
@@ -556,7 +586,8 @@ async def read_learn(request: Request):
                     "subtitle": "Принципы построения микросервисной архитектуры",
                     "links": [
                         {"text": "Что такое микросервисы", "url": "https://habr.com/ru/post/432868/"},
-                        {"text": "Microservices Architecture", "url": "https://martinfowler.com/articles/microservices.html"}
+                        {"text": "Microservices Architecture",
+                         "url": "https://martinfowler.com/articles/microservices.html"}
                     ],
                     "projectIdea": "Разработка простого микросервисного приложения для управления пользователями."
                 },
@@ -564,7 +595,8 @@ async def read_learn(request: Request):
                     "subtitle": "Преимущества и недостатки",
                     "links": [
                         {"text": "Преимущества микросервисов", "url": "https://habr.com/ru/post/432868/"},
-                        {"text": "Advantages and Disadvantages of Microservices", "url": "https://www.bmc.com/blogs/microservices-architecture/"}
+                        {"text": "Advantages and Disadvantages of Microservices",
+                         "url": "https://www.bmc.com/blogs/microservices-architecture/"}
                     ],
                     "projectIdea": "Анализ и демонстрация масштабируемости микросервисной архитектуры."
                 },
@@ -572,7 +604,8 @@ async def read_learn(request: Request):
                     "subtitle": "Шаблоны проектирования микросервисов",
                     "links": [
                         {"text": "Шаблоны проектирования микросервисов", "url": "https://habr.com/ru/post/273003/"},
-                        {"text": "Microservices Design Patterns", "url": "https://www.toptal.com/software/microservices-architecture-tutorial"}
+                        {"text": "Microservices Design Patterns",
+                         "url": "https://www.toptal.com/software/microservices-architecture-tutorial"}
                     ],
                     "projectIdea": "Реализация шаблонов микросервисов для общего микросервисного приложения."
                 },
@@ -580,15 +613,18 @@ async def read_learn(request: Request):
                     "subtitle": "Оркестрация микросервисов",
                     "links": [
                         {"text": "Оркестрация микросервисов", "url": "https://habr.com/ru/company/otus/blog/437612/"},
-                        {"text": "Microservices Orchestration", "url": "https://www.redhat.com/en/topics/microservices/what-is-microservices-orchestration"}
+                        {"text": "Microservices Orchestration",
+                         "url": "https://www.redhat.com/en/topics/microservices/what-is-microservices-orchestration"}
                     ],
                     "projectIdea": "Настройка Kubernetes для управления микросервисами."
                 },
                 {
                     "subtitle": "Инструменты для микросервисов (Docker, Kubernetes)",
                     "links": [
-                        {"text": "Использование Docker и Kubernetes для микросервисов", "url": "https://habr.com/ru/company/flant/blog/468079/"},
-                        {"text": "Using Docker and Kubernetes for Microservices", "url": "https://kubernetes.io/blog/2018/11/07/microservices-and-kubernetes/"}
+                        {"text": "Использование Docker и Kubernetes для микросервисов",
+                         "url": "https://habr.com/ru/company/flant/blog/468079/"},
+                        {"text": "Using Docker and Kubernetes for Microservices",
+                         "url": "https://kubernetes.io/blog/2018/11/07/microservices-and-kubernetes/"}
                     ],
                     "projectIdea": "Развертывание микросервисов с использованием Docker и Kubernetes."
                 }
@@ -625,7 +661,8 @@ async def read_learn(request: Request):
                     "subtitle": "Преимущества и недостатки по сравнению с REST",
                     "links": [
                         {"text": "GraphQL vs REST", "url": "https://habr.com/ru/post/441574/"},
-                        {"text": "GraphQL vs REST Comparison", "url": "https://www.apollographql.com/blog/graphql/basics/graphql-vs-rest/"}
+                        {"text": "GraphQL vs REST Comparison",
+                         "url": "https://www.apollographql.com/blog/graphql/basics/graphql-vs-rest/"}
                     ],
                     "projectIdea": "Анализ производительности и гибкости GraphQL по сравнению с REST."
                 },
@@ -649,7 +686,8 @@ async def read_learn(request: Request):
                     "subtitle": "Облачные технологии",
                     "links": [
                         {"text": "Облачные технологии", "url": "https://aws.amazon.com/getting-started/"},
-                        {"text": "Introduction to Cloud Computing", "url": "https://azure.microsoft.com/en-us/overview/what-is-cloud-computing/"}
+                        {"text": "Introduction to Cloud Computing",
+                         "url": "https://azure.microsoft.com/en-us/overview/what-is-cloud-computing/"}
                     ],
                     "projectIdea": "Развертывание веб-приложения на AWS с использованием сервисов EC2 и S3."
                 },
@@ -657,7 +695,8 @@ async def read_learn(request: Request):
                     "subtitle": "Контейнеризация и оркестрация (Kubernetes)",
                     "links": [
                         {"text": "Основы Kubernetes", "url": "https://kubernetes.io/docs/concepts/"},
-                        {"text": "Kubernetes Introduction", "url": "https://www.redhat.com/en/topics/containers/what-is-kubernetes"}
+                        {"text": "Kubernetes Introduction",
+                         "url": "https://www.redhat.com/en/topics/containers/what-is-kubernetes"}
                     ],
                     "projectIdea": "Развертывание и управление контейнерами с помощью Kubernetes."
                 },
@@ -673,7 +712,8 @@ async def read_learn(request: Request):
                     "subtitle": "Применение DPI в сетевой безопасности",
                     "links": [
                         {"text": "DPI в сетевой безопасности", "url": "https://habr.com/ru/company/ruvds/blog/486234/"},
-                        {"text": "DPI for Network Security", "url": "https://www.csoonline.com/article/3250247/what-is-deep-packet-inspection-how-it-works-and-when-to-use-it.html"}
+                        {"text": "DPI for Network Security",
+                         "url": "https://www.csoonline.com/article/3250247/what-is-deep-packet-inspection-how-it-works-and-when-to-use-it.html"}
                     ],
                     "projectIdea": "Анализ и защита сетевого трафика от подозрительных пакетов."
                 },
@@ -689,7 +729,8 @@ async def read_learn(request: Request):
                     "subtitle": "Методы деплоя проектов",
                     "links": [
                         {"text": "Деплой веб-приложений", "url": "https://habr.com/ru/post/334066/"},
-                        {"text": "Deploying Web Applications", "url": "https://www.digitalocean.com/community/tutorial_series/getting-started-with-django-apps"}
+                        {"text": "Deploying Web Applications",
+                         "url": "https://www.digitalocean.com/community/tutorial_series/getting-started-with-django-apps"}
                     ],
                     "projectIdea": "Деплой веб-приложения на облачный сервис с использованием CI/CD."
                 },
@@ -713,7 +754,8 @@ async def read_learn(request: Request):
                     "subtitle": "Принципы анонимизации кода",
                     "links": [
                         {"text": "Анонимизация кода", "url": "https://habr.com/ru/post/491700/"},
-                        {"text": "Code Anonymization", "url": "https://www.oreilly.com/library/view/anonymizing-data/9781449311775/ch04.html"}
+                        {"text": "Code Anonymization",
+                         "url": "https://www.oreilly.com/library/view/anonymizing-data/9781449311775/ch04.html"}
                     ],
                     "projectIdea": "Реализация системы анонимизации данных в веб-приложении."
                 },
@@ -729,7 +771,8 @@ async def read_learn(request: Request):
                     "subtitle": "Примеры использования",
                     "links": [
                         {"text": "Примеры анонимизации кода", "url": "https://habr.com/ru/post/491700/"},
-                        {"text": "Anonymization Examples", "url": "https://dataprivacylab.org/dataprivacy/projects/kanonymity/index.html"}
+                        {"text": "Anonymization Examples",
+                         "url": "https://dataprivacylab.org/dataprivacy/projects/kanonymity/index.html"}
                     ],
                     "projectIdea": "Реализация и тестирование различных методов анонимизации в проекте."
                 },
@@ -737,23 +780,28 @@ async def read_learn(request: Request):
                     "subtitle": "Стратификация кода и построение современных сайтов",
                     "links": [
                         {"text": "Стратификация кода", "url": "https://habr.com/ru/post/462643/"},
-                        {"text": "Code Layering", "url": "https://martinfowler.com/articles/refactoring-code-layering.html"}
+                        {"text": "Code Layering",
+                         "url": "https://martinfowler.com/articles/refactoring-code-layering.html"}
                     ],
                     "projectIdea": "Реализация стратифицированного архитектурного подхода в веб-приложении."
                 },
                 {
                     "subtitle": "Использование современных инструментов построения веба",
                     "links": [
-                        {"text": "Современные инструменты веб-разработки", "url": "https://habr.com/ru/company/otus/blog/492056/"},
-                        {"text": "Modern Web Development Tools", "url": "https://developer.mozilla.org/en-US/docs/Learn/Tools_and_testing/Understanding_client-side_tools/Introduction"}
+                        {"text": "Современные инструменты веб-разработки",
+                         "url": "https://habr.com/ru/company/otus/blog/492056/"},
+                        {"text": "Modern Web Development Tools",
+                         "url": "https://developer.mozilla.org/en-US/docs/Learn/Tools_and_testing/Understanding_client-side_tools/Introduction"}
                     ],
                     "projectIdea": "Создание современного веб-приложения с использованием React, Vue.js или Angular."
                 },
                 {
                     "subtitle": "Построение современных сайтов",
                     "links": [
-                        {"text": "Построение современных сайтов", "url": "https://habr.com/ru/company/ruvds/blog/436034/"},
-                        {"text": "Building Modern Websites", "url": "https://www.smashingmagazine.com/2020/02/building-modern-web-layouts-flexbox-css-grid/"}
+                        {"text": "Построение современных сайтов",
+                         "url": "https://habr.com/ru/company/ruvds/blog/436034/"},
+                        {"text": "Building Modern Websites",
+                         "url": "https://www.smashingmagazine.com/2020/02/building-modern-web-layouts-flexbox-css-grid/"}
                     ],
                     "projectIdea": "Создание респонсивного и SEO-оптимизированного сайта с использованием современных технологий."
                 }
@@ -773,7 +821,8 @@ async def read_learn(request: Request):
                 {
                     "subtitle": "Примеры использования Jinja2",
                     "links": [
-                        {"text": "Using Jinja2", "url": "https://flask.palletsprojects.com/en/2.0.x/patterns/templateinheritance/"},
+                        {"text": "Using Jinja2",
+                         "url": "https://flask.palletsprojects.com/en/2.0.x/patterns/templateinheritance/"},
                         {"text": "Jinja2 Examples", "url": "https://pythonspot.com/jinja2/"}
                     ],
                     "projectIdea": "Реализация системы динамического создания HTML-страниц с помощью Jinja2."
@@ -782,7 +831,8 @@ async def read_learn(request: Request):
                     "subtitle": "Расширенные возможности Jinja2",
                     "links": [
                         {"text": "Advanced Jinja2", "url": "https://jinja.palletsprojects.com/en/3.0.x/templates/"},
-                        {"text": "Jinja2 Features", "url": "https://realpython.com/primer-on-jinja-templating/#advanced-jinja2"}
+                        {"text": "Jinja2 Features",
+                         "url": "https://realpython.com/primer-on-jinja-templating/#advanced-jinja2"}
                     ],
                     "projectIdea": "Создание сложных шаблонов с использованием макросов и фильтров Jinja2."
                 }
@@ -1001,6 +1051,7 @@ async def manage_terminal(request: Request,
                                            "bottles": bottles,
                                            "sorted": sorted_bottles,
                                            "current_user": current_user})
+
 
 
 @app.get("/admin/panel", response_class=HTMLResponse)
