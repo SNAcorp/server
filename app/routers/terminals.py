@@ -20,7 +20,6 @@ BIG_PORTION_TIME = 9
 
 @router.post("/register-terminal")
 async def register_terminal(request: RegisterTerminalRequest, db: AsyncSession = Depends(get_db)):
-
     res = await db.execute(select(Terminal).where(Terminal.serial == request.serial))
     old_terminal = res.scalars().first()
     if old_terminal is not None:
@@ -92,7 +91,6 @@ async def use_terminal(request: UseTerminalRequest, db: AsyncSession = Depends(g
     if terminal_bottle is None:
         raise HTTPException(status_code=404, detail="Bottle not found in the terminal")
     terminal_bottle.remaining_volume -= request.volume
-
 
     order_item = OrderItem(order_id=order, bottle_id=terminal_bottle.bottle_id, volume=request.volume)
     db.add(order_item)
@@ -193,15 +191,30 @@ async def update_terminal_bottle(terminal_id: int, request: Request, db: AsyncSe
 
         if terminal_bottle:
             if terminal_bottle.bottle_id != bottle_id:
+                bottle = terminal_bottle.bottle
+                initial_volume = bottle.volume
+                used_volume = initial_volume - terminal_bottle.remaining_volume
+                if used_volume > 0:
+                    usage_log = BottleUsageLog(
+                        terminal_id=terminal.id,
+                        bottle_id=bottle.id,
+                        usage_date=datetime.utcnow(),
+                        used_volume=used_volume
+                    )
+                    db.add(usage_log)
+
                 terminal_bottle.bottle_id = bottle_id
                 terminal_bottle.remaining_volume = (
-                    await db.execute(select(Bottle.volume).where(Bottle.id == bottle_id))).scalar()
+                    await db.execute(select(Bottle.volume).where(Bottle.id == bottle_id))
+                ).scalar()
         else:
             terminal_bottle = TerminalBottle(
                 terminal_id=terminal_id,
                 bottle_id=bottle_id,
                 slot_number=slot_number,
-                remaining_volume=(await db.execute(select(Bottle.volume).where(Bottle.id == bottle_id))).scalar(),
+                remaining_volume=(
+                    await db.execute(select(Bottle.volume).where(Bottle.id == bottle_id))
+                ).scalar(),
             )
             db.add(terminal_bottle)
 

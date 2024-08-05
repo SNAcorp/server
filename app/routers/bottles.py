@@ -77,6 +77,7 @@ async def create_bottle_endpoint(
 async def read_bottle_usage_log(request: Request, db: AsyncSession = Depends(get_db)):
     logs = await db.execute(select(BottleUsageLog))
     result = logs.all()
+    print(result)
     return app_templates.TemplateResponse("bottle_usage_log.html", {"request": request, "logs": result})
 
 @router.get("/{bottle_id}", response_class=HTMLResponse)
