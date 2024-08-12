@@ -12,4 +12,4 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine, clas
 
 async def get_db() -> AsyncSession:
     async with SessionLocal() as session:
-        yield session  # Создание асинхронной сессии для взаимодействия с базой данных
+        yield session
