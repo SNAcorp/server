@@ -73,7 +73,8 @@ async def check_user(user_id: int,
                      db: AsyncSession = Depends(get_db)):
     if current_user is None:
         raise HTTPException(401, "Unauthorized")
-    user = await get_user(user_id)
+    user = await get_user(user_id, db)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return user
+

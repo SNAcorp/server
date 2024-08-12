@@ -35,8 +35,8 @@ async def get_user_details(user_id: int,
 @router.put("/user/{user_id}", response_class=JSONResponse)
 async def update_user_details(user_id: int,
                               user_data: dict,
-                              db: AsyncSession = Depends(get_db),
-                              current_user: User = Depends(get_admin_user)):
+                              current_user: User = Depends(get_admin_user),
+                              db: AsyncSession = Depends(get_db)):
     user = await check_user(user_id)
     updated_user = await update_user(user, user_data, db)
     user_data = user_to_dict(updated_user)
