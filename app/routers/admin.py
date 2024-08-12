@@ -16,7 +16,7 @@ async def change_user_role(request: Request,
                            user_id: int,
                            db: AsyncSession = Depends(get_db),
                            current_user: User = Depends(get_admin_user)):
-    user = await check_user(user_id, current_user=current_user)
+    user = await check_user(user_id)
     data = await request.json()
     if data["role"] == "superuser" and not current_user.is_superuser:
         raise HTTPException(status_code=403, detail="Permission denied")
@@ -27,7 +27,7 @@ async def change_user_role(request: Request,
 @router.get("/user/{user_id}", response_class=JSONResponse)
 async def get_user_details(user_id: int,
                            current_user: User = Depends(get_admin_user)):
-    user = await check_user(user_id, current_user=current_user)
+    user = await check_user(user_id)
     user_data = user_to_dict(user)
     return JSONResponse(content=user_data)
 
@@ -37,7 +37,7 @@ async def update_user_details(user_id: int,
                               user_data: dict,
                               db: AsyncSession = Depends(get_db),
                               current_user: User = Depends(get_admin_user)):
-    user = await check_user(user_id, current_user=current_user)
+    user = await check_user(user_id)
     updated_user = await update_user(user, user_data, db)
     user_data = user_to_dict(updated_user)
     return JSONResponse(content=user_data)
@@ -48,7 +48,7 @@ async def update_user_details(user_id: int,
                               user_data: dict,
                               db: AsyncSession = Depends(get_db),
                               current_user: User = Depends(get_admin_user)):
-    user = await check_user(user_id, current_user=current_user)
+    user = await check_user(user_id)
     updated_user = await update_user(user, user_data, db)
     return updated_user
 

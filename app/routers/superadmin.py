@@ -14,7 +14,7 @@ router = APIRouter()
 async def verify_user(user_id: int,
                       db: AsyncSession = Depends(get_db),
                       current_user: User = Depends(get_superadmin_user)):
-    user = await check_user(user_id, current_user=current_user)
+    user = await check_user(user_id)
     updated_user = await update_user_status(user, True, db)
     return updated_user
 
