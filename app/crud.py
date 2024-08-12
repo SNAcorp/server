@@ -13,27 +13,27 @@ from app.schemas import (UserCreate)
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
-async def get_user(user_id: int, db: AsyncSession = Depends(get_db)):
+async def get_user(user_id: int, db: AsyncSession):
     result = await db.execute(select(User).filter(User.id == user_id))
     return result.scalars().first()
 
 
-async def get_user_by_email(email: str, db: AsyncSession = Depends(get_db)):
+async def get_user_by_email(email: str, db: AsyncSession):
     result = await db.execute(select(User).filter(User.email == email))
     return result.scalars().first()
 
 
-async def get_all_users(db: AsyncSession = Depends(get_db)):
+async def get_all_users(db: AsyncSession):
     result = await db.execute(select(User))
     return result.scalars().all()
 
 
-async def get_unblocked_users(db: AsyncSession = Depends(get_db)):
+async def get_unblocked_users(db: AsyncSession):
     result = await db.execute(select(User).where(User.is_active is True))
     return result.scalars().all()
 
 
-async def get_blocked_users(db: AsyncSession = Depends(get_db)):
+async def get_blocked_users(db: AsyncSession):
     result = await db.execute(select(User).where(User.is_active is False))
     return result.scalars().all()
 
@@ -59,7 +59,7 @@ async def create_user(user: UserCreate, db: AsyncSession = Depends(get_db)):
     return db_user
 
 
-async def get_unverified_users(db: AsyncSession = Depends(get_db)):
+async def get_unverified_users(db: AsyncSession):
     result = await db.execute(select(User).where(not User.is_verified))
     return result.scalars().all()
 
@@ -68,7 +68,7 @@ async def hash_func(word: str) -> str:
     return pwd_context.hash(word)
 
 
-async def update_user_role(user: User, role: str, db: AsyncSession = Depends(get_db)):
+async def update_user_role(user: User, role: str, db: AsyncSession):
     user.role = role
     await db.commit()
     await db.refresh(user)
