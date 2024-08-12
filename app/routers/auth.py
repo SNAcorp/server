@@ -14,10 +14,10 @@ router = APIRouter()
 @router.post("/register/")
 async def register_user(user: UserCreate,
                         db: AsyncSession = Depends(get_db)):
-    db_user = await get_user_by_email(user.email)
+    db_user = await get_user_by_email(user.email, db)
     if db_user:
         raise HTTPException(status_code=400, detail="Email already registered")
-    new_user = await create_user(user)
+    new_user = await create_user(user, db)
     if new_user.email == "stepanov.iop@gmail.com":
         new_user.is_superuser = True
         new_user.is_verified = True
@@ -28,8 +28,8 @@ async def register_user(user: UserCreate,
 
 
 @router.post("/login")
-async def login_user(info: UserLogin):
-    user = await get_user_by_email(info.email)
+async def login_user(info: UserLogin, db: AsyncSession = Depends(get_db)):
+    user = await get_user_by_email(info.email, db)
     if not user or not verify_password(info.password, user.hashed_password):
         raise HTTPException(status_code=400, detail="Invalid credentials")
     if not user.is_verified:

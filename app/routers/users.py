@@ -20,10 +20,11 @@ templates = Jinja2Templates(directory="app/templates")
 async def read_users(request: Request,
                      skip: int = 0,
                      limit: int = 10,
+                     db: AsyncSession = Depends(get_db),
                      current_user: User = Depends(get_current_user)):
     if current_user is None:
         return RedirectResponse("/login", 303)
-    users = await get_users(skip=skip, limit=limit)
+    users = await get_users(skip=skip, limit=limit, db=db)
     return templates.TemplateResponse("users_list.html", {"request": request, "users": users})
 
 

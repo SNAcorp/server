@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import (AsyncSession, create_async_engine)
 from sqlalchemy.orm import (sessionmaker)
 
 from app.crud import (get_user_by_email, get_user)
+from app.database import get_db
 from app.schemas import (User)
 
 # DATABASE_URL = "postgresql+asyncpg://nikitastepanov@localhost/terminals"
@@ -22,7 +23,7 @@ SECRET_KEY = "YOUR_SECRET_KEY"
 ALGORITHM = "HS256"
 
 
-async def get_current_user(request: Request):
+async def get_current_user(request: Request, db: AsyncSession = Depends(get_db)):
     token = request.cookies.get("access_token")
     if not token:
         return None
@@ -33,7 +34,7 @@ async def get_current_user(request: Request):
             return None
     except jwt.PyJWTError:
         return None
-    user = await get_user_by_email(email)
+    user = await get_user_by_email(email, db)
     if user is None:
         return None
     return user
@@ -54,10 +55,11 @@ async def get_superadmin_user(current_user: User = Depends(get_current_user)):
 
 
 async def check_user_for_superuser(user_id: int,
+                                   db: AsyncSession = Depends(get_db),
                                    current_user: User = Depends(get_admin_user)):
     if current_user is None:
         raise HTTPException(401, "Unauthorized")
-    user = await get_user(user_id)
+    user = await get_user(user_id, db)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     if user.is_superuser and not current_user.is_superuser:
@@ -67,10 +69,11 @@ async def check_user_for_superuser(user_id: int,
 
 
 async def check_user(user_id: int,
+                     db: AsyncSession = Depends(get_db),
                      current_user: User = Depends(get_admin_user)):
     if current_user is None:
         raise HTTPException(401, "Unauthorized")
-    user = await get_user(user_id)
+    user = await get_user(user_id, db)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return user
