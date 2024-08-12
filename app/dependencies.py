@@ -35,7 +35,7 @@ async def get_current_user(request: Request, db: AsyncSession = Depends(get_db))
     except jwt.PyJWTError:
         return None
     user = await get_user_by_email(email, db)
-    if user is None:
+    if user is None or user.is_active is False or user.block_date is not None:
         return None
     return user
 

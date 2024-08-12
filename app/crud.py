@@ -80,6 +80,7 @@ async def update_user_status(user: User, is_verified: bool, db: AsyncSession):
 
 
 async def block_user(user: User, db: AsyncSession):
+    user.is_active = False
     user.block_date = datetime.utcnow()
     await db.commit()
     await db.refresh(user)
@@ -87,6 +88,7 @@ async def block_user(user: User, db: AsyncSession):
 
 
 async def unblock_user(user: User, db: AsyncSession):
+    user.is_active = True
     user.block_date = None
     await db.commit()
     await db.refresh(user)
