@@ -1,48 +1,51 @@
-from datetime import datetime
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
-from app import models
-from passlib.context import CryptContext
+from passlib.context import (CryptContext)
+from datetime import (datetime)
 
-from app.models import User
-from app.schemas import UserCreate
+from fastapi import (Depends)
+
+from sqlalchemy.ext.asyncio import (AsyncSession)
+from sqlalchemy.future import (select)
+
+from app.database import (get_db)
+from app.models import (User)
+from app.schemas import (UserCreate)
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
-async def get_user(db: AsyncSession, user_id: int):
-    result = await db.execute(select(models.User).filter(models.User.id == user_id))
+async def get_user(user_id: int, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(User).filter(User.id == user_id))
     return result.scalars().first()
 
 
-async def get_user_by_email(db: AsyncSession, email: str):
-    result = await db.execute(select(models.User).filter(models.User.email == email))
+async def get_user_by_email(email: str, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(User).filter(User.email == email))
     return result.scalars().first()
 
 
-async def get_all_users(db: AsyncSession):
+async def get_all_users(db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(User))
     return result.scalars().all()
 
 
-async def get_unblocked_users(db: AsyncSession):
-    result = await db.execute(select(User).where(User.is_active == True))
+async def get_unblocked_users(db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(User).where(User.is_active is True))
     return result.scalars().all()
 
 
-async def get_blocked_users(db: AsyncSession):
-    result = await db.execute(select(User).where(User.is_active == False))
+async def get_blocked_users(db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(User).where(User.is_active is False))
     return result.scalars().all()
 
 
-async def get_users(db: AsyncSession, skip: int = 0, limit: int = 10):
-    result = await db.execute(select(models.User).offset(skip).limit(limit))
+async def get_users(skip: int = 0, limit: int = 10, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(User).offset(skip).limit(limit))
     return result.scalars().all()
 
 
-async def create_user(db: AsyncSession, user: UserCreate):
+async def create_user(user: UserCreate, db: AsyncSession = Depends(get_db)):
     hashed_password = pwd_context.hash(user.password)
-    db_user = models.User(
+    db_user = User(
         email=user.email,
         hashed_password=hashed_password,
         first_name=user.first_name,
@@ -56,7 +59,7 @@ async def create_user(db: AsyncSession, user: UserCreate):
     return db_user
 
 
-async def get_unverified_users(db: AsyncSession):
+async def get_unverified_users(db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(User).where(not User.is_verified))
     return result.scalars().all()
 
@@ -65,28 +68,28 @@ async def hash_func(word: str) -> str:
     return pwd_context.hash(word)
 
 
-async def update_user_role(db: AsyncSession, user: models.User, role: str):
+async def update_user_role(user: User, role: str, db: AsyncSession = Depends(get_db)):
     user.role = role
     await db.commit()
     await db.refresh(user)
     return user
 
 
-async def update_user_status(db: AsyncSession, user: models.User, is_verified: bool):
+async def update_user_status(user: User, is_verified: bool, db: AsyncSession = Depends(get_db)):
     user.is_verified = is_verified
     await db.commit()
     await db.refresh(user)
     return user
 
 
-async def block_user(db: AsyncSession, user: models.User):
+async def block_user(user: User, db: AsyncSession = Depends(get_db)):
     user.block_date = datetime.utcnow()
     await db.commit()
     await db.refresh(user)
     return user
 
 
-async def unblock_user(db: AsyncSession, user: models.User):
+async def unblock_user(user: User, db: AsyncSession = Depends(get_db)):
     user.block_date = None
     await db.commit()
     await db.refresh(user)
@@ -110,7 +113,7 @@ def user_to_dict(user: User):
     }
 
 
-async def update_user(db: AsyncSession, user: User, user_data: dict):
+async def update_user(user: User, user_data: dict, db: AsyncSession = Depends(get_db)):
     for key, value in user_data.items():
         setattr(user, key, value)
     db.add(user)

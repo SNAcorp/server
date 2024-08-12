@@ -1,15 +1,17 @@
-from fastapi import APIRouter, Depends, HTTPException, Request
-from fastapi.responses import RedirectResponse
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
-from sqlalchemy.orm import selectinload, joinedload
-from datetime import datetime, timedelta, timezone
-from app.models import Terminal, TerminalBottle, RFID, Order, OrderItem, Bottle, EMPTY_BOTTLE_ID, BottleUsageLog, \
-    OrderRFID
-from app.database import get_db
-from app.jwt_auth import create_terminal_token, verify_terminal
-from app.schemas import TerminalBottleCreate, UseTerminalRequest, TerminalResponse, \
-    ResetTerminalRequest, RegisterTerminalRequest
+from datetime import (datetime)
+
+from fastapi import (APIRouter, Depends, HTTPException, Request)
+from fastapi.responses import (RedirectResponse)
+
+from sqlalchemy.ext.asyncio import (AsyncSession)
+from sqlalchemy.future import (select)
+from sqlalchemy.orm import (selectinload, joinedload)
+
+from app.models import (Terminal, TerminalBottle, RFID, Order,
+                        OrderItem, Bottle, EMPTY_BOTTLE_ID, BottleUsageLog, OrderRFID)
+from app.database import (get_db)
+from app.jwt_auth import (create_terminal_token, verify_terminal)
+from app.schemas import (TerminalBottleCreate, UseTerminalRequest, ResetTerminalRequest, RegisterTerminalRequest)
 
 router = APIRouter()
 SMALL_PORTION = 30
@@ -19,7 +21,8 @@ BIG_PORTION_TIME = 9
 
 
 @router.post("/register-terminal")
-async def register_terminal(request: RegisterTerminalRequest, db: AsyncSession = Depends(get_db)):
+async def register_terminal(request: RegisterTerminalRequest,
+                            db: AsyncSession = Depends(get_db)):
     res = await db.execute(select(Terminal).where(Terminal.serial == request.serial))
     old_terminal = res.scalars().first()
     if old_terminal is not None:
@@ -52,7 +55,8 @@ async def register_terminal(request: RegisterTerminalRequest, db: AsyncSession =
 
 
 @router.post("/use")
-async def use_terminal(request: UseTerminalRequest, db: AsyncSession = Depends(get_db)):
+async def use_terminal(request: UseTerminalRequest,
+                       db: AsyncSession = Depends(get_db)):
     payload = verify_terminal(request.token)
 
     if payload["terminal_id"] != request.terminal_id:
@@ -100,7 +104,8 @@ async def use_terminal(request: UseTerminalRequest, db: AsyncSession = Depends(g
 
 
 @router.post("/add-bottle-to-terminal")
-async def add_bottle_to_terminal(terminal_bottle: TerminalBottleCreate, db: AsyncSession = Depends(get_db)):
+async def add_bottle_to_terminal(terminal_bottle: TerminalBottleCreate,
+                                 db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(Terminal).filter(Terminal.id == terminal_bottle.terminal_id))
     terminal = result.scalars().first()
 
@@ -124,7 +129,8 @@ async def add_bottle_to_terminal(terminal_bottle: TerminalBottleCreate, db: Asyn
 
 
 @router.get("/terminal-bottles/{terminal_id}")
-async def get_terminal_bottles(terminal_id: int, db: AsyncSession = Depends(get_db)):
+async def get_terminal_bottles(terminal_id: int,
+                               db: AsyncSession = Depends(get_db)):
     result = await db.execute(
         select(Terminal).options(selectinload(Terminal.bottles)).filter(Terminal.id == terminal_id))
     terminal = result.scalars().first()
@@ -159,7 +165,9 @@ async def get_terminal_bottles(terminal_id: int, db: AsyncSession = Depends(get_
 
 
 @router.post("/{terminal_id}/update-bottle")
-async def update_terminal_bottle(terminal_id: int, request: Request, db: AsyncSession = Depends(get_db)):
+async def update_terminal_bottle(terminal_id: int,
+                                 request: Request,
+                                 db: AsyncSession = Depends(get_db)):
     form = await request.form()
     bottles_data = {}
 
@@ -238,16 +246,18 @@ async def update_terminal_bottle(terminal_id: int, request: Request, db: AsyncSe
 
 
 @router.post("/reset_bottles")
-async def reset_bottles_endpoint(request: ResetTerminalRequest, db: AsyncSession = Depends(get_db)):
+async def reset_bottles_endpoint(request: ResetTerminalRequest,
+                                 db: AsyncSession = Depends(get_db)):
     payload = verify_terminal(request.token)
     if payload["terminal_id"] != request.terminal_id:
         raise HTTPException(status_code=403, detail="Invalid terminal ID")
 
-    await reset_bottles_to_initial_volume(db, payload["terminal_id"])
+    await reset_bottles_to_initial_volume(payload["terminal_id"], db)
     return {"message": "Bottles in terminal reset to initial volume and usage logged successfully"}
 
 
-async def reset_bottles_to_initial_volume(db: AsyncSession, terminal_id: int):
+async def reset_bottles_to_initial_volume(terminal_id: int,
+                                          db: AsyncSession = Depends(get_db)):
     # Получаем терминал с указанным ID и загруженными бутылками
     result = await db.execute(select(Terminal).where(Terminal.id == terminal_id).options(
         joinedload(Terminal.bottles).joinedload(TerminalBottle.bottle)))

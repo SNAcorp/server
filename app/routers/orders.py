@@ -1,10 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException, Request
-from fastapi.responses import JSONResponse, RedirectResponse
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
-from sqlalchemy.orm import selectinload
-from app.models import Order, RFID, OrderRFID
-from app.database import get_db
+from fastapi import (APIRouter, Depends, HTTPException, Request)
+from fastapi.responses import (JSONResponse, RedirectResponse)
+
+from sqlalchemy.ext.asyncio import (AsyncSession)
+from sqlalchemy.future import (select)
+from sqlalchemy.orm import (selectinload)
+
+from app.models import (Order, RFID, OrderRFID)
+from app.database import (get_db)
 
 router = APIRouter()
 
@@ -17,7 +19,8 @@ async def get_orders(db: AsyncSession = Depends(get_db)):
 
 
 @router.post("/order/{order_id}/complete")
-async def complete_order(order_id: int, db: AsyncSession = Depends(get_db)):
+async def complete_order(order_id: int,
+                         db: AsyncSession = Depends(get_db)):
     result = await db.execute(
         select(Order).options(selectinload(Order.rfids)).where(Order.id == order_id)
     )
@@ -32,7 +35,8 @@ async def complete_order(order_id: int, db: AsyncSession = Depends(get_db)):
 
 
 @router.post("/create-order")
-async def create_order(request: Request, db: AsyncSession = Depends(get_db)):
+async def create_order(request: Request,
+                       db: AsyncSession = Depends(get_db)):
     form = await request.form()
     rfids = form.getlist('rfids')
     order = Order()

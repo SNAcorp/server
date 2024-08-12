@@ -1,7 +1,7 @@
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-from sqlalchemy.orm import sessionmaker
-from app.models import TerminalState
 import os
+
+from sqlalchemy.ext.asyncio import (create_async_engine, AsyncSession)
+from sqlalchemy.orm import (sessionmaker)
 
 DATABASE_URL = os.getenv('DATABASE_URL')
 # DATABASE_URL = "postgresql+asyncpg://nikitastepanov@localhost/terminals"

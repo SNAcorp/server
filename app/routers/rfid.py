@@ -1,17 +1,18 @@
-from datetime import timedelta, datetime
+from fastapi import (APIRouter, Depends)
+from fastapi.responses import (JSONResponse)
 
-from fastapi import APIRouter, Depends
-from fastapi.responses import JSONResponse
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
-from app.models import RFID
-from app.database import get_db
+from sqlalchemy.ext.asyncio import (AsyncSession)
+from sqlalchemy.future import (select)
+
+from app.models import (RFID)
+from app.database import (get_db)
 
 router = APIRouter()
 
 
 @router.get("/validate/{rfid_code}")
-async def validate_rfid(rfid_code: str, db: AsyncSession = Depends(get_db)):
+async def validate_rfid(rfid_code: str,
+                        db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(RFID).where(RFID.code == rfid_code))
     rfid = result.scalars().first()
     if rfid is None:

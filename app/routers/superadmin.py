@@ -1,45 +1,31 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.ext.asyncio import AsyncSession
-from app.schemas import User
-from app.crud import update_user_role, update_user_status, get_user
-from app.dependencies import get_db, get_superadmin_user
+from fastapi import (APIRouter, Depends)
+
+from app.schemas import (User)
+from app.crud import (update_user_role, update_user_status)
+from app.dependencies import (get_superadmin_user, check_user, check_user_for_superuser)
 
 router = APIRouter()
 
 
 @router.put("/verify/{user_id}")
-async def verify_user(user_id: int, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_superadmin_user)):
-    if current_user is None:
-        raise HTTPException(401, "Unauthorized")
-    user = await get_user(db, user_id)
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    updated_user = await update_user_status(db, user, True)
+async def verify_user(user_id: int,
+                      current_user: User = Depends(get_superadmin_user)):
+    user = await check_user(user_id, current_user=current_user)
+    updated_user = await update_user_status(user, True)
     return updated_user
 
 
 @router.put("/reject/{user_id}")
-async def reject_user(user_id: int, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_superadmin_user)):
-    if current_user is None:
-        raise HTTPException(401, "Unauthorized")
-    user = await get_user(db, user_id)
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    if user.role == "superuser" and not current_user.is_superuser:
-        raise HTTPException(status_code=403, detail="Permission denied")
-    updated_user = await update_user_status(db, user, False)
+async def reject_user(user_id: int,
+                      current_user: User = Depends(get_superadmin_user)):
+    user = await check_user_for_superuser(user_id, current_user=current_user)
+    updated_user = await update_user_status(user, False)
     return updated_user
 
 
 @router.put("/superadmin/{user_id}")
-async def make_superadmin(user_id: int, db: AsyncSession = Depends(get_db),
+async def make_superadmin(user_id: int,
                           current_user: User = Depends(get_superadmin_user)):
-    if current_user is None:
-        raise HTTPException(401, "Unauthorized")
-    user = await get_user(db, user_id)
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    if user.role == "superuser" and not current_user.is_superuser:
-        raise HTTPException(status_code=403, detail="Permission denied")
-    updated_user = await update_user_role(db, user, "superadmin")
+    user = await check_user_for_superuser(user_id, current_user=current_user)
+    updated_user = await update_user_role(user, "superadmin")
     return updated_user

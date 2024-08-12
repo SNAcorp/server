@@ -1,11 +1,13 @@
 import jwt
-from datetime import datetime
-from fastapi import HTTPException
-from fastapi.security import HTTPBearer
+from datetime import (datetime)
+
+from fastapi import (HTTPException)
+from fastapi.security import (HTTPBearer)
 
 SECRET_KEY = "your_secret_key"
 ALGORITHM = "HS256"
 security = HTTPBearer()
+
 
 def decode_terminal_token(token: str):
     try:
@@ -13,6 +15,7 @@ def decode_terminal_token(token: str):
         return payload
     except jwt.PyJWTError:
         raise HTTPException(status_code=403, detail="Invalid token")
+
 
 def create_terminal_token(terminal_id: int, registration_date: datetime, uid: str) -> str:
     payload = {
@@ -22,6 +25,7 @@ def create_terminal_token(terminal_id: int, registration_date: datetime, uid: st
     }
     token = jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
     return token
+
 
 def verify_terminal(token: str):
     try:

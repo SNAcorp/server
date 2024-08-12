@@ -1,16 +1,17 @@
 import uuid
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, Request
-from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
-from fastapi.templating import Jinja2Templates
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
-
-from app.dependencies import get_current_user, get_admin_user
-from app.models import Bottle, User, BottleUsageLog
-from app.database import get_db
 import os
 
-from app.schemas import BottleUpdateModel
+from fastapi import (APIRouter, Depends, HTTPException, UploadFile, File, Form, Request)
+from fastapi.responses import (FileResponse, HTMLResponse, RedirectResponse)
+from fastapi.templating import (Jinja2Templates)
+
+from sqlalchemy.ext.asyncio import (AsyncSession)
+from sqlalchemy.future import (select)
+
+from app.dependencies import (get_current_user, get_admin_user)
+from app.models import (Bottle, User, BottleUsageLog)
+from app.database import (get_db)
+from app.schemas import (BottleUpdateModel)
 
 router = APIRouter()
 app_templates = Jinja2Templates(directory="app/templates")
@@ -18,7 +19,8 @@ UPLOAD_DIR = "/images"
 
 
 @router.post("/upload-image")
-async def upload_image(file: UploadFile = File(...), current_user: User = Depends(get_current_user)):
+async def upload_image(file: UploadFile = File(...),
+                       current_user: User = Depends(get_current_user)):
     if current_user is None:
         raise HTTPException(status_code=401, detail="Unauthorized")
     os.makedirs(UPLOAD_DIR, exist_ok=True)
@@ -41,19 +43,17 @@ async def manage_bottles(request: Request,
 
 
 @router.post("/create")
-async def create_bottle_endpoint(
-        name: str = Form(...),
-        winery: str = Form(...),
-        rating_average: float = Form(...),
-        location: str = Form(...),
-        image_path300_hidden: str = Form(...),
-        image_path600_hidden: str = Form(...),
-        description: str = Form(...),
-        wine_type: str = Form(...),
-        volume: float = Form(...),
-        current_user: User = Depends(get_current_user),
-        db: AsyncSession = Depends(get_db)
-):
+async def create_bottle_endpoint(name: str = Form(...),
+                                 winery: str = Form(...),
+                                 rating_average: float = Form(...),
+                                 location: str = Form(...),
+                                 image_path300_hidden: str = Form(...),
+                                 image_path600_hidden: str = Form(...),
+                                 description: str = Form(...),
+                                 wine_type: str = Form(...),
+                                 volume: float = Form(...),
+                                 db: AsyncSession = Depends(get_db),
+                                 current_user: User = Depends(get_current_user)):
     if current_user is None:
         raise HTTPException(status_code=401, detail="Unauthorized")
     new_bottle = Bottle(
@@ -74,7 +74,9 @@ async def create_bottle_endpoint(
 
 
 @router.get("/usages", response_class=HTMLResponse)
-async def read_bottle_usage_log(request: Request, current_user: User = Depends(get_admin_user), db: AsyncSession = Depends(get_db)):
+async def read_bottle_usage_log(request: Request,
+                                db: AsyncSession = Depends(get_db),
+                                current_user: User = Depends(get_admin_user)):
     query = select(BottleUsageLog)
     result = (await db.execute(query)).scalars().all()
 
@@ -90,17 +92,20 @@ async def read_bottle_usage_log(request: Request, current_user: User = Depends(g
         for log in result
     ]
 
-    return app_templates.TemplateResponse("bottle_usage_log.html", {"request": request, "logs": logs, "current_user": current_user})
+    return app_templates.TemplateResponse("bottle_usage_log.html",
+                                          {"request": request, "logs": logs, "current_user": current_user})
 
 
 @router.get("/{bottle_id}", response_class=HTMLResponse)
-async def read_bottle(bottle_id: int, request: Request, current_user: User = Depends(get_current_user),
-                      session: AsyncSession = Depends(get_db)):
+async def read_bottle(bottle_id: int,
+                      request: Request,
+                      db: AsyncSession = Depends(get_db),
+                      current_user: User = Depends(get_current_user)):
     if current_user is None:
         return RedirectResponse("/login", 303)
     if bottle_id < 0:
         if current_user.is_superuser:
-            result = await session.execute(
+            result = await db.execute(
                 select(Bottle).filter(Bottle.id == bottle_id)
             )
             bottle = result.scalars().first()
@@ -108,7 +113,7 @@ async def read_bottle(bottle_id: int, request: Request, current_user: User = Dep
                                                   {"request": request, "bottle": bottle, "current_user": current_user})
         else:
             raise HTTPException(status_code=404, detail="Bottle not found")
-    result = await session.execute(
+    result = await db.execute(
         select(Bottle).filter(Bottle.id == bottle_id)
     )
     bottle = result.scalars().first()
@@ -119,7 +124,8 @@ async def read_bottle(bottle_id: int, request: Request, current_user: User = Dep
 
 
 @router.get("/image/{bottle_id}/{resolution}", response_class=FileResponse)
-async def get_bottle_image(bottle_id: int, resolution: str, current_user: User = Depends(get_current_user),
+async def get_bottle_image(bottle_id: int,
+                           resolution: str,
                            db: AsyncSession = Depends(get_db)):
     async with db as session:
         result = await session.execute(select(Bottle).filter(Bottle.id == bottle_id))
@@ -136,16 +142,14 @@ async def get_bottle_image(bottle_id: int, resolution: str, current_user: User =
 
 
 @router.post("/update-bottle/{bottle_id}")
-async def update_bottle(
-        bottle_id: int,
-        bottle_data: BottleUpdateModel,
-        session: AsyncSession = Depends(get_db)
-):
+async def update_bottle(bottle_id: int,
+                        bottle_data: BottleUpdateModel,
+                        db: AsyncSession = Depends(get_db)):
     if bottle_id < 0:
         raise HTTPException(status_code=404, detail="Bottle not found")
 
-    async with session.begin():
-        result = await session.execute(
+    async with db.begin():
+        result = await db.execute(
             select(Bottle).filter(Bottle.id == bottle_id)
         )
         bottle = result.scalars().first()
@@ -162,6 +166,6 @@ async def update_bottle(
         bottle.wine_type = bottle_data.wine_type
         bottle.volume = bottle_data.volume
 
-        session.add(bottle)
-        await session.commit()
+        db.add(bottle)
+        await db.commit()
     return {"message": "Bottle updated successfully"}
