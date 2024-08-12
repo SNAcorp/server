@@ -13,7 +13,7 @@ from app.schemas import (UserCreate)
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
-async def get_user(user_id: int, db: AsyncSession):
+async def get_user(user_id: int, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(User).filter(User.id == user_id))
     return result.scalars().first()
 
