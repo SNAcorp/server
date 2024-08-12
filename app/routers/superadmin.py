@@ -14,7 +14,7 @@ router = APIRouter()
 async def verify_user(user_id: int,
                       db: AsyncSession = Depends(get_db),
                       current_user: User = Depends(get_superadmin_user)):
-    user = await check_user(user_id)
+    user = await check_user(user_id, current_user=current_user, db=db)
     updated_user = await update_user_status(user, True, db)
     return updated_user
 
@@ -23,7 +23,7 @@ async def verify_user(user_id: int,
 async def reject_user(user_id: int,
                       db: AsyncSession = Depends(get_db),
                       current_user: User = Depends(get_superadmin_user)):
-    user = await check_user_for_superuser(user_id, current_user=current_user)
+    user = await check_user_for_superuser(user_id, current_user=current_user, db=db)
     updated_user = await update_user_status(user, False, db)
     return updated_user
 
@@ -32,6 +32,6 @@ async def reject_user(user_id: int,
 async def make_superadmin(user_id: int,
                           db: AsyncSession = Depends(get_db),
                           current_user: User = Depends(get_superadmin_user)):
-    user = await check_user_for_superuser(user_id, current_user=current_user)
+    user = await check_user_for_superuser(user_id, current_user=current_user, db=db)
     updated_user = await update_user_role(user, "superadmin", db)
     return updated_user

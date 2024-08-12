@@ -16,16 +16,16 @@ router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
 
 
-# @router.get("/", response_model=list[User])
-# async def read_users(request: Request,
-#                      skip: int = 0,
-#                      limit: int = 10,
-#                      db: AsyncSession = Depends(get_db),
-#                      current_user: User = Depends(get_current_user)):
-#     if current_user is None:
-#         return RedirectResponse("/login", 303)
-#     users = await get_users(skip=skip, limit=limit, db=db)
-#     return templates.TemplateResponse("users_list.html", {"request": request, "users": users})
+@router.get("/", response_model=list[User])
+async def read_users(request: Request,
+                     skip: int = 0,
+                     limit: int = 10,
+                     db: AsyncSession = Depends(get_db),
+                     current_user: User = Depends(get_current_user)):
+    if current_user is None:
+        return RedirectResponse("/login", 303)
+    users = await get_users(skip=skip, limit=limit, db=db)
+    return templates.TemplateResponse("users_list.html", {"request": request, "users": users})
 
 
 @router.get("/me/", response_model=User)
@@ -41,7 +41,7 @@ async def change_password(old_password: str = Form(...),
                           new_password: str = Form(...),
                           confirm_password: str = Form(...),
                           db: AsyncSession = Depends(get_db),
-                          current_user: models.User = Depends(get_current_user)):
+                          current_user: User = Depends(get_current_user)):
     if current_user is None:
         raise HTTPException(401, "Unauthorized")
     if not verify_password(old_password, current_user.hashed_password):

@@ -1,19 +1,16 @@
 from passlib.context import (CryptContext)
 from datetime import (datetime)
 
-from fastapi import (Depends)
-
 from sqlalchemy.ext.asyncio import (AsyncSession)
 from sqlalchemy.future import (select)
 
-from app.database import (get_db)
 from app.models import (User)
 from app.schemas import (UserCreate)
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
-async def get_user(user_id: int, db: AsyncSession = Depends(get_db)):
+async def get_user(user_id: int, db: AsyncSession):
     result = await db.execute(select(User).filter(User.id == user_id))
     return result.scalars().first()
 
@@ -38,12 +35,12 @@ async def get_blocked_users(db: AsyncSession):
     return result.scalars().all()
 
 
-async def get_users(skip: int = 0, limit: int = 10, db: AsyncSession = Depends(get_db)):
+async def get_users(db: AsyncSession, skip: int = 0, limit: int = 10):
     result = await db.execute(select(User).offset(skip).limit(limit))
     return result.scalars().all()
 
 
-async def create_user(user: UserCreate, db: AsyncSession = Depends(get_db)):
+async def create_user(user: UserCreate, db: AsyncSession):
     hashed_password = pwd_context.hash(user.password)
     db_user = User(
         email=user.email,
@@ -75,21 +72,21 @@ async def update_user_role(user: User, role: str, db: AsyncSession):
     return user
 
 
-async def update_user_status(user: User, is_verified: bool, db: AsyncSession = Depends(get_db)):
+async def update_user_status(user: User, is_verified: bool, db: AsyncSession):
     user.is_verified = is_verified
     await db.commit()
     await db.refresh(user)
     return user
 
 
-async def block_user(user: User, db: AsyncSession = Depends(get_db)):
+async def block_user(user: User, db: AsyncSession):
     user.block_date = datetime.utcnow()
     await db.commit()
     await db.refresh(user)
     return user
 
 
-async def unblock_user(user: User, db: AsyncSession = Depends(get_db)):
+async def unblock_user(user: User, db: AsyncSession):
     user.block_date = None
     await db.commit()
     await db.refresh(user)
@@ -113,7 +110,7 @@ def user_to_dict(user: User):
     }
 
 
-async def update_user(user: User, user_data: dict, db: AsyncSession = Depends(get_db)):
+async def update_user(user: User, user_data: dict, db: AsyncSession):
     for key, value in user_data.items():
         setattr(user, key, value)
     db.add(user)

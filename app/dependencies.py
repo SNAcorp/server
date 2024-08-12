@@ -55,11 +55,11 @@ async def get_superadmin_user(current_user: User = Depends(get_current_user)):
 
 
 async def check_user_for_superuser(user_id: int,
-                                   current_user: User = Depends(get_admin_user),
-                                   db: AsyncSession = Depends(get_db)):
+                                   current_user: User,
+                                   db: AsyncSession):
     if current_user is None:
         raise HTTPException(401, "Unauthorized")
-    user = await get_user(user_id)
+    user = await get_user(user_id, db)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     if user.is_superuser and not current_user.is_superuser:
@@ -69,12 +69,11 @@ async def check_user_for_superuser(user_id: int,
 
 
 async def check_user(user_id: int,
-                     current_user: User = Depends(get_admin_user),
-                     db: AsyncSession = Depends(get_db)):
+                     current_user: User,
+                     db: AsyncSession):
     if current_user is None:
         raise HTTPException(401, "Unauthorized")
     user = await get_user(user_id, db)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return user
-
