@@ -27,24 +27,21 @@ ALGORITHM = "HS256"
 async def get_current_user(request: Request, db: AsyncSession = Depends(get_db)):
     token = request.cookies.get("access_token")
     if not token:
-        return None
+        raise HTTPException(401, "Unauthorized")
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         email: str = payload.get("sub")
         if email is None:
-            return None
+            raise HTTPException(401, "Unauthorized")
     except jwt.PyJWTError:
-        return None
+        raise HTTPException(401, "Unauthorized")
     user = await get_user_by_email(email, db)
     if user is None or user.is_active is False or user.block_date is not None:
-        raise None
+        raise HTTPException(401, "Unauthorized")
     return user
 
 
 async def get_admin_user(current_user: User = Depends(get_current_user)):
-    if current_user is None:
-        raise HTTPException(401, "Unauthorized")
-
     if not current_user.is_superuser:
         if current_user.role != "admin":
             raise HTTPException(status_code=403, detail=f"Not enough permissions")
@@ -53,8 +50,6 @@ async def get_admin_user(current_user: User = Depends(get_current_user)):
 
 
 async def get_superadmin_user(current_user: User = Depends(get_current_user)):
-    if current_user is None:
-        raise HTTPException(401, "Unauthorized")
     if current_user.role != "superadmin" or not current_user.is_superuser:
         raise HTTPException(status_code=403, detail="Not enough permissions")
     return current_user
