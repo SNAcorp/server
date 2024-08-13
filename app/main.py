@@ -1,5 +1,6 @@
 import os
 from datetime import (timedelta)
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from fastapi import (FastAPI, Depends, HTTPException, Request, Form)
 from fastapi.middleware.cors import (CORSMiddleware)
@@ -18,7 +19,7 @@ from app.jwt_auth import (verify_terminal)
 from app.models import (Base, EMPTY_BOTTLE_ID, RFID, OrderItem, OrderRFID, TerminalState, Order, Terminal, Bottle)
 from app.database import (get_db, DATABASE_URL)
 from app.schemas import (IsServerOnline, User)
-
+from app.routers.error_handlers import (custom_404_handler, custom_401_handler)
 app = FastAPI()
 
 # DATABASE_URL = "postgresql+asyncpg://nikitastepanov@localhost/terminals"
@@ -39,6 +40,10 @@ engine = create_async_engine(DATABASE_URL, echo=True)
 AsyncSessionLocal = sessionmaker(bind=engine,
                                  class_=AsyncSession,
                                  expire_on_commit=False)
+
+app.add_exception_handler(404, custom_404_handler)
+app.add_exception_handler(401, custom_401_handler)
+
 
 app.include_router(terminals.router, prefix="/terminal", tags=["terminals"])
 app.include_router(orders.router, prefix="/orders", tags=["orders"])

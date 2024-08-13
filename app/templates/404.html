@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Page Not Found - Vinotech{% endblock %}
+
+{% block style %}
+<style>
+    .error-container {
+        text-align: center;
+        margin-top: 50px;
+    }
+    .error-image {
+        max-width: 300px;
+        margin: 0 auto;
+        animation: float 3s ease-in-out infinite;
+    }
+    .error-message {
+        font-size: 24px;
+        color: #343a40;
+        margin-top: 20px;
+    }
+    @keyframes float {
+        0% {
+            transform: translateY(0);
+        }
+        50% {
+            transform: translateY(-10px);
+        }
+        100% {
+            transform: translateY(0);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="error-container">
+    <img src="http://51.250.89.99/static/sad_cat.png" alt="Sad Cat" class="error-image">
+    <p class="error-message">Ой! Страница не найдена.</p>
+    <p class="error-message">Кажется, эта страница больше не существует.</p>
+    <a href="/" class="btn btn-primary mt-4">Вернуться на главную</a>
+</div>
+{% endblock %}
