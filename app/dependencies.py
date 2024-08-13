@@ -3,6 +3,7 @@ import jwt
 
 from fastapi import (Depends, HTTPException, Request)
 from fastapi.security import (OAuth2PasswordBearer)
+from fastapi.responses import (RedirectResponse)
 
 from sqlalchemy.ext.asyncio import (AsyncSession, create_async_engine)
 from sqlalchemy.orm import (sessionmaker)
@@ -33,10 +34,10 @@ async def get_current_user(request: Request, db: AsyncSession = Depends(get_db))
         if email is None:
             return None
     except jwt.PyJWTError:
-        return None
+        return RedirectResponse('/login', 303)
     user = await get_user_by_email(email, db)
     if user is None or user.is_active is False or user.block_date is not None:
-        return None
+        raise HTTPException(401, "Unauthorized")
     return user
 
 

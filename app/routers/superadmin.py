@@ -35,3 +35,4 @@ async def make_superadmin(user_id: int,
     user = await check_user_for_superuser(user_id, current_user=current_user, db=db)
     updated_user = await update_user_role(user, "superadmin", db)
     return updated_user
+

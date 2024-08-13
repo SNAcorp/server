@@ -1,5 +1,5 @@
 from fastapi import (APIRouter, Depends, HTTPException, Request)
-from fastapi.responses import (HTMLResponse, JSONResponse)
+from fastapi.responses import (JSONResponse)
 
 from sqlalchemy.ext.asyncio import (AsyncSession)
 
@@ -42,16 +42,6 @@ async def update_user_details(user_id: int,
     updated_user = await update_user(user, user_data, db)
     user_data = user_to_dict(updated_user)
     return JSONResponse(content=user_data)
-
-
-@router.put("/user/{user_id}", response_class=HTMLResponse)
-async def update_user_details(user_id: int,
-                              user_data: dict,
-                              db: AsyncSession = Depends(get_db),
-                              current_user: User = Depends(get_admin_user)):
-    user = await check_user(user_id, current_user=current_user, db=db)
-    updated_user = await update_user(user, user_data, db)
-    return updated_user
 
 
 @router.put("/block/{user_id}")
