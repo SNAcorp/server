@@ -175,7 +175,7 @@ async def add_rfid_to_order(order_id: int,
 @app.get("/login")
 def admin_panel(request: Request,
                 current_user: User = Depends(get_current_user)):
-    if current_user:
+    if current_user is not None:
         return RedirectResponse("/orders", 303)
     return app_templates.TemplateResponse("login_register.html",
                                           {"request": request})
@@ -292,7 +292,9 @@ async def dashboard(request: Request,
 
 
 @app.get("/", response_class=JSONResponse)
-async def for_huckers():
+async def for_huckers(current_user: User = Depends(get_current_user)):
+    if current_user is not None:
+        return RedirectResponse("/orders", 303)
     return {"msg": "Hello, how are you mr/mrs?) What are you need at this website?"}
 
 

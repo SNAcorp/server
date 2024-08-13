@@ -13,4 +13,7 @@ async def custom_404_handler(request: Request, exc: StarletteHTTPException) -> H
 
 
 async def custom_401_handler(request: Request, exc: HTTPException) -> RedirectResponse:
-    return RedirectResponse("/login", status_code=303)
+    if request.url.path != "/login":
+        return RedirectResponse("/login", status_code=303)
+    else:
+        pass
