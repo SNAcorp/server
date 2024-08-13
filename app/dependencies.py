@@ -27,12 +27,12 @@ ALGORITHM = "HS256"
 async def get_current_user(request: Request, db: AsyncSession = Depends(get_db)):
     token = request.cookies.get("access_token")
     if not token:
-        return None
+        return RedirectResponse('/login', 303)
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         email: str = payload.get("sub")
         if email is None:
-            return None
+            return RedirectResponse('/login', 303)
     except jwt.PyJWTError:
         return RedirectResponse('/login', 303)
     user = await get_user_by_email(email, db)
