@@ -126,8 +126,13 @@ async def log_requests(request: Request, call_next):
 
     # Логирование информации о запросе
     logger.info(f"Incoming request: {request.method} {request.url}")
-    print("lol", request)
+
     response = await call_next(request)
+
+    if response is None:
+        logger.error(f"Response is None for request: {request.method} {request.url}")
+        print(f"LOL, Response is None for request: {request.method} {request.url}")
+        return JSONResponse(status_code=500, content={"detail": "Internal Server Error"})
 
     process_time = time.time() - start_time
     status_code = response.status_code
@@ -152,6 +157,10 @@ async def detect_suspicious_requests(request: Request, call_next):
         return RedirectResponse("404.html", 303)
 
     response = await call_next(request)
+    if response is None:
+        logger.error(f"Response is None for request: {request.method} {request.url}")
+        print(f"LOL, Response is None for request: {request.method} {request.url}")
+        return JSONResponse(status_code=500, content={"detail": "Internal Server Error"})
     return response
 
 
