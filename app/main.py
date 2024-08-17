@@ -126,9 +126,7 @@ async def log_requests(request: Request, call_next):
 
     # Логирование информации о запросе
     logger.info(f"Incoming request: {request.method} {request.url}")
-    if request is None:
-        print("lol", request)
-        raise HTTPException(status_code=401, detail="Unauthorized")
+    print("lol", request)
     response = await call_next(request)
 
     process_time = time.time() - start_time
