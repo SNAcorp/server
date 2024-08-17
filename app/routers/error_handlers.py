@@ -2,7 +2,7 @@
 from fastapi import Request, HTTPException
 from fastapi.templating import Jinja2Templates
 from starlette.exceptions import HTTPException as StarletteHTTPException
-from starlette.responses import HTMLResponse, RedirectResponse
+from starlette.responses import HTMLResponse, RedirectResponse, Response
 
 
 templates = Jinja2Templates(directory="app/templates")
@@ -12,8 +12,8 @@ async def custom_404_handler(request: Request, exc: StarletteHTTPException) -> H
     return templates.TemplateResponse("404.html", {"request": request}, status_code=404)
 
 
-async def custom_401_handler(request: Request, exc: HTTPException) -> RedirectResponse:
+async def custom_401_handler(request: Request, exc: HTTPException):
     if request.url.path != "/login":
         return RedirectResponse("/login", status_code=303)
     else:
-        pass
+        return Response(status_code=401)
