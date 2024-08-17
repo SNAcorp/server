@@ -1,6 +1,7 @@
 import os
+import time
 from datetime import (timedelta)
-from starlette.exceptions import HTTPException as StarletteHTTPException
+from loguru import logger
 
 from fastapi import (FastAPI, Depends, HTTPException, Request, Form)
 from fastapi.middleware.cors import (CORSMiddleware)
@@ -13,13 +14,16 @@ from sqlalchemy.future import (select)
 from sqlalchemy.orm import (selectinload, sessionmaker)
 
 from app.crud import (get_unverified_users, get_all_users, get_blocked_users, get_unblocked_users)
+from app.crypto import generate_rsa_keys
 from app.dependencies import (get_current_user, get_admin_user)
-from app.routers import (auth, users, admin, superadmin, terminals, orders, bottles, rfid)
+from app.routers import (auth, users, admin, superadmin, terminals, orders, bottles, rfid, logs)
 from app.jwt_auth import (verify_terminal)
 from app.models import (Base, EMPTY_BOTTLE_ID, RFID, OrderItem, OrderRFID, TerminalState, Order, Terminal, Bottle)
 from app.database import (get_db, DATABASE_URL)
 from app.schemas import (IsServerOnline, User)
 from app.routers.error_handlers import (custom_404_handler, custom_401_handler)
+from app.utils import load_keys
+
 app = FastAPI()
 
 # DATABASE_URL = "postgresql+asyncpg://nikitastepanov@localhost/terminals"
@@ -36,6 +40,8 @@ app = FastAPI()
 # # Закрытие соединения
 # conn.close()
 
+logger.add("/logs/app.log", rotation="1 day", retention="7 days", level="DEBUG")
+
 engine = create_async_engine(DATABASE_URL, echo=True)
 AsyncSessionLocal = sessionmaker(bind=engine,
                                  class_=AsyncSession,
@@ -43,7 +49,6 @@ AsyncSessionLocal = sessionmaker(bind=engine,
 
 app.add_exception_handler(404, custom_404_handler)
 app.add_exception_handler(401, custom_401_handler)
-
 
 app.include_router(terminals.router, prefix="/terminal", tags=["terminals"])
 app.include_router(orders.router, prefix="/orders", tags=["orders"])
@@ -53,24 +58,26 @@ app.include_router(auth.router, prefix="/auth", tags=["auth"])
 app.include_router(users.router, prefix="/users", tags=["users"])
 app.include_router(admin.router, prefix="/admin", tags=["admin"])
 app.include_router(superadmin.router, prefix="/superadmin", tags=["superadmin"])
+app.include_router(logs.router, prefix="/logs", tags=["logs"])
 
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 
 @app.on_event("startup")
 async def startup():
+    logger.info("Application start up")
+    await generate_rsa_keys()
+    await load_keys()
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
     async with AsyncSession(engine) as session:
-        states = [
-            "Active",
-            "Broken",
-            "Under Maintenance",
-            "Updating",
-            "Switched off",
-            "Connection lost"
-        ]
+        states = ["Active",
+                  "Broken",
+                  "Under Maintenance",
+                  "Updating",
+                  "Switched off",
+                  "Connection lost"]
         result = await session.execute(select(Bottle).where(Bottle.id == EMPTY_BOTTLE_ID))
         empty_bottle = result.scalars().first()
         if empty_bottle is None:
@@ -111,6 +118,41 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    start_time = time.time()
+
+    # Логирование информации о запросе
+    logger.info(f"Incoming request: {request.method} {request.url}")
+
+    response = await call_next(request)
+
+    process_time = time.time() - start_time
+    status_code = response.status_code
+
+    # Определяем категорию запроса
+    if status_code >= 500:
+        category = "Failed"
+    elif 400 <= status_code < 500:
+        category = "Suspicious"
+    else:
+        category = "Successful"
+
+    logger.info(f"Request processed: {category} - {status_code} - {request.method} | {request.url} | ({process_time:.2f}s)")
+
+    return response
+
+
+@app.middleware("http")
+async def detect_suspicious_requests(request: Request, call_next):
+    if any(word in request.url.path.lower() for word in ["select", "drop", "insert", "update", "delete", "wget", "php", "xml", "%", "-"]):
+        logger.warning(f"Suspicious request detected: {request.method} | {request.url}")
+        return RedirectResponse("404.html", 303)
+
+    response = await call_next(request)
+    return response
 
 
 @app.get("/learning", response_class=HTMLResponse)
