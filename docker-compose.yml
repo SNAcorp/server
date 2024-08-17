@@ -18,8 +18,11 @@ services:
       - DATABASE_URL=postgresql+asyncpg://server:v9023aSH@db-1:5432/terminals
     volumes:
       - images:/images
+      - logs:/logs
 
 volumes:
   postgres_data:
   images:
+    driver: local
+  logs:
     driver: local

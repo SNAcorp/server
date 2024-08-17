@@ -1,4 +1,7 @@
 import os
+from pathlib import Path
+import aiofiles
+
 import jwt
 
 from fastapi import (Depends, HTTPException, Request)
@@ -13,6 +16,8 @@ from app.database import (get_db)
 from app.schemas import (User)
 
 # DATABASE_URL = "postgresql+asyncpg://nikitastepanov@localhost/terminals"
+from app.utils import load_keys
+
 DATABASE_URL = os.getenv('DATABASE_URL')
 
 engine = create_async_engine(DATABASE_URL, echo=True)
@@ -20,24 +25,33 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine, clas
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-SECRET_KEY = "YOUR_SECRET_KEY"
-ALGORITHM = "HS256"
+
+ALGORITHM = "RS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 540
 
 
 async def get_current_user(request: Request, db: AsyncSession = Depends(get_db)):
+    from app.utils import PUBLIC_KEY
+    if PUBLIC_KEY is None:
+        await load_keys()
+
     token = request.cookies.get("access_token")
     if not token:
         return None
+
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        print("decode:", PUBLIC_KEY)
+        payload = jwt.decode(token, PUBLIC_KEY, algorithms=[ALGORITHM])
         email: str = payload.get("sub")
         if email is None:
             return None
     except jwt.PyJWTError:
-        raise HTTPException(401, "Unauthorized")
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
     user = await get_user_by_email(email, db)
-    if user is None or user.is_active is False or user.block_date is not None:
-        raise HTTPException(401, "Unauthorized")
+    if user is None or not user.is_active or user.block_date is not None:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
     return user
 
 
