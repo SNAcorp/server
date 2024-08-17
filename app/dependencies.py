@@ -40,7 +40,6 @@ async def get_current_user(request: Request, db: AsyncSession = Depends(get_db))
         return None
 
     try:
-        print("decode:", PUBLIC_KEY)
         payload = jwt.decode(token, PUBLIC_KEY, algorithms=[ALGORITHM])
         email: str = payload.get("sub")
         if email is None:

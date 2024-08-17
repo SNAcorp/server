@@ -8,8 +8,8 @@ PRIVATE_KEY_PATH = "private_key.pem"
 PUBLIC_KEY_PATH = "public_key.pem"
 
 
-async def generate_rsa_keys():
-    if not os.path.exists(PRIVATE_KEY_PATH) or not os.path.exists(PUBLIC_KEY_PATH):
+async def generate_rsa_keys(regenerate: bool = False):
+    if not os.path.exists(PRIVATE_KEY_PATH) or not os.path.exists(PUBLIC_KEY_PATH) or regenerate is True:
         # Генерация приватного ключа
         private_key = rsa.generate_private_key(
             public_exponent=65537,
