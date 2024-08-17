@@ -37,13 +37,13 @@ async def get_current_user(request: Request, db: AsyncSession = Depends(get_db))
 
     token = request.cookies.get("access_token")
     if not token:
-        return None
+        raise HTTPException(status_code=401, detail="Unauthorized")
 
     try:
         payload = jwt.decode(token, PUBLIC_KEY, algorithms=[ALGORITHM])
         email: str = payload.get("sub")
         if email is None:
-            return None
+            raise HTTPException(status_code=401, detail="Unauthorized")
     except jwt.PyJWTError:
         raise HTTPException(status_code=401, detail="Unauthorized")
 
