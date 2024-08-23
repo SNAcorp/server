@@ -135,7 +135,7 @@
                 <div class="detail-text"><strong>Wine Type:</strong> {{ bottle.wine_type }}</div>
                 <div class="detail-text"><strong>Volume (ml):</strong> {{ bottle.volume }}</div>
             </div>
-            {% if current_user.is_superuser %}
+            {% if current_user.is_superuser or current_user.role == "admin" %}
             <form id="bottle-form" class="hidden">
                 <div class="form-group">
                     <label for="name">Name</label>

@@ -2,58 +2,187 @@
 
 {% block title %}Order Details{% endblock %}
 
+{% block style %}
+.nav-tabs {
+    margin-bottom: 20px;
+}
+
+.tab-content {
+    border: 1px solid #dee2e6;
+    border-top: none;
+    padding: 15px;
+}
+
+.order-completed {
+    color: green;
+    font-weight: bold;
+}
+
+.order-not-completed {
+    color: red;
+    font-weight: bold;
+}
+{% endblock %}
+
 {% block content %}
 <div class="container">
     <h2 class="mt-4">Order Details</h2>
-    <div class="card mt-4">
-        <div class="card-body">
-            <h4 class="card-title">Order ID: {{ order.id }}</h4>
-            <p class="card-text">Completed: {{ order.is_completed }}</p>
+
+    <ul class="nav nav-tabs" id="orderTabs" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link active" id="info-tab" data-toggle="tab" href="#info" role="tab">Info</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="items-tab" data-toggle="tab" href="#items" role="tab">Items</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="rfids-tab" data-toggle="tab" href="#rfids" role="tab">RFIDs</a>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="orderTabsContent">
+        <div class="tab-pane fade show active" id="info" role="tabpanel">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">Order ID: {{ order.id }}</h4>
+                    <p class="card-text">Completed:
+                        {% if order.is_completed %}
+                            <span class="order-completed">Yes</span>
+                        {% else %}
+                            <span class="order-not-completed">No</span>
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+            <div class="mt-4">
+                <form id="complete-order-form">
+                    <button type="submit" class="btn btn-success">Complete Order</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="items" role="tabpanel">
+            <h3>Items</h3>
+            <ul class="list-group">
+                {% for item in items %}
+                <li class="list-group-item">
+                    <strong>Bottle Name:</strong> {{ item.bottle.name }} <br>
+                    <strong>Bottle ID:</strong> {{ item.bottle_id }} <br>
+                    <strong>Total Volume:</strong> {{ item.volume }} ml <br>
+                    <strong>Time:</strong> {{ item.timestamp }}
+                </li>
+                {% else %}
+                <li class="list-group-item">No items found for this order.</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div class="tab-pane fade" id="rfids" role="tabpanel">
+            <h3>RFIDs</h3>
+            <ul class="list-group mb-4">
+                {% for rfid in order.rfids %}
+                <li class="list-group-item">
+                    <strong>RFID:</strong> {{ rfid.code }} <br>
+                    <small class="text-muted">Timestamp: {{ rfid.timestamp }}</small>
+                </li>
+                {% endfor %}
+            </ul>
+
+            <h3>Add RFID</h3>
+            <form id="add-rfid-form" class="form-inline">
+                <div class="form-group mb-2">
+                    <input type="text" name="rfid_code" class="form-control" placeholder="Enter RFID code" required oninput="checkRfid(this)">
+                    <span class="rfid-status ml-2"></span>
+                </div>
+                <button type="submit" class="btn btn-primary mb-2 ml-2">Add RFID</button>
+            </form>
         </div>
     </div>
-
-    <div class="mt-4">
-        <h3>RFIDs</h3>
-        <ul class="list-group">
-            {% for rfid in order.rfids %}
-            <li class="list-group-item">
-                <strong>RFID:</strong> {{ rfid.code }} <br>
-                <small class="text-muted">Timestamp: {{ rfid.timestamp }}</small>
-            </li>
-            {% endfor %}
-        </ul>
-    </div>
-
-    <div class="mt-4">
-        <h3>Items</h3>
-        <ul class="list-group">
-            {% for item in items %}
-            <li class="list-group-item">
-                <strong>Bottle Name:</strong> {{ item.bottle.name }} <br>
-                <strong>Bottle ID:</strong> {{ item.bottle_id }} <br>
-                <strong>Total Volume:</strong> {{ item.volume }} ml
-                <strong>Time:</strong> {{item.timestamp}}
-            </li>
-            {% else %}
-            <li class="list-group-item">No items found for this order.</li>
-            {% endfor %}
-        </ul>
-    </div>
-
-    <div class="mt-4">
-        <h3>Add RFID</h3>
-        <form action="/order/{{ order.id }}/add_rfid" method="post" class="form-inline">
-            <div class="form-group mb-2">
-                <input type="text" name="rfid_code" class="form-control" placeholder="Enter RFID code" required>
-            </div>
-            <button type="submit" class="btn btn-primary mb-2 ml-2">Add RFID</button>
-        </form>
-    </div>
-
-    <div class="mt-4">
-        <form action="/orders/order/{{ order.id }}/complete" method="post">
-            <button type="submit" class="btn btn-success">Complete Order</button>
-        </form>
-    </div>
 </div>
+
+<script>
+document.getElementById('add-rfid-form').addEventListener('submit', async function(event) {
+    event.preventDefault();
+    const form = event.target;
+    const formData = new FormData(form);
+
+    try {
+        const response = await fetch("/orders/{{ order.id }}/add", {
+            method: 'POST',
+            body: formData
+        });
+
+        if (response.ok) {
+            location.reload();  // Обновляем страницу при успешном добавлении RFID
+        } else {
+            console.error('Error adding RFID:', response.statusText);
+            alert('Failed to add RFID. Please try again.');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Failed to add RFID. Please try again.');
+    }
+});
+
+document.getElementById('complete-order-form').addEventListener('submit', async function(event) {
+    event.preventDefault();
+    const form = event.target;
+
+    try {
+        const response = await fetch("/orders/{{ order.id }}/complete", {
+            method: 'POST'
+        });
+
+        if (response.ok) {
+            window.location.href = "/orders";  // Перенаправляем на страницу заказов при успешном завершении
+        } else {
+            console.error('Error completing order:', response.statusText);
+            alert('Failed to complete the order. Please try again.');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Failed to complete the order. Please try again.');
+    }
+});
+
+async function checkRfid(input) {
+    const rfidValue = input.value.trim();
+    const statusElement = input.nextElementSibling;
+
+    if (rfidValue === '') {
+        statusElement.innerHTML = ''; // Убираем значок, если поле пустое
+        input.classList.remove('input-error', 'input-success');
+        return;
+    }
+
+    try {
+        const response = await fetch("/orders/rfid/check", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ rfid: rfidValue })
+        });
+
+        const data = await response.json();
+
+        if (data === false) {
+            // Если RFID занят
+            statusElement.innerHTML = '❌';
+            input.classList.remove('input-success');
+            input.classList.add('input-error');
+        } else {
+            // Если RFID свободен
+            statusElement.innerHTML = '✅';
+            input.classList.remove('input-error');
+            input.classList.add('input-success');
+        }
+    } catch (error) {
+        console.error('Error checking RFID:', error);
+        statusElement.innerHTML = '❗';  // Обозначаем ошибку
+        input.classList.remove('input-success');
+        input.classList.add('input-error');
+    }
+}
+</script>
 {% endblock %}

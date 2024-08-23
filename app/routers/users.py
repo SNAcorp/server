@@ -1,19 +1,17 @@
 from fastapi import (APIRouter, Depends, Request, Form)
-from fastapi.templating import (Jinja2Templates)
 from fastapi.responses import (JSONResponse, RedirectResponse)
 from fastapi.exceptions import (HTTPException)
 
 from sqlalchemy.ext.asyncio import (AsyncSession)
 
-from app import (models)
 from app.database import (get_db)
 from app.schemas import (User)
 from app.crud import (get_users, hash_func)
 from app.dependencies import (get_current_user)
+from app.templates import app_templates
 from app.utils import (verify_password)
 
 router = APIRouter()
-templates = Jinja2Templates(directory="app/templates")
 
 
 @router.get("/", response_model=list[User])
@@ -25,7 +23,7 @@ async def read_users(request: Request,
     if current_user is None:
         return RedirectResponse("/login", 303)
     users = await get_users(skip=skip, limit=limit, db=db)
-    return templates.TemplateResponse("users_list.html", {"request": request, "users": users})
+    return app_templates.TemplateResponse("users_list.html", {"request": request, "users": users})
 
 
 @router.get("/me/", response_model=User)
@@ -33,7 +31,7 @@ async def read_user_me(request: Request,
                        current_user: User = Depends(get_current_user)):
     if current_user is None:
         return RedirectResponse("/login", 303)
-    return templates.TemplateResponse("profile.html", {"request": request, "current_user": current_user})
+    return app_templates.TemplateResponse("profile.html", {"request": request, "current_user": current_user})
 
 
 @router.post("/me/change-password")

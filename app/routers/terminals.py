@@ -1,23 +1,37 @@
-from datetime import (datetime)
+import datetime
 
 from fastapi import (APIRouter, Depends, HTTPException, Request)
-from fastapi.responses import (RedirectResponse)
+from fastapi.responses import (RedirectResponse, HTMLResponse)
 
 from sqlalchemy.ext.asyncio import (AsyncSession)
 from sqlalchemy.future import (select)
 from sqlalchemy.orm import (selectinload, joinedload)
 
+from app.dependencies import get_current_user
 from app.models import (Terminal, TerminalBottle, RFID, Order,
                         OrderItem, Bottle, EMPTY_BOTTLE_ID, BottleUsageLog, OrderRFID)
 from app.database import (get_db)
 from app.jwt_auth import (create_terminal_token, verify_terminal)
-from app.schemas import (TerminalBottleCreate, UseTerminalRequest, ResetTerminalRequest, RegisterTerminalRequest)
+from app.schemas import (TerminalBottleCreate, UseTerminalRequest, ResetTerminalRequest, RegisterTerminalRequest, User)
+from app.templates import app_templates
 
 router = APIRouter()
 SMALL_PORTION = 30
 BIG_PORTION = 120
 SMALL_PORTION_TIME = 3
 BIG_PORTION_TIME = 9
+
+
+@router.get("/", response_class=HTMLResponse)
+async def dashboard(request: Request,
+                    db: AsyncSession = Depends(get_db),
+                    current_user: User = Depends(get_current_user)):
+    result = await db.execute(select(Terminal).options(selectinload(Terminal.status)))
+    terminals = result.scalars().all()
+    return app_templates.TemplateResponse("terminals.html",
+                                          {"request": request,
+                                           "terminals": terminals,
+                                           "current_user": current_user})
 
 
 @router.post("/register-terminal")
@@ -29,7 +43,7 @@ async def register_terminal(request: RegisterTerminalRequest,
         token = create_terminal_token(old_terminal.id, old_terminal.registration_date, request.serial)
         return {"terminal_id": old_terminal.id, "token": token}
 
-    new_terminal = Terminal(status_id=1, registration_date=datetime.utcnow(), serial=request.serial)
+    new_terminal = Terminal(status_id=1, registration_date=datetime.datetime.utcnow(), serial=request.serial)
     db.add(new_terminal)
     await db.commit()
     await db.refresh(new_terminal)
@@ -207,7 +221,7 @@ async def update_terminal_bottle(terminal_id: int,
                     usage_log = BottleUsageLog(
                         terminal_id=terminal.id,
                         bottle_id=bottle.id,
-                        usage_date=datetime.utcnow(),
+                        usage_date=datetime.datetime.utcnow(),
                         used_volume=used_volume
                     )
                     db.add(usage_log)
@@ -222,7 +236,7 @@ async def update_terminal_bottle(terminal_id: int,
                     usage_log = BottleUsageLog(
                         terminal_id=terminal.id,
                         bottle_id=bottle.id,
-                        usage_date=datetime.utcnow(),
+                        usage_date=datetime.datetime.utcnow(),
                         used_volume=used_volume
                     )
                     db.add(usage_log)
@@ -275,7 +289,7 @@ async def reset_bottles_to_initial_volume(terminal_id: int,
             usage_log = BottleUsageLog(
                 terminal_id=terminal.id,
                 bottle_id=bottle.id,
-                usage_date=datetime.utcnow(),
+                usage_date=datetime.datetime.utcnow(),
                 used_volume=used_volume
             )
             db.add(usage_log)
@@ -284,3 +298,26 @@ async def reset_bottles_to_initial_volume(terminal_id: int,
             terminal_bottle.remaining_volume = initial_volume
 
     await db.commit()
+
+
+@router.get("/{terminal_id}", response_class=HTMLResponse)
+async def manage_terminal(request: Request,
+                          terminal_id: int,
+                          db: AsyncSession = Depends(get_db),
+                          current_user: User = Depends(get_current_user)):
+    result = await db.execute(
+        select(Terminal).options(selectinload(Terminal.bottles)).filter(Terminal.id == terminal_id))
+    terminal = result.scalars().first()
+    if not terminal:
+        raise HTTPException(status_code=404, detail="Terminal not found")
+
+    bottles_result = await db.execute(select(Bottle))
+    bottles = bottles_result.scalars().all()
+    sorted_bottles = sorted(terminal.bottles, key=lambda x: x.slot_number)
+
+    return app_templates.TemplateResponse("manage_terminal.html",
+                                          {"request": request,
+                                           "terminal": terminal,
+                                           "bottles": bottles,
+                                           "sorted": sorted_bottles,
+                                           "current_user": current_user})

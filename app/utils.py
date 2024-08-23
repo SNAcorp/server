@@ -1,8 +1,12 @@
-from pathlib import Path
 import aiofiles
 import jwt
 from passlib.context import (CryptContext)
-from datetime import (datetime, timedelta)
+from datetime import (timedelta)
+import datetime
+from app.logging_config import log
+from fastapi import Request
+
+from app.schemas import User
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -15,19 +19,27 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 540
 PRIVATE_KEY = None
 PUBLIC_KEY = None
 
+SPECIAL_TOKEN = "sokdfw324r-vekrfm2-sdvm2f-vsokdkvs"
 
-async def create_access_token(data: dict, expires_delta: timedelta = None):
+async def create_access_token(request: Request, current_user: User, data: dict, expires_delta: timedelta = None):
     if PRIVATE_KEY is None:
         await load_keys()
 
     to_encode = data.copy()
     if expires_delta:
-        expire = datetime.utcnow() + expires_delta
+        expire = datetime.datetime.utcnow() + expires_delta
     else:
-        expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        expire = datetime.datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
 
-    to_encode.update({"exp": expire})
+    to_encode.update({"exp": expire, "special_token": SPECIAL_TOKEN})
     encoded_jwt = jwt.encode(to_encode, PRIVATE_KEY, algorithm=ALGORITHM)
+    log.bind(type="users",
+             method=request.method,
+             current_user_id=current_user.id,
+             url=str(request.url),
+             headers=dict(request.headers),
+             params=dict(request.query_params)
+             ).info(f"Token was created in {datetime.datetime.utcnow()}")
     return encoded_jwt
 
 

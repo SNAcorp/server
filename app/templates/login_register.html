@@ -199,9 +199,13 @@ form.show {
                 throw new Error('Network response was not ok');
             }
 
-            const result = await response.json();
-            console.log(result);
-            // Добавьте логику для обработки успешной регистрации
+            if (response.redirected) {
+                window.location.href = response.url;  // Перенаправление на новую страницу
+            } else {
+                const data = await response.json();  // Обработка JSON-ответа
+                console.log(data);
+            }
+
         } catch (error) {
             console.error('There was a problem with the fetch operation:', error);
         }

@@ -27,7 +27,7 @@
             <ul class="list-group mt-3" id="activeOrdersList">
                 {% for order in orders if not order.is_completed %}
                 <li class="list-group-item">
-                    <a href="/order/{{ order.id }}">Order ID: {{ order.id }} - {{ 'Pending' }}</a>
+                    <a href="/orders/{{ order.id }}">Order ID: {{ order.id }} - {{ 'Pending' }}</a>
                 </li>
                 {% endfor %}
             </ul>
@@ -36,14 +36,14 @@
             <ul class="list-group mt-3" id="archivedOrdersList">
                 {% for order in orders if order.is_completed %}
                 <li class="list-group-item">
-                    <a href="/order/{{ order.id }}">Order ID: {{ order.id }} - Completed</a>
+                    <a href="/orders/{{ order.id }}">Order ID: {{ order.id }} - Completed</a>
                 </li>
                 {% endfor %}
             </ul>
         </div>
     </div>
     {% if current_user.role == "admin" or current_user.is_superuser %}
-    <a href="/create-order" class="btn btn-primary mt-4">Create New Order</a>
+    <a href="/orders/create" class="btn btn-primary mt-4">Create New Order</a>
     {% endif %}
 </div>
 

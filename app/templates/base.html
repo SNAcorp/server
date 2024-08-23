@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Vinotech{% endblock %}</title>
-    <link rel="icon" href="http://51.250.89.99/static/icon.svg" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="http://51.250.89.99/static/apple180.png">
-    <link rel="icon" href="http://51.250.89.99/static/favicon32.ico">
-    <link rel="icon" href="http://51.250.89.99/static/favicon16.ico">
+    <link rel="icon" href="http://localhost/static/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="http://localhost/static/apple180.png">
+    <link rel="icon" href="http://localhost/static/favicon32.ico">
+    <link rel="icon" href="http://localhost/static/favicon16.ico">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     {% block link %}{% endblock %}
     <style>
@@ -128,6 +128,7 @@
                         {% if current_user.is_superuser %}
                         <li class="nav-item"><a class="nav-link" href="/bottles">Manage Bottles</a></li>
                         <li class="nav-item"><a class="nav-link" href="/admin/panel">Admin Panel</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/logs">Logs</a></li>
                     {% endif %}
                     {% else %}
                     <li class="nav-item"><a class="nav-link" href="/login">Login/Register</a></li>
@@ -146,14 +147,10 @@
                         <li><a href="/users/me">My Profile</a></li>
                         <li><a href="/terminals">Terminals</a></li>
                         <li><a href="/orders">Orders</a></li>
-                        {% if current_user.role == "admin" %}
+                        {% if current_user.role == "admin" or current_user.is_superuser%}
                         <li><a href="/bottles">Manage Bottles</a></li>
                         <li><a href="/admin/panel">Admin Panel</a></li>
                         {% endif %}
-                        {% if current_user.is_superuser %}
-                        <li><a href="/bottles">Manage Bottles</a></li>
-                        <li><a href="/admin/panel">Admin Panel</a></li>
-                    {% endif %}
                     {% else %}
                     <li><a href="/login">Login/Register</a></li>
                     {% endif %}

@@ -1,42 +1,18 @@
 {% extends "base.html" %}
 
-{% block title %}Page Not Found - Vinotech{% endblock %}
-
-{% block style %}
-<style>
-    .error-container {
-        text-align: center;
-        margin-top: 50px;
-    }
-    .error-image {
-        max-width: 300px;
-        margin: 0 auto;
-        animation: float 3s ease-in-out infinite;
-    }
-    .error-message {
-        font-size: 24px;
-        color: #343a40;
-        margin-top: 20px;
-    }
-    @keyframes float {
-        0% {
-            transform: translateY(0);
-        }
-        50% {
-            transform: translateY(-10px);
-        }
-        100% {
-            transform: translateY(0);
-        }
-    }
-</style>
-{% endblock %}
+{% block title %}Page Not Found{% endblock %}
 
 {% block content %}
-<div class="error-container">
-    <img src="https://main-cdn.sbermegamarket.ru/big2/hlr-system/-10/983/769/533/201/232/600010876953b0.jpeg" alt="Sad Cat" class="error-image">
-    <p class="error-message">Ой! Страница не найдена.</p>
-    <p class="error-message">Кажется, эта страница больше не существует.</p>
-    <a href="/" class="btn btn-primary mt-4">Вернуться на главную</a>
+<div class="d-flex flex-column align-items-center justify-content-center" style="height: 100%;">
+    <div class="text-center">
+        <img src="https://cdn-icons-png.flaticon.com/512/564/564619.png" alt="404 Error Icon" style="width: 100px; height: 100px;" class="mb-4">
+        <h1 class="display-4 text-warning">404 - Page Not Found</h1>
+        <p class="lead mt-4 text-secondary">Sorry, the page you are looking for could not be found.</p>
+        <hr class="my-4" style="width: 50%;">
+        <p class="mb-4 text-muted">
+            It might have been removed, had its name changed, or is temporarily unavailable.
+        </p>
+        <a href="/" class="btn btn-primary btn-lg">Return to Home</a>
+    </div>
 </div>
 {% endblock %}
