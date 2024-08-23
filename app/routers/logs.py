@@ -1,45 +1,110 @@
-from fastapi import Request, APIRouter, Depends
-from fastapi.responses import HTMLResponse, StreamingResponse
-from fastapi.templating import Jinja2Templates
-from sqlalchemy.ext.asyncio import (AsyncSession)
-from sqlalchemy.future import (select)
-from app.database import get_db
+import os
+import json
+import aiofiles
+from fastapi import APIRouter, Request, Depends, Query, HTTPException, WebSocket
+from fastapi.responses import HTMLResponse, StreamingResponse, JSONResponse
+from typing import Optional, Dict
+from datetime import datetime
+
+from app.templates import app_templates
+from app.logging_config import log
 from app.dependencies import get_superadmin_user
-from app.models import User
+from app.schemas import User
 
 router = APIRouter()
 
-app_templates = Jinja2Templates(directory="app/templates")
+log_paths: Dict[str, str] = {
+    "app": "/logs/app.json",
+    "db": "/logs/db.json",
+    "users": "/logs/users.json",
+    "admins": "/logs/admins.json",
+    "terminals": "/logs/terminals.json",
+    "system": "/logs/system.json"
+}
 
 
 @router.get("/", response_class=HTMLResponse)
-async def get_logs(request: Request, db: AsyncSession = Depends(get_db)):
-    with open('/logs/app.log', 'r') as file:
-        logs = file.readlines()
+async def show_logs(request: Request, current_user: User = Depends(get_superadmin_user)):
+    log.bind(type="admins",
+             method=request.method,
+             current_user_id=current_user.id,
+             url=str(request.url),
+             headers=dict(request.headers),
+             params=dict(request.query_params),
+             ).info(f"Gained logs template")
 
-    # blocked_ips = await db.execute(select(BlockedIP))
-    # ip_count = len(blocked_ips.scalars().all())
-
-    return app_templates.TemplateResponse("logs.html",
-                                          {"request": request,
-                                           "logs": logs})
+    return app_templates.TemplateResponse("logs.html", {
+        "request": request,
+        "current_user": current_user,
+        "log_type": "app",
+        "log_content": "",
+        "log_paths": log_paths
+    })
 
 
 @router.get("/download/{log_type}")
-async def download_logs(log_type: str, current_user: User = Depends(get_superadmin_user)):
-    types = {"app": "/logs/app.log",
-             "db": "/logs/db.log",
-             "users": "/logs/users.log",
-             "admins": "/logs/admins/log",
-             "terminals": "/logs/terminals.log"}
+async def download_logs(request: Request, log_type: str, current_user: User = Depends(get_superadmin_user)):
+    path = log_paths.get(log_type)
 
-    def iter_file(path_to_log_file: str):
-        with open(path_to_log_file, mode='rb') as file_like:
+    async def iter_file(path_to_log_file: str):
+        async with aiofiles.open(path_to_log_file, mode='rb') as file_like:
             while True:
-                chunk = file_like.read(8192)
+                chunk = await file_like.read(8192)
                 if not chunk:
                     break
                 yield chunk
 
-    return StreamingResponse(iter_file(types[log_type]), media_type="text/plain",
-                             headers={"Content-Disposition": "attachment; filename=app.log"})
+    log.bind(type="admins",
+             method=request.method,
+             current_user_id=current_user.id,
+             url=str(request.url),
+             headers=dict(request.headers),
+             params=dict(request.query_params),
+             ).info(f"Downloading logs for {log_type}")
+    return StreamingResponse(iter_file(path), media_type="application/json",
+                             headers={"Content-Disposition": f"attachment; filename={log_type}.json"})
+
+
+@router.delete("/delete_all_logs", response_class=JSONResponse)
+async def delete_all_logs(request: Request, current_user: User = Depends(get_superadmin_user)):
+    cleared_logs = []
+    for log_type, path in log_paths.items():
+        try:
+            if os.path.exists(path):
+                async with aiofiles.open(path, 'w') as file:
+                    await file.write("")
+                cleared_logs.append(log_type)
+                log.bind(type="admins",
+                         method=request.method,
+                         current_user_id=current_user.id,
+                         url=str(request.url),
+                         headers=dict(request.headers),
+                         params=dict(request.query_params),
+                         ).info(f"Delete logs for {log_type}")
+        except Exception as e:
+            log.bind(type="admins",
+                     method=request.method,
+                     current_user_id=current_user.id,
+                     url=str(request.url),
+                     headers=dict(request.headers),
+                     params=dict(request.query_params),
+                     ).info(f"Tried to delete logs for {log_type} but an error occurred: {str(e)}")
+            raise HTTPException(status_code=500, detail=f"Failed to clear {log_type} logs: {str(e)}")
+
+    if not cleared_logs:
+        log.bind(type="admins",
+                 method=request.method,
+                 current_user_id=current_user.id,
+                 url=str(request.url),
+                 headers=dict(request.headers),
+                 params=dict(request.query_params),
+                 ).info(f"Tried to clear all logs, but all logs are empty")
+        return JSONResponse(content={"detail": "No log files were found or cleared."}, status_code=200)
+    log.bind(type="admins",
+             method=request.method,
+             current_user_id=current_user.id,
+             url=str(request.url),
+             headers=dict(request.headers),
+             params=dict(request.query_params),
+             ).info(f"Delete all logs")
+    return JSONResponse(content={"detail": f"Cleared logs for: {', '.join(cleared_logs)}"}, status_code=200)

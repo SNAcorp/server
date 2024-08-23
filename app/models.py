@@ -1,4 +1,4 @@
-from datetime import (datetime)
+import datetime
 
 from sqlalchemy import (Column, Integer, String, Boolean, ForeignKey, DateTime, Float)
 from sqlalchemy.orm import (relationship)
@@ -20,7 +20,7 @@ class User(Base):
     last_name = Column(String, nullable=False)  # Фамилия пользователя
     middle_name = Column(String, nullable=True)  # Отчество пользователя
     phone_number = Column(String, nullable=False)  # Телефонный номер пользователя
-    registration_date = Column(DateTime, default=datetime.utcnow)  # Дата регистрации пользователя
+    registration_date = Column(DateTime, default=datetime.datetime.utcnow())  # Дата регистрации пользователя
     block_date = Column(DateTime, nullable=True)  # Дата блокировки пользователя, null если не заблокирован
 
 
@@ -35,7 +35,7 @@ class Order(Base):
 class RFID(Base):
     __tablename__ = "rfids"
     id = Column(Integer, primary_key=True, index=True)
-    code = Column(String, unique=True, index=True)
+    code = Column(String, index=True)
     is_valid = Column(Boolean, default=True)
     limit = Column(Boolean, default=False)
     last_used = Column(DateTime, nullable=True)
@@ -46,7 +46,7 @@ class RFID(Base):
 class Terminal(Base):
     __tablename__ = "terminals"
     id = Column(Integer, primary_key=True, index=True)
-    registration_date = Column(DateTime, default=datetime.utcnow)
+    registration_date = Column(DateTime, default=datetime.datetime.utcnow())
     status_id = Column(Integer, ForeignKey('terminal_states.id'), default=1, nullable=False)
     serial = Column(String, unique=True)
     bottles = relationship("TerminalBottle", back_populates="terminal")
@@ -90,7 +90,7 @@ class BottleUsageLog(Base):
     id = Column(Integer, primary_key=True, index=True)
     terminal_id = Column(Integer, ForeignKey("terminals.id"))
     bottle_id = Column(Integer, ForeignKey("bottles.id"))
-    usage_date = Column(DateTime, default=datetime.utcnow)
+    usage_date = Column(DateTime, default=datetime.datetime.utcnow())
     used_volume = Column(Float)
 
 
@@ -102,7 +102,7 @@ class OrderItem(Base):
     volume = Column(Float)
     order = relationship("Order", back_populates="items")
     bottle = relationship("Bottle")
-    timestamp = Column(DateTime, default=datetime.utcnow)
+    timestamp = Column(DateTime, default=datetime.datetime.utcnow())
 
 
 class OrderRFID(Base):
@@ -110,7 +110,7 @@ class OrderRFID(Base):
     id = Column(Integer, primary_key=True, index=True)
     order_id = Column(Integer, ForeignKey("orders.id"))
     rfid_id = Column(Integer, ForeignKey("rfids.id"))
-    timestamp = Column(DateTime, default=datetime.utcnow)
+    timestamp = Column(DateTime, default=datetime.datetime.utcnow())
     order = relationship("Order", back_populates="rfids")
     rfid = relationship("RFID", back_populates="order_rfids")
 

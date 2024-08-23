@@ -1,19 +1,29 @@
 # error_handlers.py
-from fastapi import Request, HTTPException
-from fastapi.templating import Jinja2Templates
+from fastapi import Request, HTTPException, Depends
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.responses import HTMLResponse, RedirectResponse, Response
 
-templates = Jinja2Templates(directory="app/templates")
+from app.dependencies import get_current_user
+from app.schemas import User
+from app.templates import app_templates
 
 
-async def custom_404_handler(request: Request, exc: StarletteHTTPException) -> HTMLResponse:
-    return templates.TemplateResponse("404.html", {"request": request}, status_code=404)
+async def custom_404_handler(request: Request, exc: StarletteHTTPException,
+                             current_user: User = Depends(get_current_user)) -> HTMLResponse:
+    return app_templates.TemplateResponse("404.html", {"request": request,
+                                                       "current_user": current_user}, status_code=404)
 
 
-async def custom_401_handler(request: Request, exc: HTTPException):
-    if request.url.path != "/login":
-        return RedirectResponse("/login", status_code=303)
+async def custom_403_handler(request: Request, exc: HTTPException,
+                             current_user: User = Depends(get_current_user)):
+    return app_templates.TemplateResponse("403.html", {"request": request,
+                                                       "current_user": current_user}, status_code=403)
+
+
+async def custom_401_handler(request: Request, exc: HTTPException,
+                             current_user: User = Depends(get_current_user)):
+    if request.url.path != "/auth/login":
+        return RedirectResponse("/auth/login", status_code=303)
     else:
-        return templates.TemplateResponse("login_register.html",
-                                          {"request": request})
+        return app_templates.TemplateResponse("login_register.html",
+                                              {"request": request})

@@ -3,6 +3,8 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.backends import default_backend
 import os
 import aiofiles
+from app.logging_config import log
+
 
 PRIVATE_KEY_PATH = "private_key.pem"
 PUBLIC_KEY_PATH = "public_key.pem"
@@ -38,7 +40,10 @@ async def generate_rsa_keys(regenerate: bool = False):
                     format=serialization.PublicFormat.SubjectPublicKeyInfo
                 )
             )
-
-        print("Пара ключей сгенерирована и сохранена в файлы 'private_key.pem' и 'public_key.pem'")
+        log.bind(type="system",
+                 is_regenerate=regenerate
+                 ).info(f"Пара ключей сгенерирована и сохранена в файлы {PRIVATE_KEY_PATH} и {PUBLIC_KEY_PATH}")
     else:
-        print("Ключи уже существуют, генерация не требуется.")
+        log.bind(type="system",
+                 is_regenerate=regenerate
+                 ).info(f"Пара ключей уже сгенерирована и сохранена в файлы")
