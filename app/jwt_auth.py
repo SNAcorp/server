@@ -1,15 +1,26 @@
+import os
 import jwt
 from datetime import (datetime)
 
 from fastapi import (HTTPException)
-from fastapi.security import (HTTPBearer)
 
-SECRET_KEY = "your_secret_key"
-ALGORITHM = "HS256"
-security = HTTPBearer()
+SECRET_KEY = os.getenv("SECRET_KEY")
+ALGORITHM = os.getenv("ALGORITHM")
 
 
-def decode_terminal_token(token: str):
+def decode_terminal_token(token: str) -> dict:
+    """
+    Decode a terminal token and return its payload.
+
+    Args:
+        token (str): The token to decode.
+
+    Returns:
+        dict: The payload of the token.
+
+    Raises:
+        HTTPException: If the token is invalid.
+    """
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         return payload
@@ -17,7 +28,20 @@ def decode_terminal_token(token: str):
         raise HTTPException(status_code=403, detail="Invalid token")
 
 
-def create_terminal_token(terminal_id: int, registration_date: datetime, uid: str) -> str:
+def create_terminal_token(terminal_id: int,
+                          registration_date: datetime,
+                          uid: str) -> str:
+    """
+    Create a terminal token.
+
+    Args:
+        terminal_id (int): The terminal ID.
+        registration_date (datetime): The registration date.
+        uid (str): The user ID.
+
+    Returns:
+        str: The generated token.
+    """
     payload = {
         "terminal_id": terminal_id,
         "registration_date": registration_date.isoformat(),
@@ -27,7 +51,19 @@ def create_terminal_token(terminal_id: int, registration_date: datetime, uid: st
     return token
 
 
-def verify_terminal(token: str):
+def verify_terminal(token: str) -> dict:
+    """
+    Verify a terminal token and return its payload.
+
+    Args:
+        token (str): The token to verify.
+
+    Returns:
+        dict: The payload of the token.
+
+    Raises:
+        HTTPException: If the token is expired or invalid.
+    """
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         return payload

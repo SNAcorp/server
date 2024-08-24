@@ -1,3 +1,60 @@
+"""
+Collection of topics for web development.
+
+This module contains a collection of topics related to web development.
+Each topic is represented as a dictionary with the following structure:
+
+.. code-block:: python
+
+    {
+        "title": "string",
+        "sections": [
+            {
+                "subtitle": "string",
+                "links": [
+                    {
+                        "text": "string",
+                        "url": "string"
+                    },
+                    ...
+                ]
+            },
+            ...
+        ]
+    }
+
+The ``title`` field is a string that represents the title of the topic.
+
+The ``sections`` field is a list of dictionaries containing information about the sections of the topic. Each section is represented as a dictionary with the following structure:
+
+.. code-block:: python
+
+    {
+        "subtitle": "string",
+        "links": [
+            {
+                "text": "string",
+                "url": "string"
+            },
+            ...
+        ]
+    }
+
+The ``subtitle`` field is a string that represents the subtitle of the section.
+
+The ``links`` field is a list of dictionaries containing information about the links in the section. Each link is represented as a dictionary with the following structure:
+
+.. code-block:: python
+
+    {
+        "text": "string",
+        "url": "string"
+    }
+
+The ``text`` field is a string that represents the text of the link.
+
+The ``url`` field is a string that represents the URL of the link.
+"""
 topics = [
         {
             "title": "HTTP и HTTPS запросы",

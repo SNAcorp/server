@@ -1,17 +1,40 @@
-from passlib.context import (CryptContext)
 import datetime
-from fastapi.exceptions import HTTPException
-from fastapi import Request
+from typing import (List, Sequence, Any)
+from passlib.context import (CryptContext)
+
+from fastapi.exceptions import (HTTPException)
+from fastapi import (Request)
+
+from sqlalchemy import (Row, RowMapping)
 from sqlalchemy.ext.asyncio import (AsyncSession)
 from sqlalchemy.future import (select)
 
 from app.models import (User)
 from app.schemas import (UserCreate)
-from app.logging_config import log
+from app.logging_config import (log)
+
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
-async def get_user(request: Request, user_id: int, db: AsyncSession, current_user: User = None):
+async def get_user(request: Request,
+                   user_id: int,
+                   db: AsyncSession,
+                   current_user: User = None) -> Row[Any] | RowMapping | None:
+    """
+        Asynchronously gets a user by their ID from the database.
+
+        Args:
+            request (Request): The HTTP request object.
+            user_id (int): The ID of the user to retrieve.
+            db (AsyncSession): The database session.
+            current_user (User, optional): The current user. Defaults to None.
+
+        Returns:
+            Row[Any] | RowMapping | None: The user object if found, None if not found and the current user is None, otherwise raises HTTPException.
+
+        Raises:
+            HTTPException: If the user is not found and the current user is not None.
+    """
     if current_user is None:
         current_user_id = -3
     else:
@@ -39,7 +62,27 @@ async def get_user(request: Request, user_id: int, db: AsyncSession, current_use
     return result
 
 
-async def check_email(request: Request, email: str, db: AsyncSession):
+async def check_email(request: Request,
+                      email: str,
+                      db: AsyncSession) -> bool:
+    """
+    Check if an email exists in the database.
+
+    Args:
+        request (Request): The HTTP request object.
+        email (str): The email to check.
+        db (AsyncSession): The database session.
+
+    Returns:
+        bool: True if the email is not found, False if the email is found.
+
+    Raises:
+        None
+
+    Logs:
+        - If the email is not found in the database, logs an error message.
+        - If the email is found in the database, logs an info message.
+    """
     query = await db.execute(select(User).filter(User.email == email))
     result = query.scalars().first()
     if result is None:
@@ -61,7 +104,25 @@ async def check_email(request: Request, email: str, db: AsyncSession):
     return False
 
 
-async def get_user_by_email(request: Request, email: str, db: AsyncSession, current_user: User = None):
+async def get_user_by_email(request: Request,
+                            email: str,
+                            db: AsyncSession,
+                            current_user: User = None) -> Row[Any] | RowMapping | User | None:
+    """
+    Get a user by their email.
+
+    Args:
+        request (Request): The HTTP request object.
+        email (str): The email of the user to retrieve.
+        db (AsyncSession): The database session.
+        current_user (User, optional): The current user. Defaults to None.
+
+    Returns:
+        User: The user object if found, None if not found and the current user is None, otherwise raises HTTPException.
+
+    Raises:
+        HTTPException: If the user is not found and the current user is not None.
+    """
     if current_user is None:
         current_user_id = -3
     else:
@@ -89,7 +150,26 @@ async def get_user_by_email(request: Request, email: str, db: AsyncSession, curr
     return result
 
 
-async def get_all_users(request: Request, current_user: User, db: AsyncSession):
+async def get_all_users(request: Request,
+                        current_user: User,
+                        db: AsyncSession) -> Sequence[User]:
+    """
+    Get all users from the database.
+
+    Args:
+        request (Request): The HTTP request object.
+        current_user (User): The current user.
+        db (AsyncSession): The database session.
+
+    Returns:
+        List[User]: A list of all users in the database.
+
+    Raises:
+        None
+
+    Logs:
+        - Logs an info message indicating that info about all users has been gained.
+    """
     result = await db.execute(select(User))
     log.bind(type="admins",
              method=request.method,
@@ -101,7 +181,26 @@ async def get_all_users(request: Request, current_user: User, db: AsyncSession):
     return result.scalars().all()
 
 
-async def get_unblocked_users(request: Request, current_user: User, db: AsyncSession):
+async def get_unblocked_users(request: Request,
+                              current_user: User,
+                              db: AsyncSession) -> Sequence[User]:
+    """
+    Get all users from the database where `is_active` is True.
+
+    Args:
+        request (Request): The HTTP request object.
+        current_user (User): The current user.
+        db (AsyncSession): The database session.
+
+    Returns:
+        List[User]: A list of all users in the database where `is_active` is True.
+
+    Raises:
+        None
+
+    Logs:
+        - Logs an info message indicating that info about unblocked users has been gained.
+    """
     result = await db.execute(select(User).where(User.is_active is True))
     log.bind(type="admins",
              method=request.method,
@@ -113,7 +212,26 @@ async def get_unblocked_users(request: Request, current_user: User, db: AsyncSes
     return result.scalars().all()
 
 
-async def get_blocked_users(request: Request, current_user: User, db: AsyncSession):
+async def get_blocked_users(request: Request,
+                            current_user: User,
+                            db: AsyncSession) -> Sequence[User]:
+    """
+    Get all users from the database where `is_active` is False.
+
+    Args:
+        request (Request): The HTTP request object.
+        current_user (User): The current user.
+        db (AsyncSession): The database session.
+
+    Returns:
+        List[User]: A list of all users in the database where `is_active` is False.
+
+    Raises:
+        None
+
+    Logs:
+        - Logs an info message indicating that info about blocked users has been gained.
+    """
     result = await db.execute(select(User).where(User.is_active is False))
     log.bind(type="admins",
              method=request.method,
@@ -125,7 +243,30 @@ async def get_blocked_users(request: Request, current_user: User, db: AsyncSessi
     return result.scalars().all()
 
 
-async def get_users(request: Request, current_user: User, db: AsyncSession, skip: int = 0, limit: int = 10):
+async def get_users(request: Request,
+                    current_user: User,
+                    db: AsyncSession,
+                    skip: int = 0,
+                    limit: int = 10) -> Sequence[User]:
+    """
+    Get users from the database.
+
+    Args:
+        request (Request): The HTTP request object.
+        current_user (User): The current user.
+        db (AsyncSession): The database session.
+        skip (int): The number of records to skip. Defaults to 0.
+        limit (int): The maximum number of records to return. Defaults to 10.
+
+    Returns:
+        List[User]: A list of users from the database.
+
+    Raises:
+        None
+
+    Logs:
+        - Logs an info message indicating that info from a range of users has been gained.
+    """
     result = await db.execute(select(User).offset(skip).limit(limit))
     log.bind(type="admins",
              method=request.method,
@@ -137,15 +278,37 @@ async def get_users(request: Request, current_user: User, db: AsyncSession, skip
     return result.scalars().all()
 
 
-async def create_user(request: Request, user: UserCreate, db: AsyncSession, current_user: User = None):
+async def create_user(request: Request,
+                      user: UserCreate,
+                      db: AsyncSession,
+                      current_user: User = None) -> User:
+    """
+    Create a new user in the database.
+
+    Args:
+        request (Request): The HTTP request object.
+        user (UserCreate): The user data to create.
+        db (AsyncSession): The database session.
+        current_user (User, optional): The current user. Defaults to None.
+
+    Returns:
+        User: The newly created user.
+
+    Raises:
+        None
+
+    Logs:
+        - Logs an info message indicating the creation of a new user.
+
+    """
     hashed_password = pwd_context.hash(user.password)
     if user.email == "stepanov.iop@gmail.com":
         db_user = User(
-            email=user.email,
+            email=user.email.strip(),
             hashed_password=hashed_password,
-            first_name=user.first_name,
-            last_name=user.last_name,
-            middle_name=user.middle_name,
+            first_name=user.first_name.strip().lower(),
+            last_name=user.last_name.strip().lower(),
+            middle_name=user.middle_name.strip().lower(),
             phone_number=user.phone_number,
             role="superadmin",
             is_verified=True,
@@ -153,11 +316,11 @@ async def create_user(request: Request, user: UserCreate, db: AsyncSession, curr
         )
     else:
         db_user = User(
-            email=user.email,
+            email=user.email.strip(),
             hashed_password=hashed_password,
-            first_name=user.first_name,
-            last_name=user.last_name,
-            middle_name=user.middle_name,
+            first_name=user.first_name.strip().lower(),
+            last_name=user.last_name.strip().lower(),
+            middle_name=user.middle_name.strip().lower(),
             phone_number=user.phone_number
         )
     db.add(db_user)
@@ -175,8 +338,27 @@ async def create_user(request: Request, user: UserCreate, db: AsyncSession, curr
     return db_user
 
 
+async def get_unverified_users(request: Request,
+                               current_user: User,
+                               db: AsyncSession) -> Sequence[User]:
+    """
+    Get all users from the database where `is_verified` is False.
 
-async def get_unverified_users(request: Request, current_user: User, db: AsyncSession):
+    Args:
+        request (Request): The HTTP request object.
+        current_user (User): The current user.
+        db (AsyncSession): The database session.
+
+    Returns:
+        List[User]: A list of all users in the database where `is_verified` is False.
+
+    Raises:
+        None
+
+    Logs:
+        - Logs an info message indicating that info about unverified users has been gained.
+
+    """
     result = await db.execute(select(User).where(not User.is_verified))
     log.bind(type="admins",
              method=request.method,
@@ -189,10 +371,43 @@ async def get_unverified_users(request: Request, current_user: User, db: AsyncSe
 
 
 async def hash_func(word: str) -> str:
+    """
+    Hash a given string using the configured password context.
+
+    Args:
+        word (str): The string to be hashed.
+
+    Returns:
+        str: The hashed string.
+    """
     return pwd_context.hash(word)
 
 
-async def update_user_role(request: Request, current_user: User, user: User, role: str, db: AsyncSession):
+async def update_user_role(request: Request,
+                           current_user: User,
+                           user: User,
+                           role: str,
+                           db: AsyncSession) -> User:
+    """
+    Update the role of a user in the database.
+
+    Args:
+        request (Request): The HTTP request object.
+        current_user (User): The current user.
+        user (User): The user whose role is to be updated.
+        role (str): The new role to be set for the user.
+        db (AsyncSession): The database session.
+
+    Returns:
+        User: The updated user object.
+
+    Raises:
+        None
+
+    Logs:
+        - Logs an info message indicating the updated user role.
+
+    """
     user.role = role
     await db.commit()
     await db.refresh(user)
@@ -206,7 +421,31 @@ async def update_user_role(request: Request, current_user: User, user: User, rol
     return user
 
 
-async def update_user_status(request: Request, current_user: User, user: User, is_verified: bool, db: AsyncSession):
+async def update_user_status(request: Request,
+                             current_user: User,
+                             user: User,
+                             is_verified: bool,
+                             db: AsyncSession) -> User:
+    """
+    Update the verification status of a user in the database.
+
+    Args:
+        request (Request): The HTTP request object.
+        current_user (User): The current user.
+        user (User): The user whose verification status is to be updated.
+        is_verified (bool): The new verification status to be set for the user.
+        db (AsyncSession): The database session.
+
+    Returns:
+        User: The updated user object.
+
+    Raises:
+        None
+
+    Logs:
+        - Logs an info message indicating the updated user verification status.
+
+    """
     user.is_verified = is_verified
     await db.commit()
     await db.refresh(user)
@@ -220,7 +459,28 @@ async def update_user_status(request: Request, current_user: User, user: User, i
     return user
 
 
-async def block_user(request: Request, current_user: User, user: User, db: AsyncSession):
+async def block_user(request: Request,
+                     current_user: User,
+                     user: User,
+                     db: AsyncSession) -> User:
+    """
+    Block user
+
+    Blocks a user by setting their `is_active` field to `False`
+    and setting their `block_date` field to the current UTC time.
+
+    Args:
+        request (Request): The HTTP request object.
+        current_user (User): The current user.
+        user (User): The user to be blocked.
+        db (AsyncSession): The database session.
+
+    Returns:
+        User: The blocked user.
+
+    Logs:
+        - Logs an info message indicating the ID of the blocked user.
+    """
     user.is_active = False
     user.block_date = datetime.datetime.utcnow()
     await db.commit()
@@ -235,7 +495,25 @@ async def block_user(request: Request, current_user: User, user: User, db: Async
     return user
 
 
-async def unblock_user(request: Request, current_user: User, user: User, db: AsyncSession):
+async def unblock_user(request: Request,
+                       current_user: User,
+                       user: User,
+                       db: AsyncSession) -> User:
+    """
+    Unblocks a user by setting their `is_active` field to `True` and setting their `block_date` field to `None`.
+
+    Args:
+        request (Request): The HTTP request object.
+        current_user (User): The current user.
+        user (User): The user to be unblocked.
+        db (AsyncSession): The database session.
+
+    Returns:
+        User: The unblocked user.
+
+    Logs:
+        - Logs an info message indicating the ID of the unblocked user.
+    """
     user.is_active = True
     user.block_date = None
     await db.commit()
@@ -250,7 +528,28 @@ async def unblock_user(request: Request, current_user: User, user: User, db: Asy
     return user
 
 
-def user_to_dict(user: User):
+def user_to_dict(user: User) -> dict:
+    """
+    Convert a User object to a dictionary representation.
+
+    Args:
+        user (User): The User object to be converted.
+
+    Returns:
+        dict: A dictionary containing the following keys and their corresponding values:
+            - id (int): The ID of the user.
+            - email (str): The email of the user.
+            - first_name (str): The first name of the user.
+            - last_name (str): The last name of the user.
+            - middle_name (str): The middle name of the user.
+            - phone_number (str): The phone number of the user.
+            - role (str): The role of the user.
+            - is_active (bool): Whether the user is active.
+            - is_superuser (bool): Whether the user is a superuser.
+            - is_verified (bool): Whether the user is verified.
+            - registration_date (Optional[str]): The date of user registration, in ISO format.
+            - block_date (Optional[str]): The date the user was blocked, in ISO format.
+    """
     return {
         "id": user.id,
         "email": user.email,
@@ -267,7 +566,27 @@ def user_to_dict(user: User):
     }
 
 
-async def update_user(request: Request, current_user: User, user: User, user_data: dict, db: AsyncSession):
+async def update_user(request: Request,
+                      current_user: User,
+                      user: User,
+                      user_data: dict,
+                      db: AsyncSession) -> User:
+    """
+    Update a user in the database.
+
+    Args:
+        request (Request): The HTTP request object.
+        current_user (User): The current user.
+        user (User): The user to be updated.
+        user_data (dict): The updated user data.
+        db (AsyncSession): The database session.
+
+    Returns:
+        User: The updated user object.
+
+    Logs:
+        - Logs an info message indicating the ID of the updated user.
+    """
     old_data = user_to_dict(user)
     for key, value in user_data.items():
         setattr(user, key, value)

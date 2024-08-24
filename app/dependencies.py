@@ -1,31 +1,35 @@
 import os
-
 import jwt
-from fastapi import (Depends, HTTPException, Request)
-from fastapi.security import (OAuth2PasswordBearer)
-from sqlalchemy.ext.asyncio import (AsyncSession, create_async_engine)
-from sqlalchemy.orm import (sessionmaker)
 
-from app.crud import (get_user_by_email, get_user)
+from fastapi import (Depends, HTTPException, Request)
+from sqlalchemy.ext.asyncio import (AsyncSession)
+
+from app.crud import (get_user)
 from app.database import (get_db)
 from app.logging_config import log
+from app.models import Terminal
 from app.schemas import (User)
-# DATABASE_URL = "postgresql+asyncpg://nikitastepanov@localhost/terminals"
-from app.utils import load_keys, SPECIAL_TOKEN
+from app.utils import (load_keys, SPECIAL_TOKEN)
 
-DATABASE_URL = os.getenv('DATABASE_URL')
-
-engine = create_async_engine(DATABASE_URL, echo=True)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine, class_=AsyncSession)
-
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+ALGORITHM = os.getenv("ALGORITHM")
 
 
-ALGORITHM = "RS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 540
+async def get_current_user(request: Request,
+                           db: AsyncSession = Depends(get_db)) -> User:
+    """
+    Retrieves the current user from the request.
 
+    Args:
+        request (Request): The HTTP request object.
+        db (AsyncSession, optional): The database session. Defaults to the session from `get_db`.
 
-async def get_current_user(request: Request, db: AsyncSession = Depends(get_db)):
+    Raises:
+        HTTPException: If the user is not found, or is not active or blocked.
+
+    Returns:
+        User: The current user.
+
+    """
     from app.utils import PUBLIC_KEY
     if PUBLIC_KEY is None:
         await load_keys()
@@ -81,7 +85,24 @@ async def get_current_user(request: Request, db: AsyncSession = Depends(get_db))
     return user
 
 
-async def get_admin_user(request: Request, current_user: User = Depends(get_current_user)):
+async def get_admin_user(request: Request,
+                         current_user: User = Depends(get_current_user)) -> User:
+    """
+    Get the current user if they are an admin.
+
+    Args:
+        request (Request): The HTTP request object.
+        current_user (User, optional): The current user. Defaults to the user from `get_current_user`.
+
+    Returns:
+        User: The current user if they are an admin.
+
+    Raises:
+        HTTPException: If the user is not an admin.
+
+    Logs:
+        - Logs an error message if the user is not an admin.
+    """
     if not current_user.is_superuser:
         if current_user.role != "admin":
             log.bind(type="admins",
@@ -96,7 +117,24 @@ async def get_admin_user(request: Request, current_user: User = Depends(get_curr
     return current_user
 
 
-async def get_superadmin_user(request: Request, current_user: User = Depends(get_current_user)):
+async def get_superadmin_user(request: Request,
+                              current_user: User = Depends(get_current_user)) -> User:
+    """
+    Get the current user if they are a superadmin.
+
+    Args:
+        request (Request): The HTTP request object.
+        current_user (User, optional): The current user. Defaults to the user from `get_current_user`.
+
+    Returns:
+        User: The current user if they are a superadmin.
+
+    Raises:
+        HTTPException: If the user is not a superadmin.
+
+    Logs:
+        - Logs an error message if the user is not a superadmin.
+    """
     if not current_user.is_superuser:
         log.bind(type="admins",
                  method=request.method,
@@ -109,10 +147,62 @@ async def get_superadmin_user(request: Request, current_user: User = Depends(get
     return current_user
 
 
+async def check_user(request: Request,
+                     user_id: int,
+                     current_user: User,
+                     db: AsyncSession) -> User:
+    """
+    Check if the user with the given `user_id` exists and if the current user has permission to access it.
+
+    Args:
+        request (Request): The HTTP request object.
+        user_id (int): The ID of the user to check.
+        current_user (User): The current user.
+        db (AsyncSession): The database session.
+
+    Returns:
+        User: The user object if the user exists and the current user has permission to access it.
+
+    Raises:
+        HTTPException: If the user does not exist or the current user does not have permission to access it.
+    """
+    user = await get_user(request=request, user_id=user_id,
+                          current_user=current_user, db=db)
+    if user is None:
+        log.bind(type="admins",
+                 method=request.method,
+                 current_user_id=current_user.id,
+                 url=str(request.url),
+                 headers=dict(request.headers),
+                 params=dict(request.query_params)
+                 ).error(f"User not found")
+        raise HTTPException(status_code=404, detail="User not found")
+
+    return user
+
+
 async def check_user_for_superuser(request: Request,
                                    user_id: int,
                                    current_user: User,
-                                   db: AsyncSession):
+                                   db: AsyncSession) -> User:
+    """
+    Check if the user with given `user_id` is a superuser and if the current user is not a superuser.
+
+    Args:
+        request (Request): The HTTP request object.
+        user_id (int): The ID of the user to check.
+        current_user (User): The current user.
+        db (AsyncSession): The database session.
+
+    Returns:
+        User: The user object if the user is a superuser and the current user is not a superuser.
+
+    Raises:
+        HTTPException: If the user is a superuser and the current user is not a superuser.
+
+    Logs:
+        - Logs an error message if the user is a superuser and the current user is not a superuser.
+    """
     user = await check_user(request, user_id, current_user, db)
 
     if user.is_superuser and not current_user.is_superuser:
@@ -128,21 +218,31 @@ async def check_user_for_superuser(request: Request,
     return user
 
 
-async def check_user(request: Request,
-                     user_id: int,
-                     current_user: User,
-                     db: AsyncSession):
+async def get_current_terminal(request: Request, db: AsyncSession) -> Terminal:
+    """
+    Get the current terminal from the request.
 
-    user = await get_user(request=request, user_id=user_id,
-                          current_user=current_user, db=db)
-    if user is None:
-        log.bind(type="admins",
+    Args:
+        request (Request): The HTTP request object.
+        db (AsyncSession): The database session.
+
+    Returns:
+        Terminal: The current terminal.
+
+    Raises:
+        HTTPException: If the terminal is not found.
+
+    Logs:
+        - Logs an error message if the terminal is not found.
+    """
+    terminal = await get_terminal(request, db)
+    if terminal is None:
+        log.bind(type="terminal",
                  method=request.method,
-                 current_user_id=current_user.id,
                  url=str(request.url),
                  headers=dict(request.headers),
                  params=dict(request.query_params)
-                 ).error(f"User not found")
-        raise HTTPException(status_code=404, detail="User not found")
+                 ).error(f"Terminal not found")
+        raise HTTPException(status_code=404, detail="Terminal not found")
 
-    return user
+    return terminal

@@ -3,6 +3,7 @@ from fastapi import (APIRouter,
                      Request)
 from fastapi.responses import (JSONResponse,
                                HTMLResponse)
+
 from sqlalchemy.ext.asyncio import (AsyncSession)
 
 from app.templates import (app_templates)
@@ -26,8 +27,24 @@ router = APIRouter()
 
 
 @router.get("/panel", response_class=HTMLResponse)
-async def admin_panel(request: Request, db: AsyncSession = Depends(get_db),
-                      current_user: User = Depends(get_admin_user)):
+async def admin_panel(request: Request,
+                      db: AsyncSession = Depends(get_db),
+                      current_user: User = Depends(get_admin_user)) -> HTMLResponse:
+    """
+        Endpoint for the admin panel.
+
+        Args:
+            request (Request): The HTTP request object.
+            db (AsyncSession): The database session.
+            current_user (User): The current user.
+
+        Returns:
+            TemplateResponse: The rendered admin panel HTML template.
+
+        Logs:
+            - Logs an info message indicating that the admin panel has been accessed.
+    """
+
     all_users = await get_all_users(request=request, current_user=current_user, db=db)
     unblocked_users = await get_unblocked_users(request=request, current_user=current_user, db=db)
     blocked_users = await get_blocked_users(request=request, current_user=current_user, db=db)
@@ -51,11 +68,29 @@ async def admin_panel(request: Request, db: AsyncSession = Depends(get_db),
     })
 
 
-@router.put("/role/{user_id}")
+@router.put("/role/{user_id}", response_model=User)
 async def change_user_role(request: Request,
                            user_id: int,
                            db: AsyncSession = Depends(get_db),
-                           current_user: User = Depends(get_admin_user)):
+                           current_user: User = Depends(get_admin_user)) -> User:
+    """
+    Change the role of a user in the database.
+
+    Args:
+        request (Request): The HTTP request object.
+        user_id (int): The ID of the user whose role is to be changed.
+        db (AsyncSession): The database session.
+        current_user (User): The current user.
+
+    Returns:
+        User: The updated user object.
+
+    Raises:
+        HTTPException: If the user is not found.
+
+    Logs:
+        - Logs an info message indicating the updated user role.
+    """
     user = await check_user(request=request, user_id=user_id,
                             current_user=current_user, db=db)
 
@@ -70,8 +105,23 @@ async def change_user_role(request: Request,
 async def get_user_details(request: Request,
                            user_id: int,
                            db: AsyncSession = Depends(get_db),
-                           current_user: User = Depends(get_admin_user)):
+                           current_user: User = Depends(get_admin_user)) -> JSONResponse:
 
+    """
+    Get details of a user by their ID.
+
+    Args:
+        request (Request): The HTTP request object.
+        user_id (int): The ID of the user to retrieve.
+        db (AsyncSession): The database session.
+        current_user (User): The current user.
+
+    Returns:
+        JSONResponse: A JSON response containing the user details.
+
+    Raises:
+        HTTPException: If the user is not found.
+    """
     user = await check_user(request=request, user_id=user_id,
                             current_user=current_user, db=db)
     user_data = user_to_dict(user)
@@ -84,7 +134,23 @@ async def update_user_details(request: Request,
                               user_id: int,
                               user_data: dict,
                               current_user: User = Depends(get_admin_user),
-                              db: AsyncSession = Depends(get_db)):
+                              db: AsyncSession = Depends(get_db)) -> JSONResponse:
+    """
+    Update the details of a user in the database.
+
+    Args:
+        request (Request): The HTTP request object.
+        user_id (int): The ID of the user to update.
+        user_data (dict): The updated user data.
+        current_user (User): The current user.
+        db (AsyncSession): The database session.
+
+    Returns:
+        JSONResponse: A JSON response containing the updated user details.
+
+    Raises:
+        HTTPException: If the user is not found.
+    """
     user = await check_user(request=request, user_id=user_id,
                             current_user=current_user, db=db)
     updated_user = await update_user(request=request, current_user=current_user,
@@ -94,11 +160,28 @@ async def update_user_details(request: Request,
     return JSONResponse(content=user_data)
 
 
-@router.put("/block/{user_id}")
+@router.put("/block/{user_id}", response_model=User)
 async def block_user_route(request: Request,
                            user_id: int,
                            db: AsyncSession = Depends(get_db),
-                           current_user: User = Depends(get_admin_user)):
+                           current_user: User = Depends(get_admin_user)) -> User:
+
+    """
+    Block a user.
+
+    Args:
+        request (Request): The HTTP request object.
+        user_id (int): The ID of the user to block.
+        db (AsyncSession): The database session.
+        current_user (User): The current user.
+
+    Returns:
+        User: The blocked user.
+
+    Raises:
+        HTTPException: If the user is not found.
+
+    """
     user = await check_user_for_superuser(request=request, user_id=user_id,
                                           current_user=current_user, db=db)
     blocked_user = await block_user(request=request, current_user=current_user,
@@ -107,11 +190,27 @@ async def block_user_route(request: Request,
     return blocked_user
 
 
-@router.put("/unblock/{user_id}")
+@router.put("/unblock/{user_id}", response_model=User)
 async def unblock_user_route(request: Request,
                              user_id: int,
                              db: AsyncSession = Depends(get_db),
-                             current_user: User = Depends(get_admin_user)):
+                             current_user: User = Depends(get_admin_user)) -> User:
+    """
+    Unblock a user.
+
+    Args:
+        request (Request): The HTTP request object.
+        user_id (int): The ID of the user to unblock.
+        db (AsyncSession): The database session.
+        current_user (User): The current user.
+
+    Returns:
+        User: The unblocked user.
+
+    Raises:
+        HTTPException: If the user is not found.
+
+    """
     user = await check_user_for_superuser(request=request, user_id=user_id,
                                           current_user=current_user, db=db)
     unblocked_user = await unblock_user(request=request, current_user=current_user,

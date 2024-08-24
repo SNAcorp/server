@@ -14,7 +14,7 @@ from app.database import (DATABASE_URL)
 from app.dependencies import (get_current_user)
 from app.jwt_auth import (verify_terminal)
 from app.logging_config import log
-from app.models import (Base, EMPTY_BOTTLE_ID, TerminalState, Bottle)
+from app.models import (Base, TerminalState, Bottle)
 from app.routers import (auth, users, admin, superadmin, terminals, orders, bottles, rfid, logs)
 from app.routers.error_handlers import (custom_404_handler, custom_401_handler, custom_403_handler)
 from app.schemas import (IsServerOnline, User)
@@ -44,11 +44,24 @@ app.include_router(admin.router, prefix="/admin", tags=["admin"])
 app.include_router(superadmin.router, prefix="/superadmin", tags=["superadmin"])
 app.include_router(logs.router, prefix="/logs", tags=["logs"])
 
-app.mount("/static", StaticFiles(directory="app/static"), name="static")
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
 @app.on_event("startup")
 async def startup():
+    """
+    This function is a startup event handler.
+    It is called when the application starts up.
+    It performs the following actions:
+    1. Logs the application start up event.
+    2. Generates RSA keys.
+    3. Loads the RSA keys.
+    4. Creates all tables in the database if they do not exist.
+    5. Checks if an empty bottle exists. If not, creates one.
+    6. Checks if all terminal states exist. If not, creates them.
+    Returns:
+        None
+    """
     log.bind(type="app").info("Application start up")
     await generate_rsa_keys()
     await load_keys()
@@ -56,17 +69,18 @@ async def startup():
         await conn.run_sync(Base.metadata.create_all)
 
     async with AsyncSession(engine) as session:
+        empty_bottle_id = int(os.environ.get("EMPTY_BOTTLE_ID"))
         states = ["Active",
                   "Broken",
                   "Under Maintenance",
                   "Updating",
                   "Switched off",
                   "Connection lost"]
-        result = await session.execute(select(Bottle).where(Bottle.id == EMPTY_BOTTLE_ID))
+        result = await session.execute(select(Bottle).where(Bottle.id == empty_bottle_id))
         empty_bottle = result.scalars().first()
         if empty_bottle is None:
             empty_bottle = Bottle(
-                id=EMPTY_BOTTLE_ID,
+                id=empty_bottle_id,
                 name="Empty Bottle",
                 winery="N/A",
                 rating_average=0,
@@ -84,6 +98,7 @@ async def startup():
                 new_state = TerminalState(state=state)
                 session.add(new_state)
         await session.commit()
+
 
 origins = [
     "http://localhost",
@@ -103,6 +118,23 @@ app.add_middleware(
 
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
+    """
+    Logs incoming requests and their processing time.
+
+    Args:
+        request (Request): The incoming request.
+        call_next (Callable): The next middleware or route handler.
+
+    Returns:
+        Response: The response to the request.
+
+    Raises:
+        HTTPException: If the response is None.
+
+    Logs:
+        - Information about incoming requests.
+        - Information about processed requests, including category, status code, method, URL, and processing time.
+    """
     start_time = time.time()
 
     # Логирование информации о запросе
@@ -133,6 +165,23 @@ async def log_requests(request: Request, call_next):
 
 @app.middleware("http")
 async def detect_suspicious_requests(request: Request, call_next):
+    """
+    Middleware function that detects suspicious requests and redirects them to a 404 page.
+
+    Args:
+        request (Request): The incoming request.
+        call_next (Callable): The next middleware or route handler.
+
+    Returns:
+        Response: The response to the request.
+
+    Raises:
+        None
+
+    Logs:
+        - A warning message if a suspicious request is detected.
+        - An error message if the response is None.
+    """
     if any(word in request.url.path.lower() for word in
            ["select", "drop", "insert", "update", "wget", "php", "xml", "%", "-"]):
         log.bind(type="app").warning(f"Suspicious request detected: {request.method} | {request.url}")
@@ -151,9 +200,6 @@ async def read_learn(request: Request):
     return app_templates.TemplateResponse("lol.html", {"request": request, "topics": topics})
 
 
-
-
-
 @app.get("/", response_class=JSONResponse)
 async def for_huckers(current_user: User = Depends(get_current_user)):
     if current_user is not None:
@@ -163,6 +209,18 @@ async def for_huckers(current_user: User = Depends(get_current_user)):
 
 @app.get("/static/{image_name}")
 async def get_image(image_name: str):
+    """
+    Get an image from the static directory.
+
+    Args:
+        image_name (str): The name of the image file.
+
+    Returns:
+        FileResponse: The requested image file.
+
+    Raises:
+        HTTPException: If the image file is not found.
+    """
     file_path = f"app/static/{image_name}"
     if os.path.isfile(file_path):
         return FileResponse(file_path)
@@ -172,6 +230,18 @@ async def get_image(image_name: str):
 
 @app.post("/", response_class=JSONResponse)
 async def is_server_online(request: IsServerOnline):
+    """
+        Check if the server is online.
+
+        Args:
+            request (IsServerOnline): The request object containing a terminal ID and a token.
+
+        Returns:
+            dict: A dictionary with a boolean value indicating if the server is online.
+
+        Raises:
+            HTTPException: If the token is invalid or the terminal ID in the token does not match the one in the request.
+    """
     payload = verify_terminal(request.token)
     if payload["terminal_id"] != request.terminal_id:
         raise HTTPException(status_code=403, detail="Invalid terminal ID")

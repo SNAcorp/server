@@ -1,18 +1,18 @@
-from datetime import timedelta
+from datetime import (timedelta)
 
 from fastapi import (APIRouter, Depends, HTTPException, Request, Form)
-from fastapi.responses import (JSONResponse, RedirectResponse, HTMLResponse)
+from fastapi.responses import (JSONResponse, HTMLResponse)
 
 from sqlalchemy.ext.asyncio import (AsyncSession)
 from sqlalchemy.future import (select)
 from sqlalchemy.orm import (selectinload, joinedload)
 
-from app.dependencies import get_current_user
+from app.dependencies import (get_current_user)
 from app.database import (get_db)
-from app.logging_config import log
-from app.models import Order, RFID, OrderRFID, OrderItem
-from app.schemas import User
-from app.templates import app_templates
+from app.logging_config import (log)
+from app.models import (Order, RFID, OrderRFID, OrderItem)
+from app.schemas import (User)
+from app.templates import (app_templates)
 
 router = APIRouter()
 
@@ -20,7 +20,22 @@ router = APIRouter()
 @router.get("/", response_class=HTMLResponse)
 async def read_orders(request: Request,
                       db: AsyncSession = Depends(get_db),
-                      current_user: User = Depends(get_current_user)):
+                      current_user: User = Depends(get_current_user)) -> HTMLResponse:
+    """
+    Get a list of all orders.
+
+    Parameters:
+    - request (Request): The HTTP request object.
+    - db (AsyncSession): The database session object.
+    - current_user (User): The current user (if signed in).
+
+    Returns:
+    - HTMLResponse: The rendered 'orders.html' template.
+
+    This function retrieves all orders from the database and renders the 'orders.html' template,
+    passing the list of orders and the current user as template variables. It also logs the
+    access to the orders list template.
+    """
     result = await db.execute(select(Order).options(selectinload(Order.items)))
     orders = result.scalars().all()
 
@@ -44,7 +59,24 @@ async def add_rfid_to_order(request: Request,
                             order_id: int,
                             rfid_code: str = Form(...),
                             db: AsyncSession = Depends(get_db),
-                            current_user: User = Depends(get_current_user)):
+                            current_user: User = Depends(get_current_user)) -> JSONResponse:
+    """
+    Add an RFID code to an order.
+
+    Parameters:
+    - request (Request): The HTTP request object.
+    - order_id (int): The ID of the order to add the RFID to.
+    - rfid_code (str): The RFID code to add to the order.
+    - db (AsyncSession): The database session object.
+    - current_user (User): The current user (if signed in).
+
+    Returns:
+    - JSONResponse: A JSON response indicating the success of the operation.
+
+    This function adds an RFID code to an order by creating a new RFID object and associating it with the order.
+    If the order does not exist, a 404 error is raised. If the RFID code is already active in another order, a 422 error
+    is raised. If the operation is successful, a JSON response with "success" set to True is returned.
+    """
     result = await db.execute(select(Order).where(Order.id == order_id))
     order = result.scalars().first()
     if order is None:
@@ -64,7 +96,7 @@ async def add_rfid_to_order(request: Request,
         .options(joinedload(RFID.order_rfids))  # Асинхронная предзагрузка связанных записей
         .where(
             RFID.code == rfid_code,
-            Order.is_completed == False  # Условие на активный заказ
+            Order.is_completed is False  # Условие на активный заказ
         )
     )
 
@@ -76,7 +108,8 @@ async def add_rfid_to_order(request: Request,
                  url=str(request.url),
                  headers=dict(request.headers),
                  params=dict(request.query_params)
-                 ).error(f"Аttempt to add rfid {rfid_code} to order {order_id}, but this rfid is active in another order")
+                 ).error(
+            f"Аttempt to add rfid {rfid_code} to order {order_id}, but this rfid is active in another order")
         raise HTTPException(status_code=422, detail="RFID in another order")
 
     rfid = RFID(code=rfid_code)
@@ -100,7 +133,20 @@ async def add_rfid_to_order(request: Request,
 
 @router.get("/create", response_class=HTMLResponse)
 async def create_order_page(request: Request,
-                            current_user: User = Depends(get_current_user)):
+                            current_user: User = Depends(get_current_user)) -> HTMLResponse:
+    """
+    Render the create order page.
+
+    Args:
+        request (Request): The HTTP request object.
+        current_user (User): The current user.
+
+    Returns:
+        HTMLResponse: The rendered create order page.
+
+    Logs:
+        - Logs an info message indicating that access to the creation order template has been gained.
+    """
     log.bind(type="users",
              method=request.method,
              current_user_id=current_user.id,
@@ -114,12 +160,30 @@ async def create_order_page(request: Request,
                                            "current_user": current_user})
 
 
-@router.post("/{order_id}/complete")
+@router.post("/{order_id}/complete", response_class=JSONResponse)
 async def complete_order(request: Request,
                          order_id: int,
                          db: AsyncSession = Depends(get_db),
-                         current_user: User = Depends(get_current_user)):
+                         current_user: User = Depends(get_current_user)) -> JSONResponse:
+    """
+    Complete an order by marking it as completed and invalidating all associated RFIDs.
 
+    Args:
+        request (Request): The HTTP request object.
+        order_id (int): The ID of the order to be completed.
+        db (AsyncSession): The database session.
+        current_user (User): The current user.
+
+    Returns:
+        JSONResponse: A JSON response indicating success.
+
+    Raises:
+        HTTPException: If the order is not found.
+
+    Logs:
+        - Logs an info message indicating that the order has been completed.
+        - Logs an error message if the order is not found.
+    """
     result = await db.execute(
         select(Order).options(selectinload(Order.rfids)).where(Order.id == order_id)
     )
@@ -150,9 +214,30 @@ async def complete_order(request: Request,
 
 
 @router.get("/{order_id}", response_class=HTMLResponse)
-async def read_order(order_id: int, request: Request,
+async def read_order(request: Request,
+                     order_id: int,
                      db: AsyncSession = Depends(get_db),
-                     current_user: User = Depends(get_current_user)):
+                     current_user: User = Depends(get_current_user)) -> HTMLResponse:
+    """
+    Read details of an order.
+
+    Args:
+        request (Request): The incoming request.
+        order_id (int): The ID of the order.
+        db (AsyncSession, optional): The database session. Defaults to Depends on get_db.
+        current_user (User, optional): The current user. Defaults to Depends on get_current_user.
+
+    Returns:
+        HTMLResponse: The rendered order detail page.
+
+    Raises:
+        HTTPException: If the order is not found.
+        HTTPException: If the order items are not iterable.
+
+    Logs:
+        - Logs an info message if the order is found.
+        - Logs an error message if the order is not found.
+    """
 
     result = await db.execute(
         select(Order).options(
@@ -199,9 +284,30 @@ async def read_order(order_id: int, request: Request,
                                            "items": items,
                                            "current_user": current_user})
 
-@router.post("/rfid/check")
-async def rfid_check(request: Request, db: AsyncSession = Depends(get_db),
-                     current_user: User = Depends(get_current_user)):
+
+@router.post("/rfid/check", response_model=bool)
+async def rfid_check(request: Request,
+                     db: AsyncSession = Depends(get_db),
+                     current_user: User = Depends(get_current_user)) -> bool:
+    """
+    Check if the RFID code is valid for the order.
+
+    Args:
+        request (Request): The HTTP request object.
+        db (AsyncSession): The database session.
+        current_user (User): The current user.
+
+    Returns:
+        bool: True if the RFID code is valid, False otherwise.
+
+    Raises:
+        HTTPException: If the RFID code is not provided in the request data.
+
+    Logs:
+        - Logs an info message if the RFID code is not provided in the request data.
+        - Logs a debug message with the SQL query result.
+
+    """
     data = await request.json()
     rfid = data.get("rfid")
     if not rfid:
@@ -221,7 +327,7 @@ async def rfid_check(request: Request, db: AsyncSession = Depends(get_db),
         .options(joinedload(RFID.order_rfids))  # Асинхронная предзагрузка связанных записей
         .where(
             RFID.code == rfid,
-            Order.is_completed == False  # Условие на активный заказ
+            Order.is_completed is False  # Условие на активный заказ
         )
     )
 
@@ -231,9 +337,27 @@ async def rfid_check(request: Request, db: AsyncSession = Depends(get_db),
         return True
 
     return False
+
+
 @router.post("/create", response_class=JSONResponse)
-async def create_order(request: Request, db: AsyncSession = Depends(get_db),
-                       current_user: User = Depends(get_current_user)):
+async def create_order(request: Request,
+                       db: AsyncSession = Depends(get_db),
+                       current_user: User = Depends(get_current_user)) -> JSONResponse:
+    """
+    Create an order with the provided RFID codes.
+
+    Args:
+        request (Request): The HTTP request object.
+        db (AsyncSession): The database session.
+        current_user (User): The current user.
+
+    Returns:
+        JSONResponse: A JSON response indicating the success of the operation.
+
+    This function creates an order with the provided RFID codes. It first checks if the RFID codes are already in any
+    active orders. If any RFID code is found to be in use, an error is logged and a JSON response with the error message
+    is returned. If all RFID codes are valid, the order is created and a JSON response with success returned.
+    """
     data = await request.json()
     rfids = data.get('rfids', [])
     order = Order()
@@ -249,7 +373,7 @@ async def create_order(request: Request, db: AsyncSession = Depends(get_db),
             .options(joinedload(RFID.order_rfids))  # Асинхронная предзагрузка связанных записей
             .where(
                 RFID.code == rfid_code,
-                Order.is_completed == False  # Условие на активный заказ
+                Order.is_completed is False  # Условие на активный заказ
             )
         )
 
@@ -269,7 +393,21 @@ async def create_order(request: Request, db: AsyncSession = Depends(get_db),
             db.add(order_rfid)
 
     if errors:
+        log.bind(type="users",
+                 method=request.method,
+                 current_user_id=current_user.id,
+                 url=str(request.url),
+                 headers=dict(request.headers),
+                 params=dict(request.query_params),
+                 ).info(f"Failed to create order with rfid codes: {rfids}")
         return JSONResponse(content={"success": False, "errors": errors}, status_code=400)
 
     await db.commit()
+    log.bind(type="users",
+             method=request.method,
+             current_user_id=current_user.id,
+             url=str(request.url),
+             headers=dict(request.headers),
+             params=dict(request.query_params),
+             ).info(f"Created order with rfid codes: {rfids}")
     return JSONResponse(content={"success": True}, status_code=200)

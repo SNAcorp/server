@@ -1,21 +1,32 @@
-from fastapi import (APIRouter, Depends)
+from fastapi import (APIRouter, Depends, Request)
 from fastapi.responses import (JSONResponse)
 
 from sqlalchemy.ext.asyncio import (AsyncSession)
 from sqlalchemy.future import (select)
 
-from app.models import (RFID)
+from app.dependencies import (get_current_terminal)
+from app.logging_config import (log)
+from app.models import (RFID, Terminal)
 from app.database import (get_db)
 
 router = APIRouter()
 
 
-@router.get("/validate/{rfid_code}")
-async def validate_rfid(rfid_code: str,
-                        db: AsyncSession = Depends(get_db)):
+@router.get("/validate/{rfid_code}", response_class=JSONResponse)
+async def validate_rfid(request: Request,
+                        rfid_code: str,
+                        db: AsyncSession = Depends(get_db),
+                        current_terminal: Terminal = Depends(get_current_terminal)) -> JSONResponse:
     result = await db.execute(select(RFID).where(RFID.code == rfid_code))
     rfid = result.scalars().first()
     if rfid is None:
+        log.bind(type="terminals",
+                 method=request.method,
+                 current_terminal_id=current_terminal.id,
+                 url=str(request.url),
+                 headers=dict(request.headers),
+                 params=dict(request.query_params),
+                 ).info("RFID not found in database")
         return JSONResponse(content={"is_valid": False})
 
     # if rfid.is_valid:

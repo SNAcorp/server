@@ -16,6 +16,13 @@ services:
       - db-1
     environment:
       - DATABASE_URL=postgresql+asyncpg://server:v9023aSH@db-1:5432/terminals
+      - PUBLIC_KEY_PATH=public_key.pem
+      - PRIVATE_KEY_PATH=private_key.pem
+      - ALGORITHM=RS256
+      - SECRET_KEY=IOUFh432sad%f1c7243gJ-jisdf%gsfvd3q23/asd&asdc
+      - ACCESS_TOKEN_EXPIRE_MINUTES=600
+      - SPECIAL_TOKEN=sokd%fwew324r-vek&rfm2-sdvm2f-vsokdk#vssdf
+      - EMPTY_BOTTLE_ID=-1
     volumes:
       - images:/images
       - logs:/logs

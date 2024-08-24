@@ -1,16 +1,32 @@
-from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.primitives.asymmetric import rsa
-from cryptography.hazmat.backends import default_backend
 import os
 import aiofiles
-from app.logging_config import log
+from cryptography.hazmat.primitives import (serialization)
+from cryptography.hazmat.primitives.asymmetric import (rsa)
+from cryptography.hazmat.backends import (default_backend)
+
+from app.logging_config import (log)
+
+PRIVATE_KEY_PATH = os.getenv("PRIVATE_KEY_PATH")
+PUBLIC_KEY_PATH = os.getenv("PUBLIC_KEY_PATH")
 
 
-PRIVATE_KEY_PATH = "private_key.pem"
-PUBLIC_KEY_PATH = "public_key.pem"
+async def generate_rsa_keys(regenerate: bool = False) -> None:
+    """
+        Asynchronously generates RSA private and public keys.
 
+        Args:
+            regenerate (bool, optional): If True, regenerates keys even if they already exist. Defaults to False.
 
-async def generate_rsa_keys(regenerate: bool = False):
+        Returns:
+            None
+
+        Raises:
+            None
+
+        Logs:
+            - If the keys are successfully generated, logs an info message.
+            - If the keys are not successfully generated, logs an error message.
+    """
     if not os.path.exists(PRIVATE_KEY_PATH) or not os.path.exists(PUBLIC_KEY_PATH) or regenerate is True:
         # Генерация приватного ключа
         private_key = rsa.generate_private_key(
