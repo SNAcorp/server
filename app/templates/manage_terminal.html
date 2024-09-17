@@ -3,92 +3,95 @@
 {% block title %}Manage Terminal{% endblock %}
 
 {% block style %}
-        .frame{
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+    .frame {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
 
-        .popup-content {
-            display: none;
-            position: absolute;
-            background-color: white;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            z-index: 1;
-            white-space: nowrap;
-            left: 50%;
-            transform: translateX(-33%) translateY(140%);
-        }
+    .popup-content {
+        display: none;
+        position: absolute;
+        background-color: white;
+        box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        z-index: 1;
+        white-space: nowrap;
+        left: 50%;
+        transform: translateX(-33%) translateY(140%);
+    }
 
+    .popup-content::before {
+        content: "";
+        position: absolute;
+        top: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        border-width: 5px;
+        border-style: solid;
+        border-color: transparent transparent white transparent;
+    }
 
-        .popup-content::before {
-            content: "";
-            position: absolute;
-            top: -10px;
-            left: 50%;
-            transform: translateX(-50%);
-            border-width: 5px;
-            border-style: solid;
-            border-color: transparent transparent white transparent;
-        }
+    .button-button:hover .popup-content {
+        display: block;
+    }
 
-        .button-button:hover .popup-content {
-            display: block;
-        }
-        .bottle-background,
-        .bottle-fill {
-            width: 100px;
-            height: 300px;
-            position: absolute;
-            top: 0;
-            left: 0;
-        }
-        .bottle-fill {
-            border: black;
-            clip-path: polygon(0% 100%, 100% 100%, 100% 100%, 0% 100%);
-        }
-        .bottle-background {
-            border: black;
-            clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
-        }
-        .popups {
-            display: none; /* Hidden by default */
-            position: fixed; /* Stay in place */
-            z-index: 2; /* Sit on top, higher than hover popups */
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto; /* Enable scroll if needed */
-            background-color: rgb(0,0,0); /* Fallback color */
-            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
-        }
+    .bottle-background,
+    .bottle-fill {
+        width: 100px;
+        height: 300px;
+        position: absolute;
+        top: 0;
+        left: 0;
+    }
 
-        .popup-contents {
-            position: relative;
-            background-color: #fff;
-            margin: 15% auto; /* 15% from the top and centered */
-            padding: 20px;
-            border: 1px solid #888;
-            width: 80%; /* Could be more or less, depending on screen size */
-        }
+    .bottle-fill {
+        border: black;
+        clip-path: polygon(0% 100%, 100% 100%, 100% 100%, 0% 100%);
+    }
 
-        .close-button {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-        }
+    .bottle-background {
+        border: black;
+        clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
+    }
 
-        .close-button:hover,
-        .close-button:focus {
-            color: black;
-            text-decoration: none;
-            cursor: pointer;
-        }
+    .popups {
+        display: none; /* Hidden by default */
+        position: fixed; /* Stay in place */
+        z-index: 2; /* Sit on top, higher than hover popups */
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto; /* Enable scroll if needed */
+        background-color: rgb(0,0,0); /* Fallback color */
+        background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+    }
+
+    .popup-contents {
+        position: relative;
+        background-color: #fff;
+        margin: 15% auto; /* 15% from the top and centered */
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%; /* Could be more or less, depending on screen size */
+    }
+
+    .close-button {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+    .close-button:hover,
+    .close-button:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+    }
 {% endblock %}
 
 {% block content %}
@@ -96,41 +99,45 @@
 <h2>Manage Terminal</h2>
 <p>Terminal ID: {{ terminal.id }}</p>
 
-
 {% set volumes = [] %}
 {% for bottle in sorted %}
-    {% set volume = 100 if bottle.bottle.volume == 0 else (100 - ((bottle.remaining_volume / bottle.bottle.volume) * 100))%}
+    {% set volume = 100 if bottle.bottle.volume == 0 else (100 - ((bottle.remaining_volume / bottle.bottle.volume) * 100)) %}
     {% set volumes = volumes.append(volume) %}
 {% endfor %}
 
-
-
 <div class="frame">
-<div id="svgContainer"></div>
-{% for i in range(8) %}
-    <div id="popup{{ i+1 }}" class="popup-content">
-        <p>{{ (sorted[i].remaining_volume) }} мл</p>
-    </div>
-    <div id="popup{{ i }}bottle" class="popups">
-        <div class="popup-contents">
-            <span class="close-button" data-popup-id="{{ i }}bottle">&times;</span>
-            <h2>Popup Title</h2>
-            <form action="/terminal/{{ terminal.id }}/update-bottle" method="post" id="update-bottle-form">
-                <div>
-                    <label for="bottle-{{ i }}">Bottle (Slot {{ i+1 }}):</label>
-                    <select id="bottle-{{ i }}" name="bottles[{{ i }}][bottle_id]">
-                        {% for option in bottles %}
-                        <option value="{{ option.id }}" {% if option.id == sorted[i].bottle_id %}selected{% endif %}>
-                            {{ option.name }}
-                        </option>
-                        {% endfor %}
-                    </select>
-                    <p>Remaining Volume: {{ sorted[i].remaining_volume }} ml</p>
-                </div>
-                <button type="submit">Update</button>
-            </form>
+    <div id="svgContainer"></div>
+    {% for i in range(8) %}
+        <div id="popup{{ i+1 }}" class="popup-content">
+            <p>{{ (sorted[i].remaining_volume) }} мл</p>
         </div>
-    </div>
+        <div id="popup{{ i }}bottle" class="popups">
+            <div class="popup-contents">
+                <span class="close-button" data-popup-id="{{ i }}bottle">&times;</span>
+                <h2>Manage Slot {{ i+1 }}</h2>
+                <form id="replaceBottleForm{{ i }}" class="json-form" data-url="/terminals/{{ terminal.id }}/{{ i }}/replace">
+                    <div>
+                        <label for="new-bottle-{{ i }}">Replace with Bottle:</label>
+                        <select id="new-bottle-{{ i }}" name="new_bottle_id" {% if sorted[i].bottle_id != -1 %}disabled{% endif %}>
+                            {% for option in bottles %}
+                            <option value="{{ option.id }}">
+                                {{ option.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" {% if sorted[i].bottle_id != -1 %}disabled{% endif %}>Replace</button>
+                </form>
+                <form id="updateBottleForm{{ i }}" class="json-form" data-url="/terminals/{{ terminal.id }}/{{ i }}/update">
+                    <button type="submit" {% if sorted[i].bottle_id == -1 or sorted[i].bottle.is_last %}disabled{% endif %}>
+                        Update Bottle
+                    </button>
+                </form>
+                <form id="clearSlotForm{{ i }}" class="json-form" data-url="/terminals/{{ terminal.id }}/{{ i }}/clear">
+                    <button type="submit">Clear Slot</button>
+                </form>
+            </div>
+        </div>
     {% endfor %}
 
     <script>
@@ -141,8 +148,6 @@
                 .then(data => {
                     document.getElementById('svgContainer').innerHTML = data;
 
-
-
                     // Add event listeners to SVG elements
                     const svgDocument = document.getElementById('svgContainer').querySelector('svg');
                     const bottles = svgDocument.querySelectorAll('.bottle-fill');
@@ -151,7 +156,6 @@
                         const volume = volumes[index];
                         bottle.setAttribute('style', `clip-path: polygon(0% ${volume}%, 100% ${volume}%, 100% 100%, 0% 100%)`);
                     });
-
 
                     svgDocument.querySelectorAll('a').forEach(anchor => {
                         anchor.addEventListener('mouseenter', (event) => {
@@ -200,6 +204,40 @@
                         }
                     }
                 });
+
+            // Handle form submission via JSON
+            document.querySelectorAll('.json-form').forEach(form => {
+                form.addEventListener('submit', async function(event) {
+                    event.preventDefault();
+
+                    const url = form.getAttribute('data-url');
+                    const formData = new FormData(form);
+                    const jsonData = {};
+                    formData.forEach((value, key) => {
+                        jsonData[key] = value;
+                    });
+
+                    try {
+                        const response = await fetch(url, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(jsonData)
+                        });
+
+                        if (response.ok) {
+                            alert('Request successful!');
+                        } else {
+                            const errorData = await response.json();
+                            alert('Error: ' + JSON.stringify(errorData));
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        alert('An error occurred while processing your request.');
+                    }
+                });
+            });
         });
     </script>
 </div>

@@ -12,17 +12,17 @@ from app.database import (get_db)
 router = APIRouter()
 
 
+# current_terminal: Terminal = Depends(get_current_terminal)
 @router.get("/validate/{rfid_code}", response_class=JSONResponse)
 async def validate_rfid(request: Request,
                         rfid_code: str,
-                        db: AsyncSession = Depends(get_db),
-                        current_terminal: Terminal = Depends(get_current_terminal)) -> JSONResponse:
+                        db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(RFID).where(RFID.code == rfid_code))
     rfid = result.scalars().first()
     if rfid is None:
         log.bind(type="terminals",
                  method=request.method,
-                 current_terminal_id=current_terminal.id,
+                 current_terminal_id=1,
                  url=str(request.url),
                  headers=dict(request.headers),
                  params=dict(request.query_params),

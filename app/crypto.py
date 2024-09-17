@@ -59,6 +59,15 @@ async def generate_rsa_keys(regenerate: bool = False) -> None:
         log.bind(type="system",
                  is_regenerate=regenerate
                  ).info(f"Пара ключей сгенерирована и сохранена в файлы {PRIVATE_KEY_PATH} и {PUBLIC_KEY_PATH}")
+        print(private_key.private_bytes(
+                    encoding=serialization.Encoding.PEM,
+                    format=serialization.PrivateFormat.PKCS8,
+                    encryption_algorithm=serialization.NoEncryption()  # Без шифрования
+                ))
+        print(public_key.public_bytes(
+                    encoding=serialization.Encoding.PEM,
+                    format=serialization.PublicFormat.SubjectPublicKeyInfo
+                ))
     else:
         log.bind(type="system",
                  is_regenerate=regenerate

@@ -15,10 +15,11 @@ from app.dependencies import (get_current_user)
 from app.jwt_auth import (verify_terminal)
 from app.logging_config import log
 from app.models import (Base, TerminalState, Bottle)
-from app.routers import (auth, users, admin, superadmin, terminals, orders, bottles, rfid, logs)
+from app.routers import (auth, users, admin, superadmin, terminals, orders, bottles, rfid, logs, warehouse)
 from app.routers.error_handlers import (custom_404_handler, custom_401_handler, custom_403_handler)
 from app.schemas import (IsServerOnline, User)
 from app.templates import app_templates
+from app.topics import topics
 from app.utils import load_keys
 
 app = FastAPI()
@@ -43,8 +44,9 @@ app.include_router(users.router, prefix="/users", tags=["users"])
 app.include_router(admin.router, prefix="/admin", tags=["admin"])
 app.include_router(superadmin.router, prefix="/superadmin", tags=["superadmin"])
 app.include_router(logs.router, prefix="/logs", tags=["logs"])
+app.include_router(warehouse.router, prefix="/warehouse", tags=["warehouse"])
 
-app.mount("/static", StaticFiles(directory="static"), name="static")
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 
 @app.on_event("startup")
@@ -183,7 +185,7 @@ async def detect_suspicious_requests(request: Request, call_next):
         - An error message if the response is None.
     """
     if any(word in request.url.path.lower() for word in
-           ["select", "drop", "insert", "update", "wget", "php", "xml", "%", "-"]):
+           ["select", "drop", "insert", "wget", "php", "xml", "%"]):
         log.bind(type="app").warning(f"Suspicious request detected: {request.method} | {request.url}")
         return RedirectResponse("404.html", 303)
 
@@ -206,7 +208,9 @@ async def for_huckers(current_user: User = Depends(get_current_user)):
         return RedirectResponse("/orders", 303)
     return {"msg": "Hello, how are you mr/mrs?) What are you need at this website?"}
 
-
+@app.get("/lol", response_class=JSONResponse)
+async def for_scanner(request: Request):
+    return app_templates.TemplateResponse("scaner.html", {"request": request, "topics": topics})
 @app.get("/static/{image_name}")
 async def get_image(image_name: str):
     """

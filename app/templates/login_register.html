@@ -105,7 +105,7 @@ form.show {
                                     <input type="tel" id="phone_number" name="phone_number" class="form-control" required>
                                 </div>
                                 <button type="button" class="btn btn-secondary btn-block" onclick="previousStep(1)">Back</button>
-                                <button type="button" id="next-step2-button" class="btn btn-primary btn-block" onclick="nextStep(3)" disabled>Next</button>
+                                <button type="button" id="next-step2-button" class="btn btn-primary btn-block" onclick="nextStep(3)">Next</button>
                             </form>
                             <form id="register-form-step3" class="hide form-content">
                                 <h2 class="text-center">Register - Step 3</h2>
@@ -139,10 +139,6 @@ form.show {
     const registerFormStep3 = document.getElementById('register-form-step3');
     const authCard = document.getElementById('auth-card');
     const loginAlert = document.getElementById('login-alert');
-    const emailInput = document.getElementById('register-email');
-    const emailCheckIcon = document.getElementById('email-check-icon');
-    const nextStep2Button = document.getElementById('next-step2-button');
-    let emailCheckTimeout = null;
 
     toggleButton.addEventListener('click', () => {
         if (loginForm.classList.contains('show')) {
@@ -229,6 +225,7 @@ form.show {
             });
 
             if (!response.ok) {
+                alert(response.json())
                 throw new Error('Network response was not ok');
             }
 
@@ -286,63 +283,6 @@ form.show {
             loginAlert.classList.remove('show');
         }, 30000); // Скрыть алерт через 30 секунд
     }
-
-    function validateEmailFormat(email) {
-        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return emailPattern.test(email);
-    }
-
-    async function checkEmailAvailability(email) {
-        try {
-            const response = await fetch('/auth/check/email', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ email })
-            });
-
-            const data = await response.json();
-
-            if (data.is_valid) {
-                emailCheckIcon.classList.add('show');
-                emailCheckIcon.innerHTML = '✔️'; // Зеленая галочка
-                emailCheckIcon.style.color = 'green';
-                nextStep2Button.disabled = false;
-            } else {
-                emailCheckIcon.classList.add('show');
-                emailCheckIcon.innerHTML = '❌'; // Красный крестик
-                emailCheckIcon.style.color = 'red';
-                nextStep2Button.disabled = true;
-            }
-
-        } catch (error) {
-            console.error('Ошибка проверки email:', error);
-            emailCheckIcon.classList.add('show');
-            emailCheckIcon.innerHTML = '❌';
-            emailCheckIcon.style.color = 'red';
-            nextStep2Button.disabled = true;
-        }
-    }
-
-    emailInput.addEventListener('input', () => {
-        const email = emailInput.value.trim();
-
-        if (emailCheckTimeout) {
-            clearTimeout(emailCheckTimeout);
-        }
-
-        emailCheckTimeout = setTimeout(() => {
-            if (validateEmailFormat(email)) {
-                checkEmailAvailability(email);
-            } else {
-                emailCheckIcon.classList.add('show');
-                emailCheckIcon.innerHTML = '❌'; // Красный крестик
-                emailCheckIcon.style.color = 'red';
-                nextStep2Button.disabled = true;
-            }
-        }, 500); // Задержка перед проверкой email
-    });
 
     document.addEventListener('DOMContentLoaded', () => {
         loginForm.classList.add('show');

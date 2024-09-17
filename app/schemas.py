@@ -1,6 +1,6 @@
-from typing import (Optional)
-from pydantic import (BaseModel, EmailStr)
-from datetime import (datetime)
+from typing import Optional
+from pydantic import BaseModel, EmailStr
+from datetime import datetime
 
 
 class TerminalCreate(BaseModel):
@@ -51,6 +51,15 @@ class BottleResponse(BaseModel):
 
 class RegisterTerminalRequest(BaseModel):
     serial: str
+
+
+class ReplaceBottleRequest(BaseModel):
+    new_bottle_id: int
+
+
+class UpdateStockRequest(BaseModel):
+    bottle_id: int
+    quantity: int
 
 
 class RegisterTerminalResponse(BaseModel):
@@ -113,3 +122,24 @@ class User(UserInDBBase):
 
 class UserInDB(UserInDBBase):
     hashed_password: str
+
+
+class WarehouseBottleCreate(BaseModel):
+    bottle_id: int
+    quantity: int
+
+
+class WarehouseBottleUpdate(BaseModel):
+    quantity: Optional[int]
+    current_in_terminals: Optional[int]
+
+
+class WarehouseBottleInDB(BaseModel):
+    id: int
+    bottle_id: int
+    quantity: int
+    current_in_terminals: int
+    bottle: BottleResponse
+
+    class Config:
+        orm_mode = True

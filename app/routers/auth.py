@@ -14,9 +14,9 @@ from app.logging_config import (log)
 router = APIRouter()
 
 
-@router.get("/login", response_class=Response)
+@router.get("/login")
 def admin_panel(request: Request,
-                current_user: User = Depends(get_current_user)) -> HTMLResponse | RedirectResponse:
+                current_user: User = Depends(get_current_user)):
     """
         Handles the GET request to the "/login" endpoint.
 
@@ -55,27 +55,6 @@ def admin_panel(request: Request,
     return app_templates.TemplateResponse("account_verification.html",
                                           {"request": request,
                                            "current_user": current_user})
-
-
-@router.post("/check/email", response_class=JSONResponse)
-async def check_email(request: Request,
-                      email: str,
-                      db: AsyncSession = Depends(get_db)) -> JSONResponse:
-    """
-    Check if an email exists in the database.
-
-    Args:
-        request (Request): The HTTP request object.
-        email (str): The email to check.
-        db (AsyncSession): The database session.
-
-    Returns:
-        JSONResponse: A JSON response indicating whether the email is valid or not.
-    """
-    is_email_valid = await check_email(request=request, email=email.strip(), db=db)
-    if is_email_valid is False:
-        return JSONResponse(status_code=401, content={"is_valid": False})
-    return JSONResponse(status_code=200, content={"is_valid": True})
 
 
 @router.post("/register/", response_class=RedirectResponse)

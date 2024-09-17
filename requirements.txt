@@ -80,3 +80,4 @@ websockets==12.0
 yarl==1.9.4
 loguru
 aiofiles
+zxing

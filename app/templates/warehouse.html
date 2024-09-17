@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block title %}Warehouse Inventory - Vinotech{% endblock %}
+
+{% block content %}
+<h1>Warehouse Inventory</h1>
+
+<!-- Таблица для отображения данных о бутылках на складе -->
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Bottle Name</th>
+            <th>Winery</th>
+            <th>Quantity in Warehouse</th>
+            <th>Quantity in Terminals</th>
+            <th>Total Volume</th>
+            <th>Location</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for entry in warehouse_data %}
+        <tr>
+            <td style="text-align: center">{{ entry.id }}</td>
+            <td style="text-align: center"><a href="/bottles/{{ entry.bottle_id }}" style="text-decoration: none">{{ entry.bottle.name }}</a></td>
+            <td style="text-align: center">{{ entry.bottle.winery }}</td>
+            <td style="text-align: center">{{ entry.quantity }}</td>
+            <td style="text-align: center">{{ entry.current_in_terminals }}</td>
+            <td style="text-align: center">{{ entry.bottle.volume }} ml</td>
+            <td style="text-align: center">{{ entry.bottle.location }}</td>
+            <td style="text-align: center"><button class="btn btn-primary" onclick="openPopup({{ entry.bottle_id }})">Update Stock</button></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- Попап для обновления стока -->
+<div id="popup" class="popup">
+    <div class="popup-content">
+        <span class="close" onclick="closePopup()">&times;</span>
+        <h2>Update Stock</h2>
+        <form id="updateStockForm" onsubmit="submitForm(event)">
+            <input type="hidden" id="bottle_id" name="bottle_id">
+            <div class="form-group">
+                <label for="quantity">Quantity to Add:</label>
+                <input type="number" class="form-control" id="quantity" name="quantity" required>
+            </div>
+            <button type="submit" class="btn btn-success">Update</button>
+        </form>
+
+
+
+    </div>
+</div>
+
+<!-- Стили для попапа -->
+<style>
+    .popup {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgb(0, 0, 0);
+        background-color: rgba(0, 0, 0, 0.4);
+    }
+    .popup-content {
+        background-color: #fefefe;
+        margin: 15% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 30%;
+        border-radius: 10px;
+    }
+    .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+    .close:hover,
+    .close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+    }
+</style>
+
+<!-- Скрипты для управления попапом -->
+<script>
+    function openPopup(bottle_id) {
+        document.getElementById('bottle_id').value = bottle_id;
+        document.getElementById('popup').style.display = 'block';
+    }
+
+    function closePopup() {
+        document.getElementById('popup').style.display = 'none';
+    }
+    async function submitForm(event) {
+        event.preventDefault();
+
+        const form = document.getElementById('updateStockForm');
+        const formData = new FormData(form);
+        const data = {};
+        formData.forEach((value, key) => {
+            data[key] = value;
+        });
+
+        const response = await fetch('/warehouse/update-stock', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+            body: JSON.stringify(data),
+        });
+
+        if (response.ok) {
+            alert('Stock updated successfully.');
+            closePopup();
+        } else {
+            alert('Failed to update stock.');
+        }
+    }
+</script>
+
+{% endblock %}

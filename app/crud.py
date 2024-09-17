@@ -9,7 +9,7 @@ from sqlalchemy import (Row, RowMapping)
 from sqlalchemy.ext.asyncio import (AsyncSession)
 from sqlalchemy.future import (select)
 
-from app.models import (User)
+from app.models import (User, TerminalBottle, WarehouseBottle)
 from app.schemas import (UserCreate)
 from app.logging_config import (log)
 
@@ -603,3 +603,32 @@ async def update_user(request: Request,
              params=dict(request.query_params)
              ).info(f"Updated user: {user.id}")
     return user
+
+
+async def remove_bottle_from_terminal(bottle_id: int, db: AsyncSession) -> WarehouseBottle:
+    # """
+    # Removes a bottle from a terminal, updating the warehouse stock.
+    #
+    # Args:
+    #     db (AsyncSession): The database session.
+    #     bottle_id (TerminalBottle.bottle_id): The terminal bottle entry to be removed.
+    #
+    # Returns:
+    #     WarehouseBottle: The corresponding warehouse bottle entry updated after removal.
+    # """
+    # # Find the corresponding warehouse bottle
+    # db_warehouse_bottle = await db.execute(
+    #     select(WarehouseBottle).filter(WarehouseBottle.bottle_id == bottle_id)
+    # )
+    #
+    # db_warehouse_bottle = db_warehouse_bottle.scalars().first()
+    #
+    # if db_warehouse_bottle:
+    #     if db_warehouse_bottle.current_in_terminals > 0:
+    #         db_warehouse_bottle.current_in_terminals -= 1
+    #         await db.commit()
+    #         await db.refresh(db_warehouse_bottle)
+    #     else:
+    #         raise ValueError("No bottles in terminals to remove")
+    # return db_warehouse_bottle
+    pass

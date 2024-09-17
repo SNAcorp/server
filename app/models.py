@@ -254,3 +254,24 @@ class OrderRFID(Base):
     timestamp = Column(DateTime, default=datetime.datetime.utcnow())
     order = relationship("Order", back_populates="rfids")
     rfid = relationship("RFID", back_populates="order_rfids")
+
+
+class WarehouseBottle(Base):
+    """
+    WarehouseBottle model.
+
+    This model represents a bottle stored in the warehouse.
+
+    Attributes:
+        id (int): The unique identifier of the warehouse bottle entry.
+        bottle_id (int): The identifier of the bottle.
+        quantity (int): The quantity of this bottle in the warehouse.
+        current_in_terminals (int): The current quantity of this bottle in terminals.
+    """
+    __tablename__ = "warehouse_bottles"
+    id = Column(Integer, primary_key=True, index=True)
+    bottle_id = Column(Integer, ForeignKey("bottles.id"))
+    quantity = Column(Integer)  # Количество бутылок на складе
+    current_in_terminals = Column(Integer, default=0)  # Количество бутылок в терминалах
+
+    bottle = relationship("Bottle")

@@ -8,12 +8,13 @@ from sqlalchemy.ext.asyncio import (AsyncSession)
 from sqlalchemy.future import (select)
 from sqlalchemy.orm import (selectinload)
 
+from app.crud import remove_bottle_from_terminal
 from app.dependencies import get_current_user
 from app.models import (Terminal, TerminalBottle, RFID, Order,
-                        OrderItem, Bottle, BottleUsageLog, OrderRFID)
+                        OrderItem, Bottle, BottleUsageLog, OrderRFID, WarehouseBottle)
 from app.database import (get_db)
 from app.jwt_auth import (create_terminal_token, verify_terminal)
-from app.schemas import (TerminalBottleCreate, UseTerminalRequest, RegisterTerminalRequest, User)
+from app.schemas import (TerminalBottleCreate, UseTerminalRequest, RegisterTerminalRequest, User, ReplaceBottleRequest)
 from app.templates import (app_templates)
 
 router = APIRouter()
@@ -47,9 +48,9 @@ async def dashboard(request: Request,
                                            "current_user": current_user})
 
 
-@router.post("/register-terminal", response_class=JSONResponse)
+@router.post("/register")
 async def register_terminal(request: RegisterTerminalRequest,
-                            db: AsyncSession = Depends(get_db)) -> JSONResponse:
+                            db: AsyncSession = Depends(get_db)):
     """
     Registers a new terminal with the given serial number in the database. If a terminal with the same serial number
     already exists, it generates a new token for that terminal and returns it. Otherwise, it creates a new terminal
@@ -71,7 +72,7 @@ async def register_terminal(request: RegisterTerminalRequest,
 
     new_terminal = Terminal(status_id=1, registration_date=datetime.datetime.utcnow(), serial=request.serial)
     db.add(new_terminal)
-    await db.commit()
+    await db.flush()
     await db.refresh(new_terminal)
 
     ter_id = new_terminal.id
@@ -91,7 +92,7 @@ async def register_terminal(request: RegisterTerminalRequest,
 
     token = create_terminal_token(ter_id, reg_date, request.serial)
 
-    return JSONResponse(content={"terminal_id": ter_id, "token": token}, status_code=200)
+    return {"terminal_id": ter_id, "token": token}
 
 
 @router.post("/use", response_class=JSONResponse)
@@ -169,24 +170,7 @@ async def use_terminal(request: UseTerminalRequest,
 async def add_bottle_to_terminal(terminal_bottle: TerminalBottleCreate,
                                  db: AsyncSession = Depends(get_db)) -> JSONResponse:
     """
-    Add a bottle to a terminal.
-
-    Args:
-        terminal_bottle (TerminalBottleCreate): The request object containing the necessary data to add a bottle to a terminal.
-            - terminal_id (int): The ID of the terminal.
-            - slot_number (int): The slot number of the bottle in the terminal.
-            - remaining_volume (float): The remaining volume of the bottle in the terminal.
-            - bottle_id (int): The ID of the bottle.
-        db (AsyncSession, optional): The database session. Defaults to the session from `get_db`.
-
-    Returns:
-        dict: A dictionary indicating that the operation was successful.
-            - message (str): A message indicating that the bottle was added to the terminal.
-
-    Raises:
-        HTTPException: If any of the following conditions are met:
-            - The terminal ID is not found.
-            - The slot number is not found.
+    Add a bottle to a terminal, updating the warehouse stock accordingly.
     """
     result = await db.execute(select(Terminal).filter(Terminal.id == terminal_bottle.terminal_id))
     terminal = result.scalars().first()
@@ -196,6 +180,18 @@ async def add_bottle_to_terminal(terminal_bottle: TerminalBottleCreate,
 
     if terminal_bottle.slot_number > 7 or terminal_bottle.slot_number < 0:
         raise HTTPException(status_code=404, detail="Slot not found")
+
+    warehouse_bottle = await db.execute(
+        select(WarehouseBottle).filter(WarehouseBottle.bottle_id == terminal_bottle.bottle_id)
+    )
+    warehouse_bottle = warehouse_bottle.scalars().first()
+
+    if not warehouse_bottle or warehouse_bottle.quantity <= 0:
+        raise HTTPException(status_code=400, detail="Bottle not available in warehouse")
+
+    # Уменьшаем количество бутылок на складе и добавляем бутылку в терминал
+    warehouse_bottle.quantity -= 1
+    warehouse_bottle.current_in_terminals += 1
 
     new_terminal_bottle = TerminalBottle(
         terminal_id=terminal_bottle.terminal_id,
@@ -259,168 +255,157 @@ async def get_terminal_bottles(terminal_id: int,
                                  "portions": {"big": BIG_PORTION, "small": SMALL_PORTION}}, status_code=200)
 
 
-@router.post("/{terminal_id}/update-bottle", response_class=RedirectResponse)
-async def update_terminal_bottle(terminal_id: int,
-                                 request: Request,
-                                 db: AsyncSession = Depends(get_db)) -> RedirectResponse:
+@router.post("/{terminal_id}/{slot_number}/clear", response_class=JSONResponse)
+async def clear_terminal_slot(terminal_id: int,
+                              slot_number: int,
+                              db: AsyncSession = Depends(get_db)) -> JSONResponse:
     """
-    Update the bottles in a terminal.
+    Clear the specified slot in a terminal by replacing the current bottle with a bottle having id = -1.
 
     Args:
         terminal_id (int): The ID of the terminal.
-        request (Request): The request object containing the form data.
+        slot_number (int): The slot number to clear.
         db (AsyncSession, optional): The database session. Defaults to the session from `get_db`.
 
     Returns:
-        dict: A dictionary containing the terminal ID and the list of bottles in the terminal.
-
-    Raises:
-        HTTPException: If the terminal ID is not found.
+        JSONResponse: JSON response indicating the success or failure of the operation.
     """
-    form = await request.form()
-    bottles_data = {}
-
-    for key, value in form.items():
-        if key.startswith('bottles['):
-            _, slot, field = key.split('[')
-            slot = int(slot.rstrip(']'))
-            field = field.rstrip(']')
-            if slot not in bottles_data:
-                bottles_data[slot] = {}
-            bottles_data[slot][field] = value
-
-    query = select(Terminal).filter(Terminal.id == terminal_id).options(selectinload(Terminal.bottles))
+    # Поиск бутылки в указанном слоте
+    query = select(TerminalBottle).filter(
+        TerminalBottle.terminal_id == terminal_id,
+        TerminalBottle.slot_number == slot_number
+    )
     result = await db.execute(query)
-    terminal = result.scalars().first()
+    terminal_bottle = result.scalars().first()
 
-    if not terminal:
-        raise HTTPException(status_code=404, detail="Terminal not found")
+    if not terminal_bottle:
+        raise HTTPException(status_code=404, detail="Slot not found")
 
-    for slot_number, data in bottles_data.items():
-        bottle_id = int(data['bottle_id'])
+    # Удаление текущей бутылки из терминала и обновление склада
+    await remove_bottle_from_terminal(bottle_id=terminal_bottle.bottle_id, db=db)
 
-        query = select(TerminalBottle).filter(
-            TerminalBottle.terminal_id == terminal_id,
-            TerminalBottle.slot_number == slot_number
-        ).options(selectinload(TerminalBottle.bottle))
-        result = await db.execute(query)
-        terminal_bottle = result.scalars().first()
-
-        if terminal_bottle:
-            bottle = terminal_bottle.bottle
-            initial_volume = bottle.volume
-            used_volume = initial_volume - terminal_bottle.remaining_volume
-
-            if terminal_bottle.bottle_id != bottle_id:
-                if used_volume > 0:
-                    usage_log = BottleUsageLog(
-                        terminal_id=terminal.id,
-                        bottle_id=bottle.id,
-                        usage_date=datetime.datetime.utcnow(),
-                        used_volume=used_volume
-                    )
-                    db.add(usage_log)
-
-                terminal_bottle.bottle_id = bottle_id
-                terminal_bottle.remaining_volume = (
-                    await db.execute(select(Bottle.volume).where(Bottle.id == bottle_id))
-                ).scalar()
-            else:
-                # Если бутылка заменяется на ту же самую
-                if used_volume > 0:
-                    usage_log = BottleUsageLog(
-                        terminal_id=terminal.id,
-                        bottle_id=bottle.id,
-                        usage_date=datetime.datetime.utcnow(),
-                        used_volume=used_volume
-                    )
-                    db.add(usage_log)
-
-                # Сбрасываем объем
-                terminal_bottle.remaining_volume = initial_volume
-        else:
-            terminal_bottle = TerminalBottle(
-                terminal_id=terminal_id,
-                bottle_id=bottle_id,
-                slot_number=slot_number,
-                remaining_volume=(
-                    await db.execute(select(Bottle.volume).where(Bottle.id == bottle_id))
-                ).scalar(),
-            )
-            db.add(terminal_bottle)
+    # Замена бутылки на бутылку с id = -1 (сигнализирует, что слот очищен)
+    terminal_bottle.bottle_id = -1
+    terminal_bottle.remaining_volume = 0
 
     await db.commit()
 
-    return RedirectResponse(f"/terminals/{terminal_id}", 303)
+    return JSONResponse(content={"message": f"Slot {slot_number} cleared successfully"}, status_code=200)
 
 
-# async def reset_bottles_endpoint(request: ResetTerminalRequest,
-#                                  db: AsyncSession = Depends(get_db)) -> JSONResponse:
-#     """
-#     Reset bottles in terminal to initial volume and log usage.
-#
-#     Parameters:
-#         request (ResetTerminalRequest): The request object containing the terminal ID and token.
-#         db (AsyncSession): The database session.
-#
-#     Returns:
-#         JSONResponse: A JSON response indicating success.
-#
-#     Raises:
-#         HTTPException: If the terminal ID in the request does not match the terminal ID in the token.
-#     """
-#     payload = verify_terminal(request.token)
-#     if payload["terminal_id"] != request.terminal_id:
-#         raise HTTPException(status_code=403, detail="Invalid terminal ID")
-#
-#     await reset_bottles_to_initial_volume(payload["terminal_id"], db)
-#     return JSONResponse(status_code=200,
-#                         content={
-#                             "message": "Bottles in terminal reset to initial volume and usage logged successfully"})
-#
-#
-# async def reset_bottles_to_initial_volume(terminal_id: int,
-#                                           db: AsyncSession = Depends(get_db)) -> None:
-#     """
-#     Reset bottles in terminal to initial volume and log usage.
-#
-#     Args:
-#         terminal_id (int): The ID of the terminal.
-#         db (AsyncSession): The database session.
-#
-#     Raises:
-#         HTTPException: If the terminal is not found.
-#     """
-#     # Get the terminal with the specified ID and load the bottles
-#     result = await db.execute(
-#         select(Terminal).where(Terminal.id == terminal_id).options(
-#             joinedload(Terminal.bottles).joinedload(TerminalBottle.bottle)))
-#     terminal = result.scalars().first()
-#
-#     if terminal is None:
-#         raise HTTPException(status_code=404, detail="Terminal not found")
-#
-#     # Iterate over the bottles in the terminal
-#     for terminal_bottle in terminal.bottles:
-#         bottle = terminal_bottle.bottle
-#         initial_volume = bottle.volume
-#         used_volume = initial_volume - terminal_bottle.remaining_volume
-#
-#         # If used volume is greater than 0, log the usage and update the bottle volume
-#         if used_volume > 0:
-#             # Log the usage in BottleUsageLog table
-#             usage_log = BottleUsageLog(
-#                 terminal_id=terminal.id,
-#                 bottle_id=bottle.id,
-#                 usage_date=datetime.datetime.utcnow(),
-#                 used_volume=used_volume
-#             )
-#             db.add(usage_log)
-#
-#             # Update the bottle volume to the initial value
-#             terminal_bottle.remaining_volume = initial_volume
-#
-#     await db.commit()
+@router.post("/{terminal_id}/{slot_number}/replace", response_class=JSONResponse)
+async def replace_terminal_bottle(terminal_id: int,
+                                  slot_number: int,
+                                  request: ReplaceBottleRequest,
+                                  db: AsyncSession = Depends(get_db)) -> JSONResponse:
+
+    new_bottle_id = request.new_bottle_id
+    """
+    Replace a bottle in a terminal with a different one, requiring prior slot clearing if bottle_id changes.
+
+    Args:
+        terminal_id (int): The ID of the terminal.
+        slot_number (int): The slot number where the replacement should occur.
+        new_bottle_id (int): The ID of the new bottle to place in the slot.
+        db (AsyncSession, optional): The database session. Defaults to the session from `get_db`.
+
+    Returns:
+        JSONResponse: JSON response indicating the success or failure of the operation.
+    """
+    # Предварительно загружаем связанные данные, чтобы избежать ленивой загрузки
+    query = select(TerminalBottle).filter(
+        TerminalBottle.terminal_id == terminal_id,
+        TerminalBottle.slot_number == slot_number
+    ).options(selectinload(TerminalBottle.bottle))
+    result = await db.execute(query)
+    terminal_bottle = result.scalars().first()
+
+    if not terminal_bottle:
+        raise HTTPException(status_code=404, detail="Slot not found")
+
+    # Если бутылка отличается, требуется очистка слота
+    if terminal_bottle.bottle_id != -1:
+        raise HTTPException(status_code=400, detail="Slot must be cleared before replacing with a different bottle")
+
+    # Проверяем наличие новой бутылки на складе и загружаем связанные данные
+    new_warehouse_bottle = await db.execute(
+        select(WarehouseBottle).filter(WarehouseBottle.bottle_id == new_bottle_id).options(selectinload(WarehouseBottle.bottle))
+    )
+    new_warehouse_bottle = new_warehouse_bottle.scalars().first()
+
+    if not new_warehouse_bottle or new_warehouse_bottle.quantity <= 0:
+        raise HTTPException(status_code=400, detail="New bottle not available in warehouse")
+
+    # Обновляем количество бутылок на складе и в терминале
+    new_warehouse_bottle.quantity -= 1
+    new_warehouse_bottle.current_in_terminals += 1
+
+    # Обновляем данные в терминале
+    terminal_bottle.bottle_id = new_bottle_id
+    terminal_bottle.remaining_volume = new_warehouse_bottle.bottle.volume
+
+    await db.commit()
+
+    return JSONResponse(content={"message": f"Bottle in slot {slot_number} replaced successfully"}, status_code=200)
+
+
+@router.post("/{terminal_id}/{slot_number}/update", response_class=JSONResponse)
+async def update_same_terminal_bottle(terminal_id: int,
+                                      slot_number: int,
+                                      db: AsyncSession = Depends(get_db)) -> JSONResponse:
+    """
+    Update the same bottle in a terminal, resetting its remaining volume.
+
+    Args:
+        terminal_id (int): The ID of the terminal.
+        slot_number (int): The slot number where the update should occur.
+        db (AsyncSession, optional): The database session. Defaults to the session from `get_db`.
+
+    Returns:
+        JSONResponse: JSON response indicating the success or failure of the operation.
+    """
+    query = select(TerminalBottle).filter(
+        TerminalBottle.terminal_id == terminal_id,
+        TerminalBottle.slot_number == slot_number).options(selectinload(TerminalBottle.bottle))
+
+    result = await db.execute(query)
+    terminal_bottle = result.scalars().first()
+
+    if not terminal_bottle:
+        raise HTTPException(status_code=404, detail="Slot not found")
+
+    if terminal_bottle.bottle_id == -1:
+        raise HTTPException(status_code=400, detail="Cannot update an empty slot")
+
+    # Обновляем объем бутылки до начального значения
+    initial_volume = terminal_bottle.bottle.volume
+    used_volume = initial_volume - terminal_bottle.remaining_volume
+
+    if used_volume > 0:
+        usage_log = BottleUsageLog(
+            terminal_id=terminal_id,
+            bottle_id=terminal_bottle.bottle_id,
+            usage_date=datetime.datetime.utcnow(),
+            used_volume=used_volume
+        )
+        db.add(usage_log)
+
+    new_warehouse_bottle = await db.execute(
+        select(WarehouseBottle).filter(WarehouseBottle.bottle_id == terminal_bottle.bottle.id)
+    )
+    new_bottle = new_warehouse_bottle.scalars().first()
+
+    if not new_warehouse_bottle or new_warehouse_bottle.quantity <= 0:
+        raise HTTPException(status_code=400, detail="New bottle not available in warehouse")
+
+    new_bottle.quantity -= 1
+    new_bottle.current_in_terminals += 1
+
+    terminal_bottle.remaining_volume = initial_volume
+
+    await db.commit()
+
+    return JSONResponse(content={"message": f"Bottle in slot {slot_number} updated successfully"}, status_code=200)
 
 
 @router.get("/{terminal_id}", response_class=HTMLResponse)
@@ -446,15 +431,47 @@ async def manage_terminal(request: Request,
     Raises:
         HTTPException: If the terminal is not found.
     """
+
+    # Загрузка терминала с бутылками и всеми необходимыми связанными данными, чтобы избежать ленивой загрузки
     result = await db.execute(
-        select(Terminal).options(selectinload(Terminal.bottles)).filter(Terminal.id == terminal_id))
+        select(Terminal)
+        .options(
+            selectinload(Terminal.bottles).joinedload(TerminalBottle.bottle)
+        )
+        .filter(Terminal.id == terminal_id)
+    )
     terminal = result.scalars().first()
+
     if not terminal:
         raise HTTPException(status_code=404, detail="Terminal not found")
+    print()
+    # Получение количества бутылок на складе
+    bottle_ids = [bottle.bottle_id for bottle in terminal.bottles]
+    if bottle_ids:
+        warehouse_quantities = await db.execute(
+            select(WarehouseBottle.bottle_id, WarehouseBottle.quantity)
+            .filter(WarehouseBottle.bottle_id.in_(bottle_ids))
+        )
+        warehouse_quantity_dict = {bottle_id: quantity for bottle_id, quantity in warehouse_quantities.all()}
+    else:
+        warehouse_quantity_dict = {}
 
-    bottles_result = await db.execute(select(Bottle))
+    print(terminal.bottles)
+    # Установка is_last для каждой бутылки
+    for bottle in terminal.bottles:
+        bottle.is_last = warehouse_quantity_dict.get(bottle.bottle_id, 0) == 0
+
+    # Получение всех бутылок, доступных на складе
+    bottles_result = await db.execute(
+        select(Bottle)
+        .join(WarehouseBottle, WarehouseBottle.bottle_id == Bottle.id)
+        .filter(WarehouseBottle.quantity > 0)
+    )
     bottles = bottles_result.scalars().all()
+    print(bottles)
+    # Сортировка бутылок в терминале по slot_number
     sorted_bottles = sorted(terminal.bottles, key=lambda x: x.slot_number)
+    print(sorted_bottles)
 
     return app_templates.TemplateResponse("manage_terminal.html",
                                           {"request": request,

@@ -5,7 +5,7 @@ from datetime import (datetime)
 from fastapi import (HTTPException)
 
 SECRET_KEY = os.getenv("SECRET_KEY")
-ALGORITHM = os.getenv("ALGORITHM")
+ALGORITHM = "HS256"
 
 
 def decode_terminal_token(token: str) -> dict:

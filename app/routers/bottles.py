@@ -20,9 +20,9 @@ from app.dependencies import (get_current_user,
                               get_admin_user)
 from app.models import (Bottle,
                         User,
-                        BottleUsageLog)
+                        BottleUsageLog, WarehouseBottle)
 from app.database import (get_db)
-from app.schemas import (BottleUpdateModel)
+from app.schemas import (BottleUpdateModel, UpdateStockRequest)
 from app.templates import (app_templates)
 from app.logging_config import (log)
 
@@ -133,8 +133,17 @@ async def create_bottle_endpoint(request: Request,
         volume=volume
     )
     db.add(new_bottle)
-    await db.commit()
+    await db.flush()
     await db.refresh(new_bottle)
+
+    # Добавляем запись на склад с количеством 0
+    new_warehouse_bottle = WarehouseBottle(
+        bottle_id=new_bottle.id,
+        quantity=0,
+        current_in_terminals=0
+    )
+    db.add(new_warehouse_bottle)
+
     log.bind(type="admins",
              method=request.method,
              current_user_id=current_user.id,
@@ -142,6 +151,7 @@ async def create_bottle_endpoint(request: Request,
              headers=dict(request.headers),
              params=dict(request.query_params)
              ).info(f"Create bottle: {new_bottle.id}")
+    await db.commit()
     return RedirectResponse("/bottles", 303)
 
 

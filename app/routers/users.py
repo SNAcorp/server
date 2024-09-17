@@ -55,7 +55,7 @@ async def read_users(request: Request,
 
 @router.get("/me/", response_class=HTMLResponse)
 async def read_user_me(request: Request,
-                       current_user: User = Depends(get_current_user)) -> HTMLResponse | RedirectResponse:
+                       current_user: User = Depends(get_current_user)):
     """
     Get the current user's profile page.
 

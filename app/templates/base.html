@@ -124,8 +124,10 @@
                         <li class="nav-item"><a class="nav-link" href="/orders">Orders</a></li>
                         {% if current_user.role == "admin" %}
                         <li class="nav-item"><a class="nav-link" href="/admin/panel">Admin Panel</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/warehouse">Warehouse</a></li>
                         {% endif %}
                         {% if current_user.is_superuser %}
+                        <li class="nav-item"><a class="nav-link" href="/warehouse">Warehouse</a></li>
                         <li class="nav-item"><a class="nav-link" href="/bottles">Manage Bottles</a></li>
                         <li class="nav-item"><a class="nav-link" href="/admin/panel">Admin Panel</a></li>
                         <li class="nav-item"><a class="nav-link" href="/logs">Logs</a></li>
