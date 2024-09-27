@@ -409,6 +409,7 @@ async def update_user_role(request: Request,
 
     """
     user.role = role
+    await db.flush()
     await db.refresh(user)
     await db.commit()
     log.bind(type="admins",
@@ -448,6 +449,8 @@ async def update_user_status(request: Request,
     """
     user.is_verified = is_verified
 
+    await db.flush()
+    await db.refresh(user)
     await db.commit()
     log.bind(type="admins",
              method=request.method,
@@ -484,6 +487,7 @@ async def block_user(request: Request,
     user.is_active = False
     user.block_date = datetime.datetime.utcnow()
 
+    await db.flush()
     await db.refresh(user)
     await db.commit()
     log.bind(type="admins",
@@ -518,6 +522,7 @@ async def unblock_user(request: Request,
     user.is_active = True
     user.block_date = None
 
+    await db.flush()
     await db.refresh(user)
     await db.commit()
     log.bind(type="admins",
@@ -594,6 +599,7 @@ async def update_user(request: Request,
         setattr(user, key, value)
     db.add(user)
 
+    await db.flush()
     await db.refresh(user)
     await db.commit()
     log.bind(type="admins",
