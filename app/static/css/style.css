@@ -2,7 +2,7 @@ body {
 	
 }
 .bg {
-	background: url(http://localhost/static/field.png) no-repeat;
+	background: url(http://51.250.37.160/static/field.png) no-repeat;
 	background-size: 100%;
 
 	width: 1000px;
@@ -166,7 +166,7 @@ body {
 	width: 23%;
 	height: 22%;
 
-	background: url("http://localhost/static/truck.png") no-repeat;
+	background: url("http://51.250.37.160/static/truck.png") no-repeat;
 	background-size: 100%;
 
 	rotate: -90deg;
@@ -180,7 +180,7 @@ body {
 	width: 23%;
 	height: 22%;
 
-	background: url("http://localhost/static/plane.png") no-repeat;
+	background: url("http://51.250.37.160/static/plane.png") no-repeat;
 	background-size: 100%;
 
 	animation: plane-big 6s linear forwards, remove-plane-big 6s linear 6s forwards;
@@ -193,7 +193,7 @@ body {
 	left: 75%;
 	top: 70%;
 
-	background: url("http://localhost/static/rocket.png") no-repeat;
+	background: url("http://51.250.37.160/static/rocket.png") no-repeat;
 	background-size: 100%;
 
 	animation: rocket 2s linear 4s forwards, remove-rocket 2s linear 6s forwards;
@@ -213,7 +213,7 @@ body {
 
 	opacity: 0;
 
-	background: url("http://localhost/static/fire.png") no-repeat;
+	background: url("http://51.250.37.160/static/fire.png") no-repeat;
 	background-size: 100%;
 
 	animation: fire 1s linear 6s forwards, remove-fire 4s linear 7s forwards;
@@ -226,7 +226,7 @@ body {
 	left: 50%;
 	top: 62%;
 
-	background: url("http://localhost/static/grass.png") no-repeat;
+	background: url("http://51.250.37.160/static/grass.png") no-repeat;
 	background-size: 100%;
 
 	animation: hide 15s linear 1s forwards;
@@ -239,7 +239,7 @@ body {
 	left: -25%;
 	top: 2%;
 
-	background: url("http://localhost/static/dron.png") no-repeat;
+	background: url("http://51.250.37.160/static/dron.png") no-repeat;
 	background-size: 100%;
 
 	animation: bomber 7s linear 4s forwards;
@@ -253,7 +253,7 @@ body {
 	top: 8%;
 	opacity: 0;
 
-	background: url("http://localhost/static/imba.png") no-repeat;
+	background: url("http://51.250.37.160/static/imba.png") no-repeat;
 	background-size: 100%;
 
 	animation: imba 4s linear 6s forwards;
@@ -267,7 +267,7 @@ body {
 	top: -1%;
 	opacity: 0;
 
-	background: url("http://localhost/static/explosion.png") no-repeat;
+	background: url("http://51.250.37.160/static/explosion.png") no-repeat;
 	background-size: 100%;
 
 	animation: explosion .5s linear 21s forwards;
