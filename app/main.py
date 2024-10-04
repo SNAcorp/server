@@ -202,11 +202,9 @@ async def read_learn(request: Request):
     return app_templates.TemplateResponse("lol.html", {"request": request, "topics": topics})
 
 
-@app.get("/", response_class=JSONResponse)
-async def for_huckers(current_user: User = Depends(get_current_user)):
-    if current_user is not None:
-        return RedirectResponse("/orders", 303)
-    return {"msg": "Hello, how are you mr/mrs?) What are you need at this website?"}
+@app.get("/")
+async def for_huckers(request: Request):
+    return app_templates.TemplateResponse("index.html", {"request": request})
 
 @app.get("/lol", response_class=JSONResponse)
 async def for_scanner(request: Request):
