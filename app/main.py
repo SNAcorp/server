@@ -49,7 +49,7 @@ app.include_router(warehouse.router, prefix="/warehouse", tags=["warehouse"])
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 
-@app.on_event("startup")
+# @app.on_event("startup")
 async def startup():
     """
     This function is a startup event handler.
@@ -109,16 +109,16 @@ origins = [
     # Добавьте другие допустимые источники здесь
 ]
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=origins,
+#     allow_credentials=True,
+#     allow_methods=["*"],
+#     allow_headers=["*"],
+# )
 
 
-@app.middleware("http")
+# @app.middleware("http")
 async def log_requests(request: Request, call_next):
     """
     Logs incoming requests and their processing time.
@@ -165,7 +165,7 @@ async def log_requests(request: Request, call_next):
     return response
 
 
-@app.middleware("http")
+# @app.middleware("http")
 async def detect_suspicious_requests(request: Request, call_next):
     """
     Middleware function that detects suspicious requests and redirects them to a 404 page.
